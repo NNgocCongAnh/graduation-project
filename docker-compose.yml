@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 1. Local PostgreSQL Database Container (Demo 100% Offline)
+  db:
+    image: postgres:16-alpine
+    container_name: detective_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-detective_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-detective_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-detective_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U detective_user -d detective_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. pgAdmin 4 (Giao diện trực quan quản lý CSDL cho Hội Đồng / Dev)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: detective_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@detective.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  # 3. FastAPI Backend Container (Nối với Local Proxy 9Router tại cổng 20128)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: detective_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://detective_user:detective_pass@db:5432/detective_db
+      LLM_API_BASE: ${LLM_API_BASE:-http://host.docker.internal:20128/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-sk-9router-local}
+      LLM_MODEL: ${LLM_MODEL:-openrouter/nvidia/nemotron-3-super-120b-a12b:free}
+      LLM_TEMPERATURE: "0.0"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # 4. React Web Client Frontend Container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: detective_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
