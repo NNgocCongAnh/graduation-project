@@ -13,11 +13,14 @@ import logging
 from typing import Dict, Optional, List
 from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from models import CaseDossier, VerifyRequest, VerifyResponse
 from llm_service import CaseGeneratorService
 from validator import validate_case_logic
+from asset_service import asset_service, STATIC_DIR
+
 
 # Logging Configuration
 logging.basicConfig(
@@ -68,13 +71,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Static Files Directory for Curated & Cached Case Assets
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 # Initialize Services
 case_generator = CaseGeneratorService()
 
-# Pre-populate sample case into cache and disk
+# Pre-populate sample case into cache and disk with enriched asset URLs
 sample_case = CaseGeneratorService.get_sample_case()
+asset_service.enrich_case_dossier(sample_case)
 CASE_CACHE[sample_case.case_id] = sample_case
 save_case_to_disk(sample_case)
+
 
 
 # Preset Configurations for Realistic Procedural Settings
@@ -193,6 +201,7 @@ def health_check():
 def get_sample_case():
     """Retrieve verified sample seed case dossier for offline testing and initial game load."""
     case = CaseGeneratorService.get_sample_case()
+    asset_service.enrich_case_dossier(case)
     CASE_CACHE[case.case_id] = case
     return case
 
@@ -231,8 +240,10 @@ def get_case_by_id(case_id: str):
     case = CASE_CACHE.get(case_id) or load_case_from_disk(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
+    asset_service.enrich_case_dossier(case)
     CASE_CACHE[case.case_id] = case
     return case
+
 
 
 @app.get("/api/case/{case_id}/graph")
@@ -281,10 +292,13 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
 
         logger.info(f"Generating case with synthesized theme: '{theme}'")
         case = await case_generator.generate_case(theme=theme)
+        # Enrich with semantic assets
+        asset_service.enrich_case_dossier(case)
         # Save to memory cache and persistent disk storage
         CASE_CACHE[case.case_id] = case
         save_case_to_disk(case)
         return case
+
     except Exception as e:
         logger.error(f"Failed to generate case: {e}")
         raise HTTPException(status_code=500, detail=f"Case generation error: {str(e)}")
