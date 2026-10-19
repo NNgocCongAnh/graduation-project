@@ -51,6 +51,7 @@ class Suspect(BaseModel):
     alibi_statement: str = Field(..., description="Verbal alibi testimony given by the suspect.")
     secret_innocent_fact: Optional[str] = Field(default=None, description="Innocent secret creating a red-herring conflict.")
     is_culprit: bool = Field(default=False, description="Secret flag indicating if this suspect is the actual killer.")
+    image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the portrait photograph.")
 
     @field_validator("alibi_start", "alibi_end")
     @classmethod
@@ -73,6 +74,8 @@ class Evidence(BaseModel):
     linked_suspect_id: Optional[str] = Field(default=None, description="Optional ID of suspect linked to this item.")
     is_crucial: bool = Field(default=False, description="Whether this evidence is a key clue to break the case.")
     is_red_herring: bool = Field(default=False, description="Whether this clue is intentionally deceptive pointing to an innocent suspect.")
+    image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the physical evidence photograph.")
+
 
 
 class GroundTruth(BaseModel):

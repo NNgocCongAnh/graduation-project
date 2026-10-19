@@ -26,7 +26,8 @@
       "alibi_end": "22:30",
       "alibi_statement": "Khai rằng suốt từ 21:00 đến 22:30 chỉ ở dưới bếp phụ trách chuẩn bị trà đêm một mình.",
       "secret_innocent_fact": null,
-      "is_culprit": true
+      "is_culprit": true,
+      "image_url": "/static/assets/suspects/butler_male_50s.png"
     },
     {
       "id": "SUSP-02",
@@ -38,7 +39,8 @@
       "alibi_end": "22:45",
       "alibi_statement": "Đang chơi cờ và thưởng rượu cùng khách mời tại phòng khách tầng trệt.",
       "secret_innocent_fact": "Đang lén tiêu hủy hồ sơ bảo hiểm cá nhân",
-      "is_culprit": false
+      "is_culprit": false,
+      "image_url": "/static/assets/suspects/businessman_male_50s.png"
     },
     {
       "id": "SUSP-03",
@@ -50,7 +52,8 @@
       "alibi_end": "22:00",
       "alibi_statement": "Luyện đàn tại phòng nhạc phía đông, có người hầu nghe thấy tiếng đàn piano liên tục.",
       "secret_innocent_fact": "Lén sao chép bản di chúc cũ",
-      "is_culprit": false
+      "is_culprit": false,
+      "image_url": "/static/assets/suspects/female_30s.png"
     }
   ],
   "evidences": [
@@ -61,7 +64,8 @@
       "description": "Mặt kính pha lê bị đập vỡ, kim đồng hồ dừng lại chính xác tại 21:40.",
       "linked_suspect_id": null,
       "is_crucial": true,
-      "is_red_herring": false
+      "is_red_herring": false,
+      "image_url": "/static/assets/evidences/pocket_watch_broken.png"
     },
     {
       "id": "EV-02",
@@ -70,7 +74,8 @@
       "description": "Dao rạch thư mạ bạc khắc gia huy William, có vết máu khô khớp ADN nạn nhân.",
       "linked_suspect_id": "SUSP-01",
       "is_crucial": true,
-      "is_red_herring": false
+      "is_red_herring": false,
+      "image_url": "/static/assets/evidences/evidence_glass.png"
     },
     {
       "id": "EV-03",
@@ -79,7 +84,8 @@
       "description": "Lọ thuốc an thần do Bác sĩ Julian kê đơn sáng cùng ngày, chưa bóc seal.",
       "linked_suspect_id": "SUSP-02",
       "is_crucial": false,
-      "is_red_herring": true
+      "is_red_herring": true,
+      "image_url": "/static/assets/evidences/evidence_teacup.png"
     }
   ],
   "ground_truth": {
