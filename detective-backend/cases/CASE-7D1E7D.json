@@ -1,0 +1,143 @@
+{
+  "case_id": "CASE-7D1E7D",
+  "title": "Bí ẩn Biệt thự Blackwood",
+  "summary": "Bá tước Arthur Blackwood được tìm thấy đã chết trong thư viện riêng của mình. Căn phòng được khóa trái từ bên trong bằng chốt xích, cửa sổ đóng kín và không có lối thoát nào khác. Trên bàn làm việc là một ly rượu vang chưa uống hết và một bức thư tuyệt mệnh giả mạo. Các nghi phạm bao gồm quản gia, cháu trai thừa kế và cô thư ký riêng, tất cả đều có bằng chứng ngoại phạm hời hợt cho khoảng thời gian buổi tối.",
+  "victim": {
+    "name": "Bá tước Arthur Blackwood",
+    "age": 58,
+    "occupation": "Chủ nhân lâu đài",
+    "forensic_data": {
+      "ambient_temp": 20.0,
+      "body_temp": 31.5,
+      "livor_mortis_state": "Hoen ố cố định ở lưng, không biến mất khi ấn",
+      "wound_description": "Vết đâm sâu ở vùng ngực trái",
+      "estimated_tod_start": "21:00",
+      "estimated_tod_end": "22:30"
+    }
+  },
+  "suspects": [
+    {
+      "id": "SUSP-01",
+      "name": "Julian Blackwood",
+      "age": 32,
+      "occupation": "Cháu trai kiêm người thừa kế",
+      "motive": "Nợ nần cờ bạc chồng chất và vừa biết mình sắp bị gạch tên khỏi di chúc của Bá tước.",
+      "alibi_start": "21:00",
+      "alibi_end": "22:00",
+      "alibi_statement": "Tôi ở một mình trong phòng đọc sách để nghiên cứu các tài liệu gia phả. Tôi biết chính xác mình ở đó đến 22:00 vì tôi đã nhìn vào chiếc đồng hồ quả lắc lớn trong phòng để theo dõi thời gian.",
+      "secret_innocent_fact": null,
+      "is_culprit": true
+    },
+    {
+      "id": "SUSP-02",
+      "name": "Bác sĩ Robert Thorne",
+      "age": 49,
+      "occupation": "Bác sĩ riêng",
+      "motive": "Bị Bá tước phát hiện việc kê đơn thuốc giảm đau liều cao sai quy định để trục lợi.",
+      "alibi_start": "21:20",
+      "alibi_end": "22:00",
+      "alibi_statement": "Tôi đang pha trà thảo mộc tại nhà bếp và trò chuyện cùng quản gia về sức khỏe của ngài Bá tước.",
+      "secret_innocent_fact": "Đang lén tiêu hủy các sổ sách tài chính cá nhân liên quan đến việc rửa tiền từ bảo hiểm.",
+      "is_culprit": false
+    },
+    {
+      "id": "SUSP-03",
+      "name": "Helena Vance",
+      "age": 28,
+      "occupation": "Thư ký riêng",
+      "motive": "Bị Bá tước đe dọa sa thải và khởi kiện vì làm rò rỉ hợp đồng kinh doanh quan trọng.",
+      "alibi_start": "20:45",
+      "alibi_end": "21:50",
+      "alibi_statement": "Tôi ở trong phòng làm việc riêng để gõ lại bản báo cáo di chúc theo yêu cầu cuối cùng của ngài.",
+      "secret_innocent_fact": "Đã lén sao chép chìa khóa két sắt của Bá tước để tìm kiếm những bức thư tình cũ của mẹ mình.",
+      "is_culprit": false
+    }
+  ],
+  "evidences": [
+    {
+      "id": "EV-01",
+      "title": "Chiếc đồng hồ quả lắc đứng",
+      "location": "Phòng đọc sách",
+      "description": "Chiếc đồng hồ lớn trong phòng đọc sách đã ngừng chạy. Khi kiểm tra kỹ, dây cót bên trong bị đứt hoàn toàn, kim đồng hồ dừng chính xác ở mức 21:15.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": true,
+      "is_red_herring": false
+    },
+    {
+      "id": "EV-02",
+      "title": "Chiếc khăn tay thêu chữ 'M'",
+      "location": "Dưới chân ghế sofa phòng khách",
+      "description": "Một chiếc khăn tay bằng lụa cao cấp có thêu chữ 'M' viết tắt, dính một vài giọt máu nhỏ li ti, trùng khớp với phong cách thời trang của Quản gia Morgan.",
+      "linked_suspect_id": "SUSP-03",
+      "is_crucial": false,
+      "is_red_herring": true
+    },
+    {
+      "id": "EV-03",
+      "title": "Mảnh giấy rách từ gia phả",
+      "location": "Sàn nhà phòng đọc sách",
+      "description": "Một mảnh giấy nhỏ bị xé vội từ cuốn sổ gia phả, ghi chú về một khoản nợ lớn mà Julian đang gánh chịu.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": false,
+      "is_red_herring": false
+    },
+    {
+      "id": "EV-04",
+      "title": "Vết xước trên khung cửa gỗ",
+      "location": "Cửa ra vào phòng đọc sách",
+      "description": "Một vết xước sâu mới xuất hiện trên khung cửa, dường như do một vật kim loại sắc nhọn quẹt qua khi có người vội vã rời đi.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": false,
+      "is_red_herring": false
+    }
+  ],
+  "ground_truth": {
+    "culprit_id": "SUSP-01",
+    "actual_crime_time": "21:40",
+    "murder_weapon": "Dao rọc giấy cán ngà voi",
+    "core_contradiction": "Hung thủ khai ở phòng đọc sách xem tài liệu đến 22:00 nhưng đồng hồ phòng đọc sách đã ngừng lúc 21:15 do đứt cót, khiến việc dùng đồng hồ đó để xác nhận thời gian hiện diện là không khả thi."
+  },
+  "reasoning_chain": {
+    "steps": [
+      {
+        "step_number": 1,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Thời điểm tử vong của Bá tước Arthur được xác định từ 21:00 đến 22:30. Trong khi đó, bằng chứng thực địa (EV-01) cho thấy chiếc đồng hồ quả lắc trong phòng đọc sách đã ngừng hoạt động hoàn toàn vào lúc 21:15 do đứt cót.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 2,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Julian Blackwood khẳng định mình ở trong phòng đọc sách đến đúng 22:00 và dùng chính chiếc đồng hồ quả lắc đó để theo dõi thời gian, điều này trực tiếp mâu thuẫn với tình trạng vật lý của chiếc đồng hồ đã chết từ 21:15.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 3,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Vì Julian không thể biết thời gian chính xác là 22:00 thông qua một chiếc đồng hồ đã ngừng chạy, lời khai về chứng cứ ngoại phạm của hắn là một lời nói dối được dựng lên để che đậy hành tung trong khoảng thời gian gây án.",
+        "target_suspect_id": "SUSP-01"
+      }
+    ],
+    "final_conclusion": "Julian Blackwood là hung thủ. Hắn đã ngụy tạo bằng chứng ngoại phạm bằng cách khai rằng mình theo dõi thời gian qua đồng hồ phòng đọc sách, nhưng thực tế chiếc đồng hồ đã ngừng chạy trước đó, chứng minh hắn không hề ở đó như đã khai.",
+    "decisive_contradiction": "Hung thủ khai ở phòng đọc sách xem tài liệu đến 22:00 nhưng đồng hồ phòng đọc sách đã ngừng lúc 21:15 do đứt cót, khiến việc dùng đồng hồ đó để xác nhận thời gian hiện diện là không khả thi."
+  },
+  "metadata": {
+    "model_name": "ollama/gemma4:31b-cloud",
+    "pipeline_version": "2.0-neuro-symbolic",
+    "agent_latencies": {
+      "OutlineAgent": 3.47,
+      "CharacterAgent": 3.34,
+      "ClueAgent": 3.34,
+      "DeductionAgent": 2.73
+    },
+    "total_latency": 12.89,
+    "patch_retries": 0,
+    "validator_score": 1.0
+  }
+}

@@ -1,0 +1,110 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class GameController : MonoBehaviour
+{
+    public static GameController Instance { get; private set; }
+
+    [Header("References")]
+    [SerializeField] private DetectiveAPIManager apiManager;
+    [SerializeField] private CorkboardManager corkboardManager;
+    [SerializeField] private GameObject loadingScreen;
+
+    [Header("Game State")]
+    public string currentCaseId = "CASE-2026-001";
+    public CaseData currentCase;
+    public bool isCaseLoaded = false;
+
+    private void Awake()
+    {
+        // Singleton pattern
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        // Tự động load vụ án khi bắt đầu game
+        StartCoroutine(LoadCaseRoutine());
+    }
+
+    public IEnumerator LoadCaseRoutine()
+    {
+        Debug.Log($"[GameController] Loading case: {currentCaseId}...");
+
+        if (loadingScreen != null) loadingScreen.SetActive(true);
+
+        // 1. Gọi API để lấy dữ liệu vụ án
+        var request = apiManager.GetCase(currentCaseId);
+
+        // Đợi cho đến khi API trả về kết quả (giả định apiManager dùng async hoặc callback)
+        // Trong bản hiện tại, chúng ta sẽ đợi cho đến khi data được gán
+        while (request == null || !request.isDone)
+        {
+            yield return null;
+        }
+
+        if (request.success)
+        {
+            currentCase = request.caseData;
+            isCaseLoaded = true;
+            Debug.Log("[GameController] Case loaded successfully!");
+
+            // 2. Điều phối CorkboardManager hiển thị dữ liệu
+            SetupCorkboard();
+        }
+        else
+        {
+            Debug.LogError($"[GameController] Failed to load case: {request.errorMessage}");
+        }
+
+        if (loadingScreen != null) loadingScreen.SetActive(false);
+    }
+
+    private void SetupCorkboard()
+    {
+        if (corkboardManager == null)
+        {
+            Debug.LogError("[GameController] CorkboardManager reference is missing!");
+            return;
+        }
+
+        Debug.Log("[GameController] Populating Corkboard...");
+
+        // Tạo các thẻ nghi phạm
+        foreach (var suspect in currentCase.suspects)
+        {
+            corkboardManager.CreateSuspectCard(suspect);
+        }
+
+        // Tạo các thẻ vật chứng
+        foreach (var evidence in currentCase.evidences)
+        {
+            corkboardManager.CreateEvidenceCard(evidence);
+        }
+    }
+
+    public void OnGuessCulprit(string suspectId)
+    {
+        Debug.Log($"[GameController] Player guessed culprit: {suspectId}");
+
+        if (currentCase.groundTruth.culprit_id == suspectId)
+        {
+            Debug.Log("CORRECT! You solved the case!");
+            // Trigger Win UI
+        }
+        else
+        {
+            Debug.Log("WRONG! The killer is still at large.");
+            // Trigger Fail UI
+        }
+    }
+}

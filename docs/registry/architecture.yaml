@@ -1,0 +1,12 @@
+state_ownership:
+  case_ground_truth: outline-agent
+  suspect_alibis: character-agent
+  evidence_links: clue-agent
+
+interfaces:
+  validation_result: validator-service (Boolean + ErrorList)
+  patch_request: agent-repair-interface (Snippet $\rightarrow$ FixedSnippet)
+
+forbidden_patterns:
+  - direct_llm_output_to_player: Must pass through validator first.
+  - global_regeneration_on_error: Use localized repair instead.

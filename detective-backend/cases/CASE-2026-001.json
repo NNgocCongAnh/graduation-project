@@ -1,0 +1,126 @@
+{
+  "case_id": "CASE-2026-001",
+  "title": "Bí ẩn Biệt thự Blackwood",
+  "summary": "Vụ án mạng trong thư phòng khóa kín tại tầng hai biệt thự cổ Blackwood giữa đêm mưa bão.",
+  "victim": {
+    "name": "Arthur Blackwood",
+    "age": 62,
+    "occupation": "Chủ sở hữu trang viên & Doanh nhân",
+    "forensic_data": {
+      "ambient_temp": 21.0,
+      "body_temp": 31.2,
+      "livor_mortis_state": "Hoen tử thi cố định ở vùng lưng, không đổi màu khi ấn mạnh.",
+      "wound_description": "Vết đâm sâu 8cm xuyên qua khoang ngực trái gây mất máu cấp.",
+      "estimated_tod_start": "21:00",
+      "estimated_tod_end": "22:30"
+    }
+  },
+  "suspects": [
+    {
+      "id": "SUSP-01",
+      "name": "Quản gia William Vance",
+      "age": 55,
+      "occupation": "Quản gia trưởng",
+      "motive": "Bị dọa đuổi việc và tước quyền thừa kế sau khi làm thất thoát tài sản.",
+      "alibi_start": "21:00",
+      "alibi_end": "22:30",
+      "alibi_statement": "Khai rằng suốt từ 21:00 đến 22:30 chỉ ở dưới bếp phụ trách chuẩn bị trà đêm một mình.",
+      "secret_innocent_fact": null,
+      "is_culprit": true
+    },
+    {
+      "id": "SUSP-02",
+      "name": "Bác sĩ Julian Grey",
+      "age": 40,
+      "occupation": "Bác sĩ gia đình",
+      "motive": "Bị nạn nhân phát hiện kê đơn thuốc sai quy cách nhằm trục lợi bảo hiểm.",
+      "alibi_start": "21:15",
+      "alibi_end": "22:45",
+      "alibi_statement": "Đang chơi cờ và thưởng rượu cùng khách mời tại phòng khách tầng trệt.",
+      "secret_innocent_fact": "Đang lén tiêu hủy hồ sơ bảo hiểm cá nhân",
+      "is_culprit": false
+    },
+    {
+      "id": "SUSP-03",
+      "name": "Cháu gái Eleanor Blackwood",
+      "age": 26,
+      "occupation": "Nghệ sĩ dương cầm",
+      "motive": "Cần tiền trả nợ cờ bạc khẩn cấp trước hạn chót tuần sau.",
+      "alibi_start": "20:45",
+      "alibi_end": "22:00",
+      "alibi_statement": "Luyện đàn tại phòng nhạc phía đông, có người hầu nghe thấy tiếng đàn piano liên tục.",
+      "secret_innocent_fact": "Lén sao chép bản di chúc cũ",
+      "is_culprit": false
+    }
+  ],
+  "evidences": [
+    {
+      "id": "EV-01",
+      "title": "Đồng hồ bỏ túi bị vỡ",
+      "location": "Dưới gầm bàn làm việc thư phòng",
+      "description": "Mặt kính pha lê bị đập vỡ, kim đồng hồ dừng lại chính xác tại 21:40.",
+      "linked_suspect_id": null,
+      "is_crucial": true,
+      "is_red_herring": false
+    },
+    {
+      "id": "EV-02",
+      "title": "Dao rạch thư bạc dính vết máu",
+      "location": "Trong ống thông gió gian bếp",
+      "description": "Dao rạch thư mạ bạc khắc gia huy William, có vết máu khô khớp ADN nạn nhân.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": true,
+      "is_red_herring": false
+    },
+    {
+      "id": "EV-03",
+      "title": "Hộp thuốc an thần dở dang",
+      "location": "Bàn trang điểm phòng khách",
+      "description": "Lọ thuốc an thần do Bác sĩ Julian kê đơn sáng cùng ngày, chưa bóc seal.",
+      "linked_suspect_id": "SUSP-02",
+      "is_crucial": false,
+      "is_red_herring": true
+    }
+  ],
+  "ground_truth": {
+    "culprit_id": "SUSP-01",
+    "actual_crime_time": "21:40",
+    "murder_weapon": "Dao rạch thư bạc mạ gia huy",
+    "core_contradiction": "Quản gia William khai ở bếp nấu nước pha trà từ 21:00-22:30, nhưng bếp lò lạnh ngắt và dao hung khí dính máu được giấu trong ống thông gió bếp sau khi gây án lúc 21:40."
+  },
+  "reasoning_chain": {
+    "steps": [
+      {
+        "step_number": 1,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Đồng hồ vỡ xác nhận án mạng xảy ra vào lúc 21:40, hoàn toàn trùng khớp với cửa sổ tử vong pháp y 21:00-22:30.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 2,
+        "clue_ids": [
+          "EV-02"
+        ],
+        "inference": "Dao rạch thư dính máu hung khí được tìm thấy trong ống thông gió tại gian bếp nơi Quản gia William khai đang ở một mình.",
+        "target_suspect_id": "SUSP-01"
+      }
+    ],
+    "final_conclusion": "Quản gia William Vance đã lợi dụng việc chuẩn bị trà để lẻn lên thư phòng gây án lúc 21:40 rồi phi tang hung khí vào ống thông gió.",
+    "decisive_contradiction": "Lời khai ở bếp pha trà liên tục mâu thuẫn với việc hung khí dính máu được giấu ngay tại gian bếp."
+  },
+  "metadata": {
+    "model_name": "deterministic-seed",
+    "pipeline_version": "2.0-neuro-symbolic",
+    "agent_latencies": {
+      "OutlineAgent": 0.0,
+      "CharacterAgent": 0.0,
+      "ClueAgent": 0.0,
+      "DeductionAgent": 0.0
+    },
+    "total_latency": 0.0,
+    "patch_retries": 0,
+    "validator_score": 1.0
+  }
+}
