@@ -49,9 +49,35 @@ Prepare(Trước khi đăng ký)/
 *.xlsx
 *.zip
 
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
 # Root screenshot / UI test captures
 /*.png
 
 # Markdown files (Keep README.md only)
 /*.md
 !/README.md
+

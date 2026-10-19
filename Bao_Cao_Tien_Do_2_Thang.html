@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Báo Cáo Tiến Độ Đồ Án Tốt Nghiệp - Nguyễn Ngọc Công Anh</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 20mm 20mm 20mm;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Times New Roman';
+      line-height: 1.6;
+      color: #1a1a1a;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 50px 60px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 8px;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #475569;
+      margin: 0 0 5px 0;
+    }
+    .header h2 {
+      font-size: 16px;
+      text-transform: uppercase;
+      color: #0369a1;
+      margin: 0 0 15px 0;
+      font-weight: 700;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: #0f172a;
+      text-transform: uppercase;
+      line-height: 1.4;
+      margin: 10px 0;
+      font-weight: 800;
+    }
+    .header .subtitle {
+      font-size: 14px;
+      font-style: italic;
+      color: #64748b;
+    }
+    .meta-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 15px 20px;
+      margin-bottom: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .meta-box div span.label {
+      font-weight: 600;
+      color: #0369a1;
+    }
+    h2.section-title {
+      font-size: 17px;
+      color: #0369a1;
+      border-left: 4px solid #0284c7;
+      padding-left: 12px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+    h3.sub-title {
+      font-size: 15px;
+      color: #1e293b;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    p, li {
+      font-size: 14px;
+      color: #334155;
+      text-align: justify;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .badge-done {
+      background-color: #dcfce7;
+      color: #15803d;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      display: inline-block;
+    }
+    .badge-plan {
+      background-color: #fef3c7;
+      color: #b45309;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      display: inline-block;
+    }
+    pre {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12.5px;
+      overflow-x: auto;
+    }
+    .diagram-box {
+      background: #f8fafc;
+      border: 1px dashed #94a3b8;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .signature-section {
+      margin-top: 50px;
+      display: flex;
+      justify-content: flex-end;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .signature-box {
+      width: 250px;
+    }
+    .signature-box .date {
+      font-style: italic;
+      font-size: 13.5px;
+      margin-bottom: 8px;
+    }
+    .signature-box .title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 70px;
+    }
+    .signature-box .name {
+      font-weight: bold;
+      font-size: 14px;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h3>BỘ GIÁO DỤC VÀ ĐÀO TẠO • TRƯỜNG ĐẠI HỌC PHENIKAA</h3>
+    <h2>KHOA CÔNG NGHỆ THÔNG TIN</h2>
+    <h1>BÁO CÁO TIẾN ĐỘ THỰC HIỆN ĐỒ ÁN TỐT NGHIỆP</h1>
+    <div class="subtitle">Rà soát định kỳ 2 tháng (Giai đoạn 1 & 2: Tuần 1 – Tuần 8)</div>
+  </div>
+
+  <div class="meta-box">
+    <div><span class="label">Sinh viên:</span> Nguyễn Ngọc Công Anh</div>
+    <div><span class="label">Mã SV:</span> 22010201</div>
+    <div><span class="label">Lớp:</span> K16-KHMT(AI&KHDL)</div>
+    <div><span class="label">Ngành:</span> Khoa học máy tính</div>
+    <div style="grid-column: span 2;"><span class="label">Đề tài:</span> Nghiên cứu và xây dựng trò chơi trinh thám giải đố trên nền tảng Web, ứng dụng Mô hình ngôn ngữ lớn (LLM) để sinh tự động các bộ hồ sơ vụ án có tính logic và nhất quán</div>
+    <div><span class="label">Giảng viên hướng dẫn:</span> TS. Nguyễn Văn Tánh</div>
+    <div><span class="label">Mốc thời gian:</span> Tuần 8 (14/09/2026)</div>
+  </div>
+
+  <h2 class="section-title">I. TỔNG QUAN ĐỀ TÀI & BÀI TOÁN KHOA HỌC</h2>
+  <p>Đề tài tập trung giải quyết bài toán ứng dụng <strong>Mô hình Ngôn ngữ Lớn (LLM)</strong> kết hợp kỹ thuật <strong>Sinh nội dung tự tục (Procedural Content Generation - PCG)</strong> nhằm tạo ra các bộ hồ sơ vụ án trinh thám tương tác có tính suy luận cao theo phong cách Unsolved Case Files.</p>
+  
+  <p>Điểm mấu chốt của đề tài là <strong>mô hình kiến trúc 2 tầng (2-Layer Architecture)</strong> nhằm khắc phục hiện tượng ảo giác (hallucination) của AI:</p>
+  <ul>
+    <li><strong>Tầng 1 (Ground Truth Layer):</strong> Sự thật tuyệt đối của vụ án (hung thủ thực sự, thời điểm tử vong, cơ chế gây án). Tầng này được kiểm soát logic nghiêm ngặt 100%, không cho phép bất kỳ mâu thuẫn vật lý nào.</li>
+    <li><strong>Tầng 2 (Evidence Presentation Layer):</strong> Tập hợp hồ sơ bàn giao cho người chơi. Tầng này được sinh ra từ Tầng 1 nhưng qua các bộ lọc biến dạng (alibi giả, lời khai thiếu sót, red herrings), tuân thủ nguyên tắc <em>Fair-Play Mystery</em> cổ điển (Knox & Van Dine) đảm bảo luôn tồn tại ít nhất một đường dây manh mối gián tiếp để phá án.</li>
+  </ul>
+
+  <div class="diagram-box">
+[ TẦNG 1: GROUND TRUTH ] (Sự thật gốc: Hung thủ, Thời gian tử vong, Hung khí)
+          │
+          ▼
+[ 4-STEP SEQUENTIAL PIPELINE ] (Nạn nhân ➔ Nghi phạm ➔ Timeline ➔ Bằng chứng)
+          │
+          ▼
+[ RULE-BASED VALIDATOR ] (Định luật làm nguội Henssge + Kiểm tra Alibi vs TOD + Crucial Evidence)
+          │
+          ▼
+[ TẦNG 2: EVIDENCE PRESENTATION ] (Bảng ghim Corkboard, Thẻ nghi phạm Polaroid, Biên bản pháp y)
+  </div>
+
+  <h2 class="section-title">II. KẾT QUẢ KỸ THUẬT ĐÃ HOÀN THÀNH SAU 2 THÁNG</h2>
+  <p>Đến thời điểm Tuần 8, sinh viên đã hoàn thành 100% các mục tiêu kỹ thuật đề ra cho 2 tháng đầu:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Hạng mục</th>
+        <th style="width: 55%;">Chi tiết kỹ thuật đã thực hiện</th>
+        <th style="width: 20%;">Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Mô hình Dữ liệu</strong></td>
+        <td>Định nghĩa 6 Schemas Pydantic v2 nghiêm ngặt trong <code>models.py</code> (Victim, Suspect, Evidence, ForensicData, GroundTruth, CaseDossier). Ràng buộc thời gian 24h và thông số sinh học.</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+      <tr>
+        <td><strong>2. Pipeline AI 4 bước</strong></td>
+        <td>Triển khai <code>CaseGeneratorService</code> (llm_service.py) sinh kịch bản tuần tự thay vì Single-prompt, ép định dạng JSON mode, tích hợp cơ chế tự động Retry tối đa 3 lần.</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+      <tr>
+        <td><strong>3. Bộ kiểm tra quy tắc (Validator)</strong></td>
+        <td>Lập trình <code>validator.py</code> ứng dụng định luật hạ thân nhiệt tử thi Henssge để tính khoảng thời gian tử vong (PMI bounds), phát hiện mâu thuẫn lời khai ngoại phạm (Alibi vs TOD) và bắt buộc có chứng cứ quyết định.</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+      <tr>
+        <td><strong>4. Kiểm thử tự động (Unit Test)</strong></td>
+        <td>Xây dựng bộ kiểm thử tự động <code>test_validator.py</code> với Pytest. Kết quả: <strong>6/6 tests PASSED 100%</strong> (thời gian chạy 0.95s).</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+      <tr>
+        <td><strong>5. Dịch vụ RESTful API</strong></td>
+        <td>FastAPI hoàn chỉnh các endpoints: <code>/api/case/sample</code>, <code>/api/case/generate</code>, <code>/api/case/verify</code> và Swagger UI trực quan.</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+      <tr>
+        <td><strong>6. Prototype Web UI</strong></td>
+        <td>Giao diện ReactJS hoàn thiện phong cách Bảng điều tra Corkboard, Polaroid nghi phạm, dây chỉ đỏ liên kết manh mối và modal xem báo cáo pháp y.</td>
+        <td><span class="badge-done">✅ Đạt 100%</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title">Minh chứng kết quả Unit Test thực tế (Pytest):</h3>
+  <pre>============================= test session starts =============================
+platform win32 -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\Work\Đồ Án Tốt Nghiệp\detective-backend
+collected 6 items
+
+test_validator.py ......                                                 [100%]
+
+============================== 6 passed in 0.95s ==============================</pre>
+
+  <div class="page-break"></div>
+
+  <h2 class="section-title">III. KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN (WEEKPLAN 16 TUẦN)</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 12%;">Giai đoạn</th>
+        <th style="width: 10%;">Tuần</th>
+        <th style="width: 18%;">Thời gian</th>
+        <th style="width: 45%;">Nội dung công việc</th>
+        <th style="width: 15%;">Tiến độ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="4"><strong>Giai đoạn 1<br>(Tháng 1)</strong></td>
+        <td>Tuần 1</td>
+        <td>22/07 – 28/07</td>
+        <td>Khảo sát bài toán narrative AI; nghiên cứu nguyên tắc Fair-play Mystery.</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 2</td>
+        <td>29/07 – 04/08</td>
+        <td>Thiết kế cấu trúc hệ thống 2 tầng: Ground Truth và Evidence Presentation.</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 3</td>
+        <td>05/08 – 11/08</td>
+        <td>Thiết kế mô hình dữ liệu Pydantic v2 và CSDL SQLAlchemy (models.py).</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 4</td>
+        <td>12/08 – 18/08</td>
+        <td>Xây dựng vụ án mẫu (Seed Case) "Biệt thự Blackwood" để kiểm thử offline.</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td rowspan="4"><strong>Giai đoạn 2<br>(Tháng 2)</strong></td>
+        <td>Tuần 5</td>
+        <td>19/08 – 25/08</td>
+        <td>Thử nghiệm Baseline Single-prompt để thu thập các dạng lỗi ảo giác logic.</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 6</td>
+        <td>26/08 – 01/09</td>
+        <td>Lập trình Sequential Pipeline 4 bước trên FastAPI (llm_service.py).</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 7</td>
+        <td>02/09 – 08/09</td>
+        <td>Lập trình bộ kiểm tra logic validator.py (Mô hình hạ nhiệt Henssge + Alibi).</td>
+        <td><span class="badge-done">Hoàn thành</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tuần 8</strong></td>
+        <td><strong>09/09 – 14/09</strong></td>
+        <td><strong>Bộ Unit Test 6/6 pass; dựng notebook benchmark; báo cáo tiến độ 2 tháng.</strong></td>
+        <td><span class="badge-done">Đang báo cáo</span></td>
+      </tr>
+      <tr>
+        <td rowspan="4"><strong>Giai đoạn 3<br>(Tháng 3)</strong></td>
+        <td>Tuần 9</td>
+        <td>15/09 – 21/09</td>
+        <td>Ghép nối API Backend FastAPI với giao diện ReactJS Corkboard.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 10</td>
+        <td>22/09 – 28/09</td>
+        <td>Hoàn thiện hệ thống Cáo buộc (Accusation Form) & Chấm điểm suy luận phá án.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 11</td>
+        <td>29/09 – 05/10</td>
+        <td>Tổ chức Playtest thử nghiệm với 5–10 người chơi; thu thập phản hồi.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 12</td>
+        <td>06/10 – 12/10</td>
+        <td>Tinh chỉnh prompt và validator dựa trên dữ liệu playtest; đo đạc chỉ số SUS.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td rowspan="4"><strong>Giai đoạn 4<br>(Tháng 4)</strong></td>
+        <td>Tuần 13</td>
+        <td>13/10 – 19/10</td>
+        <td>Chạy thực nghiệm benchmark định lượng (N=30 vụ án) đo tỷ lệ logic pass.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 14</td>
+        <td>20/10 – 26/10</td>
+        <td>Viết bản thảo Báo cáo Đồ án Tốt nghiệp (Chương 1 & Chương 2).</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 15</td>
+        <td>27/10 – 02/11</td>
+        <td>Viết Chương 3 & Chương 4; gửi GVHD duyệt bản thảo toàn văn.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+      <tr>
+        <td>Tuần 16</td>
+        <td>03/11 – 10/11</td>
+        <td>Đóng gói Docker Compose 1-click run, hoàn thiện Slide và kịch bản Demo.</td>
+        <td><span class="badge-plan">Kế hoạch</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="section-title">IV. ĐỀ XUẤT & XIN Ý KIẾN HƯỚNG DẪN TỪ GVHD</h2>
+  <ol>
+    <li><strong>Về quy mô mẫu thực nghiệm định lượng:</strong> Trong Chương 4, việc đo lường so sánh Baseline vs Proposed Pipeline trên cỡ mẫu N=30 vụ án ngẫu nhiên đã đủ độ tin cậy về mặt học thuật chưa ạ?</li>
+    <li><strong>Về tiêu chí khảo sát người chơi (Playtest):</strong> Ngoài thang đo độ khả dụng phần mềm SUS, thầy có định hướng thêm về tiêu chí đo lường độ hợp lý của cốt truyện (narrative fairness) không ạ?</li>
+    <li><strong>Về cấu trúc quyển báo cáo:</strong> Sinh viên dự kiến quyển báo cáo gồm 4 chương với dung lượng khoảng 55–65 trang, xin ý kiến thầy về tỷ lệ phân bổ nội dung giữa phần lý thuyết AI và phần triển khai ứng dụng.</li>
+  </ol>
+
+  <div class="signature-section">
+    <div class="signature-box">
+      <div class="date">Hà Nội, ngày 14 tháng 09 năm 2026</div>
+      <div class="title">SINH VIÊN BÁO CÁO</div>
+      <div class="name">Nguyễn Ngọc Công Anh</div>
+      <div style="font-size: 12px; color: #64748b;">MSSV: 22010201</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

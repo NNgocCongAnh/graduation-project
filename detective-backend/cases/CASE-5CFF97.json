@@ -1,0 +1,134 @@
+{
+  "case_id": "CASE-5CFF97",
+  "title": "Bí Mật Trong Căn Biệt Thự Pháp Cổ",
+  "summary": "Ông Trịnh Văn Thành được tìm thấy đã tử vong trong phòng làm việc tại một căn biệt thự Pháp cổ trên phố Phan Đình Phùng, Hà Nội. Cửa phòng được khóa trái từ bên trong bằng chốt gỗ cổ, cửa sổ đóng kín và không có dấu hiệu đột nhập, tạo nên một hiện trường phòng kín hoàn hảo giữa đêm mùa đông.",
+  "victim": {
+    "name": "Trịnh Văn Thành",
+    "age": 55,
+    "occupation": "Nhà sưu tầm đồ cổ và chuyên gia thẩm định nghệ thuật",
+    "forensic_data": {
+      "ambient_temp": 20.0,
+      "body_temp": 31.5,
+      "livor_mortis_state": "Hoen ố cố định ở lưng, không biến mất khi ấn",
+      "wound_description": "Vết thương trí mạng ở vùng ngực trái, vết đâm hẹp và sâu",
+      "estimated_tod_start": "21:00",
+      "estimated_tod_end": "22:30"
+    }
+  },
+  "suspects": [
+    {
+      "id": "SUSP-01",
+      "name": "Trịnh Minh Quân",
+      "age": 32,
+      "occupation": "Con trai trưởng của nạn nhân, quản lý quỹ đầu tư gia đình",
+      "motive": "Nợ nần chồng chất do đầu tư tiền ảo thua lỗ, muốn chiếm đoạt bộ sưu tập đồ cổ của cha để bán lấy tiền trả nợ trước khi bị vỡ nợ công khai.",
+      "alibi_start": "21:00",
+      "alibi_end": "22:15",
+      "alibi_statement": "Tôi ở phòng khách xem tivi suốt từ 21:00 đến 22:00, sau đó mới đi lên phòng ngủ. Tôi không hề rời khỏi khu vực phòng khách trong suốt thời gian đó.",
+      "secret_innocent_fact": null,
+      "is_culprit": true
+    },
+    {
+      "id": "SUSP-02",
+      "name": "Phạm Thu Hà",
+      "age": 45,
+      "occupation": "Quản gia lâu năm của gia đình",
+      "motive": "Bị ông Thành phát hiện đã âm thầm tráo đổi một vài món đồ gốm nhỏ trong bộ sưu tập bằng hàng giả để lấy tiền chữa bệnh cho mẹ ruột.",
+      "alibi_start": "21:20",
+      "alibi_end": "22:00",
+      "alibi_statement": "Tôi đang ở trong bếp chuẩn bị trà sen và dọn dẹp bát đĩa sau bữa tối, tôi có nghe tiếng tivi từ phòng khách vọng lại nên biết cậu Quân vẫn ở đó.",
+      "secret_innocent_fact": "Bà Hà thực sự đã tráo đồ cổ nhưng đã hối hận và đang định trả lại vào sáng mai, bà không hề biết về kế hoạch giết người.",
+      "is_culprit": false
+    },
+    {
+      "id": "SUSP-03",
+      "name": "Nguyễn Hoàng Nam",
+      "age": 28,
+      "occupation": "Trợ lý thẩm định nghệ thuật",
+      "motive": "Bị ông Thành đe dọa sẽ tố cáo hành vi làm giả giấy chứng nhận xuất xứ của một bức tranh quý mà Nam đã tư vấn cho khách hàng.",
+      "alibi_start": "20:45",
+      "alibi_end": "21:50",
+      "alibi_statement": "Tôi ra vườn thượng uyển hóng mát và gọi điện cho bạn gái để bàn về công việc, sau đó tôi mới quay trở lại sảnh chính.",
+      "secret_innocent_fact": "Nam đã lén chụp ảnh toàn bộ danh mục đồ cổ của ông Thành để định bán thông tin cho đối thủ cạnh tranh, nhưng anh ta quá sợ hãi ông Thành để dám ra tay giết người.",
+      "is_culprit": false
+    }
+  ],
+  "evidences": [
+    {
+      "id": "EV-01",
+      "title": "Vết bùn đất đặc trưng trên thảm chùi chân",
+      "location": "Ngay lối vào bên trong phòng kín của nạn nhân",
+      "description": "Một vài vệt bùn đỏ pha cát mịn, đặc trưng cho loại đất tại vườn thượng uyển phía sau biệt thự, bám trên thảm chùi chân. Khi đối chiếu, mẫu vân đế giày của Trịnh Minh Quân trùng khớp hoàn toàn với các vết hằn nhỏ trong lớp bùn này, chứng minh anh ta đã ra vườn và vào phòng nạn nhân, trái ngược với lời khai chỉ ở phòng khách xem tivi.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": true,
+      "is_red_herring": false
+    },
+    {
+      "id": "EV-02",
+      "title": "Chiếc khuy măng sét bằng bạc chạm khắc",
+      "location": "Dưới gầm bàn làm việc của nạn nhân",
+      "description": "Một chiếc khuy măng sét cao cấp bị rơi, có hoa văn trùng khớp với bộ trang phục mà nghi phạm Lê Hoàng Nam (quản gia/trợ lý) thường mặc. Điều này khiến điều tra viên nghi ngờ Nam đã có xô xát với nạn nhân trước khi vụ án xảy ra.",
+      "linked_suspect_id": "SUSP-02",
+      "is_crucial": false,
+      "is_red_herring": true
+    },
+    {
+      "id": "EV-03",
+      "title": "Mảnh vỡ thủy tinh từ ly rượu vang",
+      "location": "Gần chân giường của nạn nhân",
+      "description": "Những mảnh vỡ nhỏ của một ly pha lê cùng vết rượu vang đỏ đổ tràn trên sàn gỗ. Trên một mảnh vỡ lớn có dấu vân tay mờ, ban đầu được cho là của một người khách ghé thăm nhà là bà Phạm Thu Hà, nhưng không xác định được thời điểm để lại dấu vết.",
+      "linked_suspect_id": "SUSP-03",
+      "is_crucial": false,
+      "is_red_herring": false
+    }
+  ],
+  "ground_truth": {
+    "culprit_id": "SUSP-01",
+    "actual_crime_time": "21:40",
+    "murder_weapon": "Một chiếc trâm cài tóc bằng bạc nhọn",
+    "core_contradiction": "Hung thủ khai rằng mình đang ở phòng khách xem tivi suốt từ 21:00 đến 22:00, nhưng dấu vết bùn đất đặc trưng từ vườn thượng uyển của biệt thự được tìm thấy trên thảm chùi chân bên trong phòng kín, trong khi hung thủ là người duy nhất trong nhà đi đôi giày có mẫu vân đế trùng khớp."
+  },
+  "reasoning_chain": {
+    "steps": [
+      {
+        "step_number": 1,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Thời điểm tử vong của nạn nhân (21:00 - 22:30) trùng khớp hoàn toàn với khoảng thời gian Trịnh Minh Quân khẳng định mình đang ở phòng khách xem tivi.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 2,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Dấu bùn đặc trưng từ vườn thượng uyển trên thảm chùi chân trong phòng kín và vân đế giày trùng khớp chứng minh Trịnh Minh Quân đã di chuyển ra vườn và vào phòng kín, trái ngược với tuyên bố 'không rời khỏi phòng khách'.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 3,
+        "clue_ids": [
+          "EV-01"
+        ],
+        "inference": "Vì Trịnh Minh Quân là người duy nhất có dấu giày tương ứng và lời khai về việc ở phòng khách là giả mạo, đối tượng đã lợi dụng khoảng thời gian này để gây án.",
+        "target_suspect_id": "SUSP-01"
+      }
+    ],
+    "final_conclusion": "Trịnh Minh Quân chính là hung thủ. Việc phát hiện dấu bùn từ vườn thượng uyển và vân đế giày trùng khớp tại hiện trường đã bẻ gãy hoàn toàn lời khai ngoại phạm, chứng minh đối tượng đã nói dối về vị trí của mình trong thời điểm xảy ra vụ án.",
+    "decisive_contradiction": "Hung thủ khai rằng mình đang ở phòng khách xem tivi suốt từ 21:00 đến 22:00, nhưng dấu vết bùn đất đặc trưng từ vườn thượng uyển của biệt thự được tìm thấy trên thảm chùi chân bên trong phòng kín, trong khi hung thủ là người duy nhất trong nhà đi đôi giày có mẫu vân đế trùng khớp."
+  },
+  "metadata": {
+    "model_name": "ollama/gemma4:31b-cloud",
+    "pipeline_version": "2.0-neuro-symbolic",
+    "agent_latencies": {
+      "OutlineAgent": 2.74,
+      "CharacterAgent": 7.38,
+      "ClueAgent": 3.22,
+      "DeductionAgent": 2.34
+    },
+    "total_latency": 15.68,
+    "patch_retries": 0,
+    "validator_score": 1.0
+  }
+}
