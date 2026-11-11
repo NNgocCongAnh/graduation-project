@@ -157,12 +157,18 @@ class AssetService:
         return f"{self.base_url}/static/assets/evidences/{matched_file}"
 
     def generate_on_demand_cloudflare(self, prompt: str, cache_key: str) -> Optional[str]:
-        """Optionally generate a bespoke image via Cloudflare Workers AI FLUX.1."""
+        """Optionally generate a bespoke image via Cloudflare Workers AI FLUX.1 (Pure 1:1 photo interior, no borders)."""
         if not CF_ACCOUNT_ID or not CF_API_TOKEN:
             return None
 
         import urllib.request
         import json
+
+        # Enforce strict 1:1 photo cutout rules: never generate frames, borders or text
+        refined_prompt = (
+            f"{prompt}, 1:1 square photo interior, authentic 1990s 35mm film photography, neutral police evidence background. "
+            f"--no frame, borders, polaroid, paper, pins, watermark, text"
+        )
 
         cache_filename = f"{hashlib.md5(cache_key.encode()).hexdigest()}.png"
         cache_path = os.path.join(CACHE_DIR, cache_filename)
@@ -175,7 +181,7 @@ class AssetService:
             "Authorization": f"Bearer {CF_API_TOKEN}",
             "Content-Type": "application/json"
         }
-        payload = json.dumps({"prompt": prompt, "steps": 4}).encode()
+        payload = json.dumps({"prompt": refined_prompt, "steps": 4}).encode()
 
         try:
             req = urllib.request.Request(url, data=payload, headers=headers)

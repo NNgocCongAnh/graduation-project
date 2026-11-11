@@ -45,3 +45,4 @@ def test_asset_service_integration():
 
 if __name__ == "__main__":
     test_asset_service_integration()
+

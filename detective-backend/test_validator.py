@@ -112,3 +112,106 @@ def test_sample_case_metadata_and_reasoning_complete():
     assert sample.metadata is not None
     assert sample.metadata.pipeline_version == "2.0-neuro-symbolic"
 
+
+# -------------------------------------------------------------
+# Academic Benchmark Tests: Player Deduction Scoring & Anti-Spam
+# -------------------------------------------------------------
+
+def test_player_deduction_perfect_scenario():
+    """KỊCH BẢN 1: Người chơi suy luận sắc bén (Chính xác 100%).
+
+    - Chỉ định chính xác hung thủ (SUSP-01).
+    - Cung cấp đầy đủ các manh mối then chốt (EV-01, EV-02) bẻ gãy Alibi.
+    - Không nộp bất kỳ chứng cứ nghi binh (Red Herring) hay đồ vật rác nào.
+    - Kỳ vọng: is_correct=True, verdict=SOLVED_PERFECT, score=100.0, core_contradiction được tiết lộ.
+    """
+    from validator import evaluate_player_deduction
+    from models import DeductionVerdict
+
+    sample = CaseGeneratorService.get_sample_case()
+    response = evaluate_player_deduction(
+        case=sample,
+        accused_id="SUSP-01",
+        selected_clue_ids=["EV-01", "EV-02"]
+    )
+
+    assert response.is_correct is True
+    assert response.verdict == DeductionVerdict.SOLVED_PERFECT
+    assert response.culprit_identified is True
+    assert response.crucial_evidences_identified is True
+    assert response.found_crucial_count == 2
+    assert response.total_crucial_count == 2
+    assert response.red_herrings_selected_count == 0
+    assert response.irrelevant_clues_count == 0
+    assert response.score == 100.0
+    assert response.core_contradiction is not None
+    assert "XUẤT SẮC TUYỆT ĐỐI" in response.feedback
+
+
+def test_player_deduction_wrong_suspect_scenario():
+    """KỊCH BẢN 2: Người chơi cáo buộc sai hung thủ (Bắt nhầm người vô tội).
+
+    - Cáo buộc Bác sĩ Julian Grey (SUSP-02) - một nghi phạm hoàn toàn vô tội.
+    - Dù có chọn chứng cứ then chốt EV-01 hay không, kết luận vẫn là sai lầm nghiêm trọng.
+    - Kỳ vọng: is_correct=False, verdict=WRONG_SUSPECT, score=0.0, core_contradiction=None.
+    """
+    from validator import evaluate_player_deduction
+    from models import DeductionVerdict
+
+    sample = CaseGeneratorService.get_sample_case()
+    response = evaluate_player_deduction(
+        case=sample,
+        accused_id="SUSP-02",
+        selected_clue_ids=["EV-01"]
+    )
+
+    assert response.is_correct is False
+    assert response.verdict == DeductionVerdict.WRONG_SUSPECT
+    assert response.culprit_identified is False
+    assert response.score == 0.0
+    assert response.core_contradiction is None
+    assert "LẬP LUẬN SAI" in response.feedback
+    assert "Julian Grey" in response.feedback
+
+
+def test_player_deduction_logic_traps_and_spam_scenario():
+    """KỊCH BẢN 3: Bẫy logic (Sập bẫy Red Herring & Lừa chọn toàn bộ Select-All).
+
+    - Phần A (Sập bẫy Nghi binh): Người chơi chọn đúng hung thủ SUSP-01 nhưng bị đánh lừa
+      bởi manh mối EV-03 (Hộp thuốc an thần dở dang được ngụy tạo).
+      Kỳ vọng: verdict=TRAPPED_BY_RED_HERRING, is_correct=False, bị trừ điểm nặng nề.
+
+    - Phần B (Hành vi gian lận Spam Select-All): Người chơi tích chọn bừa bãi toàn bộ
+      tất cả các manh mối hiện trường [EV-01, EV-02, EV-03].
+      Kỳ vọng: Hệ thống kích hoạt phòng vệ SPAM_DETECTED, is_correct=False, score=0.0.
+    """
+    from validator import evaluate_player_deduction
+    from models import DeductionVerdict
+
+    sample = CaseGeneratorService.get_sample_case()
+
+    # --- Phần A: Sập bẫy Red Herring ---
+    response_trap = evaluate_player_deduction(
+        case=sample,
+        accused_id="SUSP-01",
+        selected_clue_ids=["EV-01", "EV-03"]
+    )
+    assert response_trap.is_correct is False
+    assert response_trap.verdict == DeductionVerdict.TRAPPED_BY_RED_HERRING
+    assert response_trap.red_herrings_selected_count == 1
+    assert response_trap.score <= 65.0
+    assert "BỊ GÀI BẪY CHỨNG CỨ" in response_trap.feedback
+    assert response_trap.core_contradiction is None
+
+    # --- Phần B: Gian lận Select-All Spam ---
+    response_spam = evaluate_player_deduction(
+        case=sample,
+        accused_id="SUSP-01",
+        selected_clue_ids=["EV-01", "EV-02", "EV-03"]
+    )
+    assert response_spam.is_correct is False
+    assert response_spam.verdict == DeductionVerdict.SPAM_DETECTED
+    assert response_spam.score == 0.0
+    assert "CẢNH BÁO SPAM CHỨNG CỨ" in response_spam.feedback
+
+

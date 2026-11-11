@@ -6,8 +6,13 @@
 
 # Databases & local storage
 *.db
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
+detective-backend/static/cache/
+detective-backend/test_outputs*/
+detective-backend/cases/CASE-HP-*.json
 
 # Python
 __pycache__/
@@ -73,6 +78,28 @@ Prepare(Trước khi đăng ký)/
 *.mdb
 *.opendb
 *.VC.db
+
+# Unity crash recovery & scene backups
+**/Assets/_Recovery/
+**/Assets/_Recovery.meta
+*.unity.bak
+*.unity.bak.meta
+
+# Tool indexes / local MCP config
+.codegraph/
+.mcp.json
+
+# LaTeX build artifacts
+thesis_latex/*.aux
+thesis_latex/*.log
+thesis_latex/*.fls
+thesis_latex/*.fdb_latexmk
+thesis_latex/*.toc
+thesis_latex/*.lof
+thesis_latex/*.lot
+thesis_latex/*.out
+thesis_latex/*.blg
+thesis_latex/*.synctex.gz
 
 # Root screenshot / UI test captures
 /*.png

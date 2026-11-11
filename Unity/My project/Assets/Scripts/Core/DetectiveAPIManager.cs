@@ -8,8 +8,8 @@ public class DetectiveAPIManager : MonoBehaviour
 {
     public static DetectiveAPIManager Instance { get; private set; }
 
-    [Header("Server Configuration")]
-    [SerializeField] private string baseUrl = "http://localhost:8000";
+    // Host is configurable at runtime (LAN lobby); see ServerConfig.
+    private static string baseUrl => ServerConfig.HttpBaseUrl;
 
     void Awake()
     {
@@ -49,6 +49,31 @@ public class DetectiveAPIManager : MonoBehaviour
                 callback?.Invoke(false, null);
             }
         }));
+    }
+
+    /// <summary>
+    /// Fetch a specific case by ID (used when joining a co-op room that already has a case).
+    /// </summary>
+    public void GetCaseById(string caseId, Action<bool, CaseDossier> callback)
+    {
+        StartCoroutine(GetRequest($"/api/case/{UnityWebRequest.EscapeURL(caseId)}", (success, json) =>
+        {
+            CaseDossier dossier = success ? ParseOrNull(json) : null;
+            callback?.Invoke(dossier != null, dossier);
+        }));
+    }
+
+    private static CaseDossier ParseOrNull(string json)
+    {
+        try
+        {
+            return string.IsNullOrEmpty(json) ? null : JsonUtility.FromJson<CaseDossier>(json);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[APIManager] JSON Parse Error: {e.Message}");
+            return null;
+        }
     }
 
     /// <summary>

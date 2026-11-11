@@ -131,6 +131,30 @@ npm run dev
 
 ---
 
+## 🕵️ Chơi co-op trong mạng LAN (tối đa 3 người)
+
+**Máy chủ (1 máy):**
+1. Chạy backend cho phép máy khác kết nối:
+   ```bash
+   cd detective-backend
+   python -m uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+2. Lần đầu, cho phép Python qua Windows Firewall ở mạng **Private**: TCP 8000 (game) và UDP 47777 (tự tìm máy chủ).
+3. Mở game, nhấn **L** → **TỰ LÀM MÁY CHỦ**. Modal hiện "IP của máy này" để đọc cho bạn chơi.
+
+**Máy khách (tối đa 2 máy):** mở game, nhấn **L** → **TÌM MÁY CHỦ** (hoặc gõ IP máy chủ) → nhập cùng **Mã phòng** → **KẾT NỐI**.
+
+| Phím | Chức năng |
+|---|---|
+| giữ **V** | Nói (voice, nên đeo tai nghe) |
+| **T** | Chat chữ |
+| **L** | Phòng LAN |
+| **Esc** | Đóng chat / modal |
+
+Đồng bộ trong phòng: vụ án đang điều tra, vị trí thẻ trên bảng, chat và voice. Người vào sau nhận đúng trạng thái hiện tại. Người thứ 4 bị từ chối ("phòng đầy"). Voice là PCM 16 kHz qua WebSocket (≈32 KB/s mỗi người nói), không cần tài khoản hay dịch vụ ngoài. Có thể dùng Discord thay thế bằng cách đơn giản là không giữ V.
+
+---
+
 ## 🧪 Kiểm thử (Testing)
 Chạy bộ kiểm thử backend với Pytest:
 ```bash
