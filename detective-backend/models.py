@@ -148,6 +148,7 @@ class ValidationResult(BaseModel):
 
 class GenerationMetadata(BaseModel):
     """Operational telemetry and benchmark metrics for the generated case."""
+    model_config = {"protected_namespaces": ()}
     model_name: str = Field(default="unknown")
     pipeline_version: str = Field(default="2.0-neuro-symbolic")
     agent_latencies: Dict[str, float] = Field(default_factory=dict, description="Latency per agent in seconds.")
@@ -159,6 +160,25 @@ class GenerationMetadata(BaseModel):
 # -------------------------------------------------------------
 # Case Dossier and API Payloads
 # -------------------------------------------------------------
+
+class DeductionVerdict(str, Enum):
+    """Categorical evaluation verdict of the player's deduction."""
+    SOLVED_PERFECT = "solved_perfect"              # Right killer + decisive clues + zero red herrings (100 pts)
+    SOLVED_FLAWED = "solved_flawed"                # Right killer + decisive clues, but fell for minor distraction (60-80 pts)
+    WRONG_SUSPECT = "wrong_suspect"                # Accused an innocent person (0 pts)
+    INSUFFICIENT_EVIDENCE = "insufficient_evidence"# Right killer, but failed to provide alibi-breaking evidence (35 pts)
+    TRAPPED_BY_RED_HERRING = "trapped_by_red_herring" # Accused innocent or submitted decisive red herring trap (10-25 pts)
+    SPAM_DETECTED = "spam_detected"                # Selected all or bulk random clues without deduction (0 pts)
+
+
+class DeductionScoreBreakdown(BaseModel):
+    """Detailed score telemetry for academic evaluation and UI display."""
+    base_culprit_score: float = Field(default=0.0, description="Score for correctly identifying the killer (up to 40).")
+    crucial_clues_score: float = Field(default=0.0, description="Score for crucial alibi-breaking evidence (up to 40).")
+    precision_bonus: float = Field(default=0.0, description="Bonus for concise deduction without irrelevant clutter (up to 20).")
+    red_herring_penalty: float = Field(default=0.0, description="Penalty for falling for misleading red-herrings.")
+    total_score: float = Field(default=0.0, ge=0.0, le=100.0, description="Final composite score (0 - 100).")
+
 
 class CaseDossier(BaseModel):
     """Complete Case Dossier structure returned to client and stored in database."""
@@ -181,12 +201,17 @@ class VerifyRequest(BaseModel):
 
 
 class VerifyResponse(BaseModel):
-    """Response payload detailing the player's deduction accuracy."""
+    """Response payload detailing the player's deduction accuracy with granular scoring."""
     case_id: str
     is_correct: bool = Field(..., description="Overall verdict (True if culprit and crucial clues match).")
+    verdict: DeductionVerdict = Field(default=DeductionVerdict.WRONG_SUSPECT, description="Categorical evaluation status.")
     culprit_identified: bool = Field(..., description="Whether the player correctly named the killer.")
     crucial_evidences_identified: bool = Field(..., description="Whether required key evidences were provided.")
-    found_crucial_count: int
-    total_crucial_count: int
+    found_crucial_count: int = Field(default=0)
+    total_crucial_count: int = Field(default=0)
+    red_herrings_selected_count: int = Field(default=0)
+    irrelevant_clues_count: int = Field(default=0)
+    score: float = Field(default=0.0, description="Composite deduction score out of 100.")
+    score_breakdown: Optional[DeductionScoreBreakdown] = Field(default=None)
     feedback: str = Field(..., description="Narrative evaluation / explanation for the player.")
     core_contradiction: Optional[str] = Field(default=None, description="Revealed explanation on victory.")

@@ -80,14 +80,40 @@ public class VerifyRequest
 }
 
 [Serializable]
+public class GenerateCaseRequest
+{
+    public string theme;
+    public string country = "Việt Nam";
+    public string setting_type = "";
+    public string era = "Hiện đại";
+    public string mystery_type = "Án mạng bí ẩn";
+}
+
+[Serializable]
+public class DeductionScoreBreakdown
+{
+    public float base_culprit_score;
+    public float crucial_clues_score;
+    public float precision_bonus;
+    public float red_herring_penalty;
+    public float total_score;
+}
+
+[Serializable]
 public class VerifyResponse
 {
     public string case_id;
     public bool is_correct;
+    // Backend DeductionVerdict enum serialized as string (e.g. "solved_perfect", "wrong_suspect")
+    public string verdict;
     public bool culprit_identified;
     public bool crucial_evidences_identified;
     public int found_crucial_count;
     public int total_crucial_count;
+    public int red_herrings_selected_count;
+    public int irrelevant_clues_count;
+    public float score;
+    public DeductionScoreBreakdown score_breakdown;
     public string feedback;
     public string core_contradiction;
 }

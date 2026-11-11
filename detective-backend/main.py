@@ -11,15 +11,26 @@ import os
 import json
 import logging
 from typing import Dict, Optional, List
-from fastapi import FastAPI, HTTPException, Query, Body
+from fastapi import FastAPI, HTTPException, Query, Body, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from models import CaseDossier, VerifyRequest, VerifyResponse
 from llm_service import CaseGeneratorService
-from validator import validate_case_logic
+from validator import validate_case_logic, evaluate_player_deduction
 from asset_service import asset_service, STATIC_DIR
+from rooms import RoomManager
+from lan_discovery import start_lan_discovery, stop_lan_discovery
+from database import (
+    init_db,
+    save_case_to_db,
+    get_case_from_db,
+    list_cases_from_db,
+    count_cases_in_db,
+    log_deduction_to_db,
+    get_case_statistics
+)
 
 
 # Logging Configuration
@@ -56,6 +67,52 @@ def load_case_from_disk(case_id: str) -> Optional[CaseDossier]:
             logger.error(f"Failed to read case file {file_path}: {e}")
     return None
 
+def save_case_persistent(
+    case: CaseDossier,
+    is_valid: bool = True,
+    validator_score: float = 1.0,
+    country: Optional[str] = None,
+    era: Optional[str] = None,
+    mystery_type: Optional[str] = None
+) -> None:
+    """Persist case dossier across SQLite database, disk JSON backup, and in-memory cache."""
+    CASE_CACHE[case.case_id] = case
+    try:
+        save_case_to_db(
+            case,
+            is_valid=is_valid,
+            validator_score=validator_score,
+            country=country,
+            era=era,
+            mystery_type=mystery_type
+        )
+    except Exception as e:
+        logger.error(f"Failed to save case '{case.case_id}' to SQLite DB: {e}")
+    try:
+        save_case_to_disk(case)
+    except Exception as e:
+        logger.error(f"Failed to save case '{case.case_id}' to disk JSON: {e}")
+
+def load_case_persistent(case_id: str) -> Optional[CaseDossier]:
+    """Retrieve case dossier prioritizing Cache -> SQLite Database -> JSON Flat-file fallback."""
+    if case_id in CASE_CACHE:
+        return CASE_CACHE[case_id]
+    
+    # 1. Query SQLite Database
+    case = get_case_from_db(case_id)
+    if not case:
+        # 2. Fallback to Disk JSON
+        case = load_case_from_disk(case_id)
+        if case:
+            try:
+                save_case_to_db(case)
+            except Exception:
+                pass
+                
+    if case:
+        CASE_CACHE[case_id] = case
+    return case
+
 app = FastAPI(
     title="AI Detective Game Engine API",
     description="Backend service for AI-powered Detective Puzzle Game with Sequential LLM Generation & Logic Validator",
@@ -77,11 +134,11 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 # Initialize Services
 case_generator = CaseGeneratorService()
 
-# Pre-populate sample case into cache and disk with enriched asset URLs
+# Pre-populate sample case into SQLite DB, cache, and disk with enriched asset URLs
+init_db()
 sample_case = CaseGeneratorService.get_sample_case()
 asset_service.enrich_case_dossier(sample_case)
-CASE_CACHE[sample_case.case_id] = sample_case
-save_case_to_disk(sample_case)
+save_case_persistent(sample_case)
 
 
 
@@ -208,14 +265,18 @@ def get_sample_case():
 
 @app.get("/api/case/all")
 def list_all_cases():
-    """List all saved cases currently in memory and disk storage."""
+    """List all saved cases currently in SQLite database and disk storage."""
+    db_cases = list_cases_from_db(limit=None)
+    if db_cases:
+        return {"total_cases": len(db_cases), "cases": db_cases}
+
     cases = []
-    # Check disk storage
+    # Fallback to disk storage
     if os.path.exists(CASES_DIR):
         for filename in os.listdir(CASES_DIR):
             if filename.endswith(".json"):
                 cid = filename.replace(".json", "")
-                c = CASE_CACHE.get(cid) or load_case_from_disk(cid)
+                c = load_case_persistent(cid)
                 if c:
                     cases.append({
                         "case_id": c.case_id,
@@ -228,6 +289,21 @@ def list_all_cases():
     return {"total_cases": len(cases), "cases": cases}
 
 
+@app.get("/api/cases")
+def query_cases(
+    skip: int = Query(0, ge=0, description="Offset for pagination"),
+    limit: int = Query(20, ge=1, le=100, description="Maximum items per page"),
+    country: Optional[str] = Query(None, description="Filter by setting country"),
+    mystery_type: Optional[str] = Query(None, description="Filter by mystery genre"),
+    is_valid_only: bool = Query(False, description="Filter only logically verified cases")
+):
+    """Query case catalog with pagination and criteria filtering for game lobby and research."""
+    filters = {"country": country, "mystery_type": mystery_type, "is_valid_only": is_valid_only}
+    records = list_cases_from_db(skip=skip, limit=limit, **filters)
+    total = count_cases_in_db(**filters)
+    return {"total": total, "skip": skip, "limit": limit, "items": records}
+
+
 @app.get("/api/case/presets")
 def get_case_presets():
     """Retrieve available realistic presets (countries, locations, eras, mystery types) for UI dropdowns."""
@@ -236,24 +312,31 @@ def get_case_presets():
 
 @app.get("/api/case/{case_id}", response_model=CaseDossier)
 def get_case_by_id(case_id: str):
-    """Retrieve a specific case dossier by its ID from memory or persistent disk."""
-    case = CASE_CACHE.get(case_id) or load_case_from_disk(case_id)
+    """Retrieve a specific case dossier by its ID from memory, SQLite DB, or disk."""
+    case = load_case_persistent(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
     asset_service.enrich_case_dossier(case)
-    CASE_CACHE[case.case_id] = case
     return case
-
 
 
 @app.get("/api/case/{case_id}/graph")
 def get_case_bipartite_graph(case_id: str):
     """Retrieve explicit Bipartite Graph representation (nodes & edges) for Corkboard visualization."""
     from case_graph import build_bipartite_case_graph
-    case = CASE_CACHE.get(case_id) or load_case_from_disk(case_id)
+    case = load_case_persistent(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
     return build_bipartite_case_graph(case)
+
+
+@app.get("/api/case/{case_id}/stats")
+def get_case_stats(case_id: str):
+    """Retrieve player deduction analytics and difficulty statistics for a given case."""
+    case = load_case_persistent(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
+    return get_case_statistics(case_id)
 
 
 @app.post("/api/case/generate", response_model=CaseDossier)
@@ -294,9 +377,8 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
         case = await case_generator.generate_case(theme=theme)
         # Enrich with semantic assets
         asset_service.enrich_case_dossier(case)
-        # Save to memory cache and persistent disk storage
-        CASE_CACHE[case.case_id] = case
-        save_case_to_disk(case)
+        # Save to memory cache, SQLite database, and persistent disk storage
+        save_case_persistent(case, country=country, era=era, mystery_type=mystery)
         return case
 
     except Exception as e:
@@ -306,8 +388,8 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
 
 @app.post("/api/case/verify", response_model=VerifyResponse)
 def verify_solution(request: VerifyRequest):
-    """Verify player's deduction (accused suspect and submitted crucial evidence IDs)."""
-    case = CASE_CACHE.get(request.case_id) or load_case_from_disk(request.case_id)
+    """Verify player's deduction using Neuro-Symbolic scoring (fair-play constraints) and persist audit log."""
+    case = load_case_persistent(request.case_id)
     if not case:
         # Fallback to checking sample case if ID matches
         if request.case_id == sample_case.case_id:
@@ -315,42 +397,81 @@ def verify_solution(request: VerifyRequest):
         else:
             raise HTTPException(status_code=404, detail=f"Case ID '{request.case_id}' not found in active session or database.")
 
-    ground_truth = case.ground_truth
-    culprit_identified = (request.selected_suspect_id == ground_truth.culprit_id)
-
-    # Calculate crucial evidence identification
-    crucial_evidences = [ev for ev in case.evidences if ev.is_crucial]
-    crucial_ev_ids = {ev.id for ev in crucial_evidences}
-    selected_ev_ids = set(request.selected_evidence_ids)
-
-    found_crucial = selected_ev_ids.intersection(crucial_ev_ids)
-    crucial_evidences_identified = len(found_crucial) >= 1  # At least 1 decisive clue identified
-
-    is_correct = culprit_identified and crucial_evidences_identified
-
-    if is_correct:
-        feedback = (
-            f"CHÍNH XÁC! Bạn đã phá giải thành công vụ án '{case.title}'. "
-            f"Hung thủ thực sự chính là {ground_truth.culprit_id}!"
-        )
-        contradiction = ground_truth.core_contradiction
-    elif not culprit_identified:
-        feedback = "LẬP LUẬN SAI! Đối tượng bạn cáo buộc không phải là hung thủ thực sự. Hãy xem xét kỹ lại Alibi và thời gian tử vong."
-        contradiction = None
-    else:
-        feedback = "GẦN ĐÚNG! Bạn đã chỉ ra đúng hung thủ, nhưng chứng cứ bạn đưa ra chưa đủ sức thuyết phục để vạch trần mâu thuẫn!"
-        contradiction = None
-
-    return VerifyResponse(
-        case_id=case.case_id,
-        is_correct=is_correct,
-        culprit_identified=culprit_identified,
-        crucial_evidences_identified=crucial_evidences_identified,
-        found_crucial_count=len(found_crucial),
-        total_crucial_count=len(crucial_ev_ids),
-        feedback=feedback,
-        core_contradiction=contradiction
+    response = evaluate_player_deduction(
+        case=case,
+        accused_id=request.selected_suspect_id,
+        selected_clue_ids=request.selected_evidence_ids
     )
+
+    # Persist deduction trial to database audit log for research analytics
+    try:
+        log_deduction_to_db(
+            case_id=request.case_id,
+            verify_req=request,
+            verify_res=response
+        )
+    except Exception as e:
+        logger.warning(f"Could not log deduction to DB: {e}")
+
+    return response
+
+
+# ---------------------------------------------------------
+# Realtime Multiplayer Room & Corkboard Sync WebSockets
+# ---------------------------------------------------------
+
+room_manager = RoomManager()
+
+
+@app.on_event("startup")
+async def _start_lan_discovery():
+    await start_lan_discovery(http_port=int(os.getenv("PORT", "8000")))
+
+
+@app.on_event("shutdown")
+async def _stop_lan_discovery():
+    stop_lan_discovery()
+
+
+@app.get("/api/rooms/{room_id}")
+def get_room_info(room_id: str):
+    """Lobby info: who is in the room and whether there is a free seat."""
+    room = room_manager.get_room(room_id)
+    players = room.player_names if room else []
+    return {
+        "room_id": room_id,
+        "players": players,
+        "max_players": room_manager.max_players,
+        "is_full": len(players) >= room_manager.max_players,
+        "case_id": room.case_id if room else None
+    }
+
+
+@app.websocket("/ws/rooms/{room_id}")
+async def websocket_room_endpoint(websocket: WebSocket, room_id: str, name: Optional[str] = Query(None)):
+    """Co-op endpoint (max 3 players): board sync, chat, presence and push-to-talk voice."""
+    player = await room_manager.join(room_id, websocket, name)
+    if player is None:
+        return
+    try:
+        while True:
+            frame = await websocket.receive()
+            if frame["type"] == "websocket.disconnect":
+                break
+            if frame.get("bytes") is not None:
+                await room_manager.relay_audio(room_id, websocket, frame["bytes"])
+            elif frame.get("text"):
+                try:
+                    data = json.loads(frame["text"])
+                except json.JSONDecodeError:
+                    continue
+                await room_manager.handle_message(room_id, websocket, data)
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.warning(f"WebSocket error in room '{room_id}': {e}")
+    finally:
+        await room_manager.leave(room_id, websocket)
 
 
 if __name__ == "__main__":
