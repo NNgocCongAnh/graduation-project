@@ -76,8 +76,10 @@ class OutlineAgent(BaseAgent):
             "CRITICAL CULTURAL RULE: All names (victim name, suspects), locations, and vocabulary MUST be authentic and strictly match the Country and Culture specified in the Theme (e.g. if Vietnam, victim MUST have a realistic Vietnamese name like 'Nguyễn Văn Hải', 'Trần Đình Trọng', 'Lê Hữu Đạt', etc. NEVER use English names like 'Arthur Blackwood' unless theme is in UK). "
             "Output JSON with title, summary, victim (name, age, occupation, forensic_data), and ground_truth. "
             "FORENSIC RULES: ambient_temp between 18.0 and 24.0°C; body_temp between 28.0 and 34.0°C. "
-            "estimated_tod_start and estimated_tod_end must be HH:MM matching body cooling rate. "
-            "ground_truth.actual_crime_time must fall inside [estimated_tod_start, estimated_tod_end]. "
+            "Also give body_weight_kg (45-120), cooling_factor (Henssge C: 1.0 clothed in still air, 0.8 lightly dressed/draughty, 1.2 under a blanket) "
+            "and discovery_time (HH:MM when the body was found and rectal temperature measured, typically 8-14 hours after the murder). "
+            "The time-of-death window is recomputed by a Henssge physics engine from these values, so keep them realistic. "
+            "ground_truth.actual_crime_time must be roughly discovery_time minus the cooling time implied by body_temp. "
             "ground_truth.culprit_id must be 'SUSP-01'."
         )
         user_prompt = f"""
@@ -95,8 +97,11 @@ Format:
       "body_temp": 31.5,
       "livor_mortis_state": "Hoen ố cố định ở lưng, không biến mất khi ấn",
       "wound_description": "Vết thương trí mạng ở vùng ngực trái",
-      "estimated_tod_start": "21:00",
-      "estimated_tod_end": "22:30"
+      "estimated_tod_start": "20:06",
+      "estimated_tod_end": "23:06",
+      "body_weight_kg": 70.0,
+      "cooling_factor": 1.0,
+      "discovery_time": "08:30"
     }}
   }},
   "ground_truth": {{
@@ -124,7 +129,9 @@ Format:
 Current Forensic: {victim.forensic_data.model_dump_json()}
 Current Crime Time: {ground_truth.actual_crime_time}
 Diagnostic Violation: {diagnostic}
-Requirement: Ensure actual_crime_time falls within [estimated_tod_start, estimated_tod_end] and ambient/body temp cooling physics.
+Requirement: The Henssge window in the diagnostic is computed by a physics engine and is authoritative.
+Move actual_crime_time inside that window (preferred), or adjust discovery_time / body_temp so that the
+recomputed window contains the crime time. Keep body_temp above ambient_temp.
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
         if "forensic_data" in data:
