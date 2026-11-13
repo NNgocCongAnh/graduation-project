@@ -11,8 +11,11 @@
       "body_temp": 31.2,
       "livor_mortis_state": "Hoen tử thi cố định ở vùng lưng, không đổi màu khi ấn mạnh.",
       "wound_description": "Vết đâm sâu 8cm xuyên qua khoang ngực trái gây mất máu cấp.",
-      "estimated_tod_start": "21:00",
-      "estimated_tod_end": "22:30"
+      "estimated_tod_start": "20:06",
+      "estimated_tod_end": "23:06",
+      "body_weight_kg": 70.0,
+      "cooling_factor": 1.0,
+      "discovery_time": "08:30"
     }
   },
   "suspects": [

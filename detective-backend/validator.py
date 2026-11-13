@@ -13,6 +13,7 @@ This module acts as the neuro-symbolic logic gatekeeper and deduction evaluator:
    - Comprehensive feedback for frontend modal and thesis benchmark analysis.
 """
 
+import math
 import re
 from typing import List, Tuple, Optional, Set, Dict, Any
 from models import (
@@ -80,21 +81,164 @@ def is_time_in_interval(target: str, start: str, end: str) -> bool:
         return t_min >= s_min or t_min <= e_min
 
 
-def calculate_henssge_pmi_bounds(body_temp: float, ambient_temp: float) -> Tuple[float, float]:
-    """Estimate minimum and maximum Post-Mortem Interval (PMI in hours) using cooling rate physics.
+# -------------------------------------------------------------
+# Henssge (1988) two-exponential body cooling model
+# -------------------------------------------------------------
+# Phi(t) = (T_body - T_amb) / (37.2 - T_amb)
+#        = 1.25 e^(-k t) - 0.25 e^(-5 k t)      for T_amb <= 23.2 C
+#        = 1.11 e^(-k t) - 0.11 e^(-10 k t)     for T_amb  > 23.2 C
+# k = 1.2815 / (M * C)^0.625 - 0.0284           (M = body mass kg, C = corrective factor)
+# Phi is strictly decreasing from 1 at t = 0, so the bisection root is unique.
 
-    Standard normal body core temperature is approx 37.0°C.
-    Standard cooling rate in ambient environment (15°C - 25°C) is roughly 1.0°C - 1.5°C/hr.
-    Returns: (pmi_min_hours, pmi_max_hours)
+HENSSGE_RECTAL_TEMP_AT_DEATH = 37.2
+HENSSGE_AMBIENT_SWITCH = 23.2
+HENSSGE_SEARCH_MAX_HOURS = 48.0
+HENSSGE_EPSILON = 1e-4
+HENSSGE_MAX_ITERATIONS = 100
+# Thesis eq. TOD = [T_discovery - (t* + 1.5), T_discovery - (t* - 1.5)]
+HENSSGE_TOD_TOLERANCE_HOURS = 1.5
+MINUTES_PER_DAY = 1440
+
+
+def henssge_cooling_constant(body_weight_kg: float = 70.0, cooling_factor: float = 1.0) -> float:
+    """Cooling constant k (1/h) from body mass M and corrective factor C."""
+    return 1.2815 / (body_weight_kg * cooling_factor) ** 0.625 - 0.0284
+
+
+def henssge_phi(hours: float, k: float, ambient: float) -> float:
+    """Normalised temperature ratio Phi(t) predicted by the Henssge model."""
+    if ambient <= HENSSGE_AMBIENT_SWITCH:
+        return 1.25 * math.exp(-k * hours) - 0.25 * math.exp(-5 * k * hours)
+    return 1.11 * math.exp(-k * hours) - 0.11 * math.exp(-10 * k * hours)
+
+
+def solve_pmi_bisection(
+    body_temp: float,
+    ambient_temp: float,
+    body_weight_kg: float = 70.0,
+    cooling_factor: float = 1.0,
+) -> Optional[float]:
+    """Post-mortem interval t* (hours) by bisection on [0, 48] h, eps = 1e-4, <= 100 iterations.
+
+    Returns 0.0 if the body is still at living temperature, or None when the reading
+    cannot be explained by cooling within the search range (body colder than the room,
+    or more than 48 h needed).
     """
-    temp_drop = max(0.0, 37.0 - body_temp)
-    if temp_drop <= 0.2:
-        return 0.0, 1.0
+    span = HENSSGE_RECTAL_TEMP_AT_DEATH - ambient_temp
+    if span <= 0:
+        return None
+    phi_target = (body_temp - ambient_temp) / span
+    if phi_target >= 1.0:
+        return 0.0
+    if phi_target <= 0.0:
+        return None
 
-    # Minimum hours (fast cooling 1.5°C/h) and maximum hours (slow cooling 0.8°C/h)
-    pmi_min = temp_drop / 1.5
-    pmi_max = temp_drop / 0.8
-    return round(pmi_min, 1), round(pmi_max, 1)
+    k = henssge_cooling_constant(body_weight_kg, cooling_factor)
+    if k <= 0:
+        return None
+
+    def f(t: float) -> float:
+        return henssge_phi(t, k, ambient_temp) - phi_target
+
+    a, b = 0.0, HENSSGE_SEARCH_MAX_HOURS
+    if f(b) > 0:  # still warmer than the model allows after 48 h
+        return None
+
+    for _ in range(HENSSGE_MAX_ITERATIONS):
+        m = (a + b) / 2
+        fm = f(m)
+        if abs(fm) < HENSSGE_EPSILON or (b - a) / 2 < HENSSGE_EPSILON:
+            return m
+        if f(a) * fm < 0:
+            b = m
+        else:
+            a = m
+    return (a + b) / 2
+
+
+def calculate_henssge_pmi_bounds(
+    body_temp: float,
+    ambient_temp: float,
+    body_weight_kg: float = 70.0,
+    cooling_factor: float = 1.0,
+) -> Tuple[float, float]:
+    """(min, max) post-mortem interval in hours: t* -/+ the Henssge tolerance.
+
+    Kept for backward compatibility; returns (0.0, 0.0) when the reading is unphysical.
+    """
+    t_star = solve_pmi_bisection(body_temp, ambient_temp, body_weight_kg, cooling_factor)
+    if t_star is None:
+        return 0.0, 0.0
+    return (
+        round(max(0.0, t_star - HENSSGE_TOD_TOLERANCE_HOURS), 2),
+        round(t_star + HENSSGE_TOD_TOLERANCE_HOURS, 2),
+    )
+
+
+def minutes_to_hhmm(total_minutes: float) -> str:
+    """Wrap minutes onto a 24 h clock and format as HH:MM."""
+    m = int(round(total_minutes)) % MINUTES_PER_DAY
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+
+def henssge_tod_window(forensic: ForensicData) -> Optional[Tuple[str, str]]:
+    """Forensic time-of-death window derived from the Henssge model.
+
+    TOD = [discovery - (t* + 1.5 h), discovery - (t* - 1.5 h)]. Returns None when
+    discovery_time is unknown (legacy dossiers) or the temperatures are unphysical.
+    """
+    if not forensic.discovery_time:
+        return None
+    discovery = robust_time_to_minutes(forensic.discovery_time)
+    t_star = solve_pmi_bisection(
+        forensic.body_temp, forensic.ambient_temp, forensic.body_weight_kg, forensic.cooling_factor
+    )
+    if discovery is None or t_star is None:
+        return None
+    earliest = discovery - (t_star + HENSSGE_TOD_TOLERANCE_HOURS) * 60
+    latest = discovery - max(0.0, t_star - HENSSGE_TOD_TOLERANCE_HOURS) * 60
+    return minutes_to_hhmm(earliest), minutes_to_hhmm(latest)
+
+
+def apply_henssge_tod_window(forensic: ForensicData) -> bool:
+    """Let the symbolic engine own the presented TOD window. Returns True if it was set."""
+    window = henssge_tod_window(forensic)
+    if window is None:
+        return False
+    forensic.estimated_tod_start, forensic.estimated_tod_end = window
+    return True
+
+
+def _henssge_violations(forensic: ForensicData, crime_time: str) -> List[ConstraintViolation]:
+    """Henssge physics check; skipped for legacy dossiers without discovery_time."""
+    if not forensic.discovery_time:
+        return []
+
+    t_star = solve_pmi_bisection(
+        forensic.body_temp, forensic.ambient_temp, forensic.body_weight_kg, forensic.cooling_factor
+    )
+    if t_star is None:
+        return [ConstraintViolation(
+            violation_type=ViolationType.TOD_PHYSICS,
+            component="outline",
+            message=(
+                f"Henssge model cannot explain body {forensic.body_temp}°C in ambient {forensic.ambient_temp}°C "
+                f"within {HENSSGE_SEARCH_MAX_HOURS:.0f} h (body must be warmer than the room)."
+            ),
+        )]
+
+    start, end = henssge_tod_window(forensic)
+    if is_time_in_interval(crime_time, start, end):
+        return []
+    return [ConstraintViolation(
+        violation_type=ViolationType.CRIME_TIME_OUTSIDE_TOD,
+        component="outline",
+        message=(
+            f"Henssge PMI t*={t_star:.2f} h (M={forensic.body_weight_kg} kg, C={forensic.cooling_factor}, "
+            f"found {forensic.discovery_time}) gives TOD window [{start} - {end}], "
+            f"but actual crime time is '{crime_time}'."
+        ),
+    )]
 
 
 def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
@@ -203,6 +347,9 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
                 f"[{forensic.estimated_tod_start} - {forensic.estimated_tod_end}]."
             )
         ))
+
+    # Henssge two-exponential cooling model (deterministic physics gate)
+    violations.extend(_henssge_violations(forensic, crime_time))
 
     # Basic thermal drop validation
     if forensic.body_temp >= 37.5 and forensic.ambient_temp < 30.0:

@@ -22,7 +22,7 @@ from models import (
     CaseDossier, Victim, Suspect, Evidence, GroundTruth, ForensicData,
     ReasoningChain, DeductionStep, GenerationMetadata, ValidationResult, ViolationType
 )
-from validator import validate_case_diagnostics, validate_case_logic
+from validator import validate_case_diagnostics, validate_case_logic, apply_henssge_tod_window
 from agents import OutlineAgent, CharacterAgent, ClueAgent, DeductionAgent
 
 from dotenv import load_dotenv
@@ -70,6 +70,8 @@ class CaseGeneratorService:
                 # 1. OutlineAgent: Premise & Ground Truth
                 t0 = time.time()
                 title, summary, victim, ground_truth = await self.outline_agent.generate(theme)
+                # Symbolic engine owns the TOD window: derive it from Henssge, not from the LLM.
+                apply_henssge_tod_window(victim.forensic_data)
                 agent_latencies["OutlineAgent"] = round(time.time() - t0, 2)
 
                 # 2. CharacterAgent: Suspects & Alibis
@@ -109,6 +111,7 @@ class CaseGeneratorService:
                             patch_retries += 1
                         elif violation.component == "outline":
                             victim, ground_truth = await self.outline_agent.repair_tod(victim, ground_truth, feedback)
+                            apply_henssge_tod_window(victim.forensic_data)
                             patch_retries += 1
 
                     # Re-assemble and re-validate
@@ -168,8 +171,12 @@ class CaseGeneratorService:
                     body_temp=31.2,
                     livor_mortis_state="Hoen tử thi cố định ở vùng lưng, không đổi màu khi ấn mạnh.",
                     wound_description="Vết đâm sâu 8cm xuyên qua khoang ngực trái gây mất máu cấp.",
-                    estimated_tod_start="21:00",
-                    estimated_tod_end="22:30"
+                    # Henssge: 31.2°C body / 21.0°C room / 70 kg / C=1.0 -> t* = 10.9 h before 08:30
+                    estimated_tod_start="20:06",
+                    estimated_tod_end="23:06",
+                    body_weight_kg=70.0,
+                    cooling_factor=1.0,
+                    discovery_time="08:30"
                 )
             ),
             suspects=[

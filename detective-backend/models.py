@@ -10,6 +10,17 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, field_validator
 
 
+def _normalize_hhmm(v: str) -> str:
+    """Validate a 24-hour 'HH:MM' string and zero-pad it."""
+    parts = str(v).strip().split(":")
+    if len(parts) != 2:
+        raise ValueError(f"Invalid time format '{v}'. Expected 'HH:MM'.")
+    hours, minutes = int(parts[0]), int(parts[1])
+    if not (0 <= hours <= 23 and 0 <= minutes <= 59):
+        raise ValueError(f"Time '{v}' out of range (00:00 - 23:59).")
+    return f"{hours:02d}:{minutes:02d}"
+
+
 class ForensicData(BaseModel):
     """Forensic biological data and post-mortem findings."""
     ambient_temp: float = Field(..., description="Ambient temperature of the crime scene in Celsius (°C).")
@@ -18,17 +29,22 @@ class ForensicData(BaseModel):
     wound_description: str = Field(..., description="Detailed description of fatal and non-fatal wounds.")
     estimated_tod_start: str = Field(..., description="Estimated start time of death (HH:MM, 24-hour format).")
     estimated_tod_end: str = Field(..., description="Estimated end time of death (HH:MM, 24-hour format).")
+    # Henssge (1988) nomogram inputs. Defaults = standard adult, light clothing, still air.
+    body_weight_kg: float = Field(default=70.0, ge=30.0, le=200.0, description="Body mass M (kg) for the Henssge cooling constant.")
+    cooling_factor: float = Field(default=1.0, ge=0.3, le=2.0, description="Henssge corrective factor C (1.0 clothed/still air, 0.75-0.9 naked, 1.1-1.2 covered, 0.5 still water).")
+    discovery_time: Optional[str] = Field(default=None, description="Time the body was found and rectal temperature measured (HH:MM). Anchors the Henssge TOD window.")
+
+    @field_validator("discovery_time")
+    @classmethod
+    def validate_discovery_time(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or not str(v).strip():
+            return None
+        return _normalize_hhmm(v)
 
     @field_validator("estimated_tod_start", "estimated_tod_end")
     @classmethod
     def validate_time_format(cls, v: str) -> str:
-        parts = v.strip().split(":")
-        if len(parts) != 2:
-            raise ValueError(f"Invalid time format '{v}'. Expected 'HH:MM'.")
-        hours, minutes = int(parts[0]), int(parts[1])
-        if not (0 <= hours <= 23 and 0 <= minutes <= 59):
-            raise ValueError(f"Time '{v}' out of range (00:00 - 23:59).")
-        return f"{hours:02d}:{minutes:02d}"
+        return _normalize_hhmm(v)
 
 
 class Victim(BaseModel):

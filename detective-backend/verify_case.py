@@ -18,7 +18,11 @@ import json
 import argparse
 
 from models import CaseDossier
-from validator import validate_case_diagnostics, is_time_in_interval, time_to_minutes
+from validator import (
+    validate_case_diagnostics, is_time_in_interval, time_to_minutes,
+    henssge_cooling_constant, solve_pmi_bisection, henssge_tod_window, minutes_to_hhmm,
+    HENSSGE_TOD_TOLERANCE_HOURS,
+)
 
 CASES_DIR = os.path.join(os.path.dirname(__file__), "cases")
 
@@ -50,19 +54,36 @@ def audit_case(case: CaseDossier):
     print("\n[Tiêu chuẩn 2/5] Kiểm định Tính Nhất quán Vật lý & Giờ Tử vong (Symbolic Physics)")
     f = case.victim.forensic_data
     crime_time = case.ground_truth.actual_crime_time
-    in_tod = is_time_in_interval(crime_time, f.estimated_tod_start, f.estimated_tod_end)
-    temp_drop = 37.0 - f.body_temp
+    k = henssge_cooling_constant(f.body_weight_kg, f.cooling_factor)
+    t_star = solve_pmi_bisection(f.body_temp, f.ambient_temp, f.body_weight_kg, f.cooling_factor)
 
-    print(f"   • Thân nhiệt nạn nhân: {f.body_temp}°C (Giảm {temp_drop:.1f}°C so với người sống 37.0°C)")
-    print(f"   • Cửa sổ tử vong tính theo Henssge: {f.estimated_tod_start} - {f.estimated_tod_end}")
-    print(f"   • Giờ gây án thực tế của hung thủ:  {crime_time}")
-
-    if in_tod:
-        print(f"   ✅ ĐẠT: Giờ gây án ({crime_time}) nằm trọn trong cửa sổ tử vong pháp y [{f.estimated_tod_start}-{f.estimated_tod_end}].")
-        print("         -> Không có lỗi vô lý về mặt y khoa/vật lý.")
-        checks_passed += 1
+    print(f"   • Đầu vào: thân nhiệt {f.body_temp}°C, nhiệt độ phòng {f.ambient_temp}°C, M = {f.body_weight_kg} kg, C = {f.cooling_factor}")
+    print(f"   • Hằng số làm lạnh k = 1.2815/(M·C)^0.625 - 0.0284 = {k:.4f} /giờ")
+    if t_star is None:
+        print("   ❌ KHÔNG ĐẠT: Mô hình Henssge không giải thích được thân nhiệt này trong 48 giờ (thi thể phải ấm hơn môi trường).")
     else:
-        print(f"   ❌ KHÔNG ĐẠT: Giờ gây án mâu thuẫn với độ lạnh của thi thể.")
+        print(f"   • Nghiệm chia đôi Henssge (ε = 1e-4): t* = {t_star:.2f} giờ kể từ lúc tử vong đến lúc đo nhiệt")
+        print(f"   • Giờ gây án thực tế của hung thủ:  {crime_time}")
+        window = henssge_tod_window(f)
+        if window is not None:
+            start, end = window
+            print(f"   • Phát hiện thi thể lúc {f.discovery_time} => cửa sổ tử vong Henssge [{start} - {end}] (t* ± {HENSSGE_TOD_TOLERANCE_HOURS} giờ)")
+            if is_time_in_interval(crime_time, start, end):
+                print(f"   ✅ ĐẠT: Giờ gây án nằm trong cửa sổ tử vong tính bằng phương trình hai hàm mũ Henssge.")
+                checks_passed += 1
+            else:
+                print(f"   ❌ KHÔNG ĐẠT: Giờ gây án mâu thuẫn với độ lạnh của thi thể theo Henssge.")
+        else:
+            crime_min = time_to_minutes(crime_time)
+            earliest = minutes_to_hhmm(crime_min + (t_star - HENSSGE_TOD_TOLERANCE_HOURS) * 60)
+            latest = minutes_to_hhmm(crime_min + (t_star + HENSSGE_TOD_TOLERANCE_HOURS) * 60)
+            in_tod = is_time_in_interval(crime_time, f.estimated_tod_start, f.estimated_tod_end)
+            print(f"   • Hồ sơ cũ chưa ghi giờ phát hiện: Henssge yêu cầu thi thể được đo nhiệt trong [{earliest} - {latest}]")
+            if in_tod:
+                print(f"   ✅ ĐẠT: Giờ gây án nằm trong cửa sổ pháp y của hồ sơ [{f.estimated_tod_start}-{f.estimated_tod_end}].")
+                checks_passed += 1
+            else:
+                print(f"   ❌ KHÔNG ĐẠT: Giờ gây án nằm ngoài cửa sổ pháp y của hồ sơ.")
 
     # TIÊU CHUẨN 3: TÍNH GIẢI ĐƯỢC CỦA VỤ ÁN (SOLVABILITY GUARANTEE)
     print("\n[Tiêu chuẩn 3/5] Kiểm định Tính Giải được & Bẻ gãy Bằng chứng Ngoại phạm (Alibi Graph)")
