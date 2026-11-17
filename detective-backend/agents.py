@@ -275,7 +275,8 @@ class ClueAgent(BaseAgent):
             "1. At least 1 evidence must be CRUCIAL (is_crucial = True). "
             "2. The crucial evidence must indirectly contradict the culprit's alibi statement or prove their presence. "
             "3. At least 1 evidence must be a red herring (is_red_herring = True) pointing suspiciously to an innocent suspect. "
-            "4. Do NOT leave obvious direct evidence like an ID card of the killer."
+            "4. NEVER explicitly state the killer's or suspect's name or direct ID in fingerprint_analysis, blood_dna_analysis, or description (e.g., NEVER write 'fingerprint matches Butler William' or 'knife belongs to the killer'). "
+            "5. Clues must provide OBJECTIVE FORENSIC FACTS that require detective deduction (e.g., partial smudged prints with wipe marks, specific fabric fibers caught in the blade matching a suspect's apron, blood type O matching a suspect's fresh finger cut, or concealment in a location where the suspect claims to have been alone)."
         )
         user_prompt = f"""
 Theme: {theme}

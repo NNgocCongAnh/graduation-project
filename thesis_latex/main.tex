@@ -72,8 +72,9 @@
 \pagestyle{fancy}
 \setlength{\headheight}{17pt}
 \fancyhf{}
-\fancyhead[L]{\small\nouppercase{\leftmark}}
-\fancyhead[R]{\small Đồ án tốt nghiệp Đại học}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptertitlename\ \thechapter.\ #1}{}}
+\fancyhead[L]{\small\leftmark}
+\fancyhead[R]{\small ĐATN}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.5pt}
 \renewcommand{\footrulewidth}{0pt}
