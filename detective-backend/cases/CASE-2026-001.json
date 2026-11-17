@@ -78,7 +78,7 @@
       "linked_suspect_id": "SUSP-01",
       "is_crucial": true,
       "is_red_herring": false,
-      "image_url": "/static/assets/evidences/evidence_glass.png"
+      "image_url": "/static/assets/evidences/evidence_knife.png"
     },
     {
       "id": "EV-03",
@@ -88,7 +88,7 @@
       "linked_suspect_id": "SUSP-02",
       "is_crucial": false,
       "is_red_herring": true,
-      "image_url": "/static/assets/evidences/evidence_teacup.png"
+      "image_url": "/static/assets/evidences/evidence_sedative.png"
     }
   ],
   "ground_truth": {

@@ -8,6 +8,8 @@ public class DetectiveChatUI : MonoBehaviour
 
     [Header("UI References")]
     [SerializeField] private GameObject chatPanel;
+
+    public bool IsChatPanelOpen => chatPanel != null && chatPanel.activeSelf;
     [SerializeField] private Text chatLogText;
     [SerializeField] private InputField chatInputField;
     [SerializeField] private Button sendButton;

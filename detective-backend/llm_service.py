@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # LLM Gateway Configuration (Default to local 9Router proxy if not set)
 LLM_API_BASE = os.getenv("LLM_API_BASE", "http://localhost:20128/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "sk-9router-local")
-LLM_MODEL = os.getenv("LLM_MODEL", "google/gemma-2-9b-it")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini/gemma-4-31b-it")
 
 
 class CaseGeneratorService:
@@ -57,6 +57,25 @@ class CaseGeneratorService:
         self.character_agent = CharacterAgent(self.client, self.model)
         self.clue_agent = ClueAgent(self.client, self.model)
         self.deduction_agent = DeductionAgent(self.client, self.model)
+
+    def update_config(self, model: Optional[str] = None, api_base: Optional[str] = None, api_key: Optional[str] = None):
+        """Update active model, api_base, and api_key dynamically at runtime."""
+        if model and model.strip():
+            self.model = model.strip()
+        if api_base and api_base.strip():
+            self.api_base = api_base.strip()
+        if api_key and api_key.strip():
+            self.api_key = api_key.strip()
+
+        self.client = AsyncOpenAI(
+            base_url=self.api_base,
+            api_key=self.api_key
+        )
+        self.outline_agent = OutlineAgent(self.client, self.model)
+        self.character_agent = CharacterAgent(self.client, self.model)
+        self.clue_agent = ClueAgent(self.client, self.model)
+        self.deduction_agent = DeductionAgent(self.client, self.model)
+        logger.info(f"Updated LLM Config -> Model: '{self.model}', Base: '{self.api_base}'")
 
     async def generate_case(self, theme: str = "Bí ẩn Biệt thự Cổ (Locked-Room Mystery)", max_retries: int = 2) -> CaseDossier:
         """Generate a logically sound Case Dossier via Multi-Agent pipeline with Localized Repair."""
@@ -132,11 +151,26 @@ class CaseGeneratorService:
 
                 # Attach Telemetry Metadata
                 total_latency = round(time.time() - start_total, 2)
+                agent_models = {
+                    "OutlineAgent": self.outline_agent.last_used_model,
+                    "CharacterAgent": self.character_agent.last_used_model,
+                    "ClueAgent": self.clue_agent.last_used_model,
+                    "DeductionAgent": self.deduction_agent.last_used_model if reasoning_chain is not None else "skipped",
+                }
+                fallback_triggered = any([
+                    self.outline_agent.fallback_used,
+                    self.character_agent.fallback_used,
+                    self.clue_agent.fallback_used,
+                    self.deduction_agent.fallback_used if reasoning_chain is not None else False,
+                ])
+
                 candidate_dossier.reasoning_chain = reasoning_chain
                 candidate_dossier.metadata = GenerationMetadata(
                     model_name=self.model,
                     pipeline_version="2.0-neuro-symbolic",
                     agent_latencies=agent_latencies,
+                    agent_models=agent_models,
+                    fallback_triggered=fallback_triggered,
                     total_latency=total_latency,
                     patch_retries=patch_retries,
                     validator_score=1.0 if diag.is_valid else 0.5

@@ -7,9 +7,16 @@ public class ForensicData
     public float ambient_temp;
     public float body_temp;
     public string livor_mortis_state;
+    public string rigor_mortis_state;
     public string wound_description;
+    public string cause_of_death;
+    public string manner_of_death;
     public string estimated_tod_start;
     public string estimated_tod_end;
+    public float body_weight_kg;
+    public float cooling_factor;
+    public string discovery_time;
+    public string clothing_state;
 }
 
 [Serializable]
@@ -17,7 +24,9 @@ public class VictimData
 {
     public string name;
     public int age;
+    public string gender;
     public string occupation;
+    public string residence;
     public ForensicData forensic_data;
 }
 
@@ -27,8 +36,16 @@ public class SuspectData
     public string id;
     public string name;
     public int age;
+    public string gender;
     public string occupation;
+    public string relationship_to_victim;
+    public string residence;
     public string motive;
+    public string statement;
+    public string timeline_claimed;
+    public string interview_notes;
+
+    // Backward compatibility fields
     public string alibi_start;
     public string alibi_end;
     public string alibi_statement;
@@ -44,6 +61,12 @@ public class EvidenceData
     public string title;
     public string location;
     public string description;
+    public bool is_weapon;
+    public string fingerprint_analysis;
+    public string blood_dna_analysis;
+    public string physical_condition;
+
+    // Backward compatibility fields
     public string linked_suspect_id;
     public bool is_crucial;
     public bool is_red_herring;
@@ -87,6 +110,17 @@ public class GenerateCaseRequest
     public string setting_type = "";
     public string era = "Hiện đại";
     public string mystery_type = "Án mạng bí ẩn";
+    public string model = "";
+    public string api_base = "";
+    public string api_key = "";
+}
+
+[Serializable]
+public class UpdateSettingsRequest
+{
+    public string model;
+    public string api_base;
+    public string api_key;
 }
 
 [Serializable]

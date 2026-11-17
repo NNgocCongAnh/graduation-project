@@ -54,6 +54,13 @@ Prepare(Trước khi đăng ký)/
 *.xlsx
 *.zip
 
+# Whitelist official thesis deliverables & compiled outputs
+!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf
+!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx
+!/BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx
+!/benchmark_evaluation.ipynb
+!/thesis_latex/main.pdf
+
 # Unity generated files
 [Ll]ibrary/
 [Tt]emp/
@@ -85,9 +92,12 @@ Prepare(Trước khi đăng ký)/
 *.unity.bak
 *.unity.bak.meta
 
-# Tool indexes / local MCP config
+# Tool indexes / local MCP config / Agent skills & web slides workspace
 .codegraph/
 .mcp.json
+.agents/
+presentation_web/
+production/session-logs/
 
 # LaTeX build artifacts
 thesis_latex/*.aux
@@ -100,6 +110,10 @@ thesis_latex/*.lot
 thesis_latex/*.out
 thesis_latex/*.blg
 thesis_latex/*.synctex.gz
+
+# Temp logs
+*.log
+build_*.txt
 
 # Root screenshot / UI test captures
 /*.png

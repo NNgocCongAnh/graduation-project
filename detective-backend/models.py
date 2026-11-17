@@ -168,6 +168,14 @@ class GenerationMetadata(BaseModel):
     model_name: str = Field(default="unknown")
     pipeline_version: str = Field(default="2.0-neuro-symbolic")
     agent_latencies: Dict[str, float] = Field(default_factory=dict, description="Latency per agent in seconds.")
+    agent_models: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Actual LLM model used per agent (including fallback)."
+    )
+    fallback_triggered: bool = Field(
+        default=False,
+        description="Whether any agent fell back to a secondary/smaller model."
+    )
     total_latency: float = Field(default=0.0, description="Total generation time in seconds.")
     patch_retries: int = Field(default=0, description="Count of localized patch repairs performed.")
     validator_score: float = Field(default=1.0, description="Logic pass score (1.0 = clean, 0.0 = invalid).")

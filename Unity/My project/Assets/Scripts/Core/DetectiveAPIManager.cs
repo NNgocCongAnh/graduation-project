@@ -26,9 +26,20 @@ public class DetectiveAPIManager : MonoBehaviour
 
     /// <summary>
     /// Fetch verified sample case dossier for offline testing and quick start.
+    /// Prioritizes local bundled sample case in StreamingAssets for instant offline playability.
     /// </summary>
     public void GetSampleCase(Action<bool, CaseDossier> callback)
     {
+        // 1. Instant check of local bundled sample case in StreamingAssets
+        CaseDossier localDossier = LoadLocalSampleCase();
+        if (localDossier != null)
+        {
+            Debug.Log("[APIManager] Loaded offline bundled sample case successfully!");
+            callback?.Invoke(true, localDossier);
+            return;
+        }
+
+        // 2. Fallback to HTTP request with timeout
         StartCoroutine(GetRequest("/api/case/sample", (success, json) =>
         {
             if (success)
@@ -37,18 +48,38 @@ public class DetectiveAPIManager : MonoBehaviour
                 {
                     CaseDossier dossier = JsonUtility.FromJson<CaseDossier>(json);
                     callback?.Invoke(true, dossier);
+                    return;
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"[APIManager] JSON Parse Error: {e.Message}");
-                    callback?.Invoke(false, null);
                 }
             }
-            else
-            {
-                callback?.Invoke(false, null);
-            }
+            callback?.Invoke(false, null);
         }));
+    }
+
+    public static CaseDossier LoadLocalSampleCase()
+    {
+        string[] paths = new string[]
+        {
+            System.IO.Path.Combine(Application.streamingAssetsPath, "sample_case.json"),
+            System.IO.Path.Combine(Application.dataPath, "StreamingAssets", "sample_case.json"),
+            System.IO.Path.Combine(Application.dataPath, "..", "StreamingAssets", "sample_case.json")
+        };
+        foreach (string p in paths)
+        {
+            if (System.IO.File.Exists(p))
+            {
+                try
+                {
+                    string json = System.IO.File.ReadAllText(p);
+                    return JsonUtility.FromJson<CaseDossier>(json);
+                }
+                catch { }
+            }
+        }
+        return null;
     }
 
     /// <summary>
@@ -100,6 +131,24 @@ public class DetectiveAPIManager : MonoBehaviour
             {
                 callback?.Invoke(false, null);
             }
+        }));
+    }
+
+    /// <summary>
+    /// Update backend AI model and credentials at runtime.
+    /// </summary>
+    public void UpdateBackendSettings(string model, string apiBase, string apiKey, Action<bool, string> callback)
+    {
+        UpdateSettingsRequest payload = new UpdateSettingsRequest
+        {
+            model = model,
+            api_base = apiBase,
+            api_key = apiKey
+        };
+        string json = JsonUtility.ToJson(payload);
+        StartCoroutine(PostRequest("/api/settings", json, (success, resJson) =>
+        {
+            callback?.Invoke(success, resJson);
         }));
     }
 
@@ -169,6 +218,11 @@ public class DetectiveAPIManager : MonoBehaviour
     {
         using (UnityWebRequest req = UnityWebRequest.Get(baseUrl + endpoint))
         {
+            req.timeout = 5; // 5-second timeout ensures we never freeze the game loop
+
+            // Attach HMAC-SHA256 Client Integrity signature
+            ClientSecurity.SignRequest(req, endpoint, "");
+
             yield return req.SendWebRequest();
 
             if (req.result != UnityWebRequest.Result.Success)
@@ -187,10 +241,14 @@ public class DetectiveAPIManager : MonoBehaviour
     {
         using (UnityWebRequest req = new UnityWebRequest(baseUrl + endpoint, "POST"))
         {
+            req.timeout = 60; // 60-second timeout for LLM generation
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
             req.uploadHandler = new UploadHandlerRaw(bodyRaw);
             req.downloadHandler = new DownloadHandlerBuffer();
             req.SetRequestHeader("Content-Type", "application/json");
+
+            // Attach HMAC-SHA256 Client Integrity signature
+            ClientSecurity.SignRequest(req, endpoint, json);
 
             yield return req.SendWebRequest();
 

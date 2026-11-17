@@ -27,9 +27,18 @@ logger = logging.getLogger(__name__)
 class BaseAgent:
     """Base class for specialized generative agents."""
 
+    FALLBACK_CANDIDATES = [
+        ("http://localhost:20128/v1", "sk-9router-local", "gemini/gemma-4-31b-it"),
+        ("http://localhost:20128/v1", "sk-9router-local", "gh/gpt-3.5-turbo-0613"),
+        ("http://localhost:20128/v1", "sk-9router-local", "gh/gpt-4o-mini"),
+        ("http://localhost:11434/v1", "ollama", "gemma4:e4b-it-qat"),
+    ]
+
     def __init__(self, client: AsyncOpenAI, model: str):
         self.client = client
         self.model = model
+        self.last_used_model: str = model
+        self.fallback_used: bool = False
 
     @staticmethod
     def _clean_json_string(text: str) -> str:
@@ -50,10 +59,10 @@ class BaseAgent:
             return text[first_brace:last_brace + 1]
         return text
 
-    async def _call_llm_json(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
-        """Call OpenAI-compatible LLM endpoint with strict JSON format."""
-        response = await self.client.chat.completions.create(
-            model=self.model,
+    async def _invoke_single_model(self, client: AsyncOpenAI, model: str, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+        """Invoke a single LLM endpoint and parse non-empty JSON payload."""
+        response = await client.chat.completions.create(
+            model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -63,7 +72,40 @@ class BaseAgent:
         )
         raw_text = response.choices[0].message.content or "{}"
         clean_text = self._clean_json_string(raw_text)
-        return json.loads(clean_text)
+        parsed = json.loads(clean_text)
+        if not parsed:
+            raise ValueError(f"Empty JSON object returned by model '{model}'")
+        return parsed
+
+    async def _call_llm_json(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+        """Call primary OpenAI-compatible LLM endpoint with per-agent smart fallback."""
+        agent_name = self.__class__.__name__
+        try:
+            data = await self._invoke_single_model(self.client, self.model, system_prompt, user_prompt)
+            self.last_used_model = self.model
+            self.fallback_used = False
+            return data
+        except Exception as primary_err:
+            logger.warning(f"[{agent_name}] Primary model '{self.model}' failed ({primary_err}). Initiating fallback chain...")
+
+        primary_base = str(self.client.base_url).rstrip("/") if getattr(self.client, "base_url", None) else ""
+        last_err: Optional[Exception] = None
+
+        for fb_base, fb_key, fb_model in self.FALLBACK_CANDIDATES:
+            if fb_model == self.model and fb_base.rstrip("/") == primary_base:
+                continue
+            try:
+                fb_client = AsyncOpenAI(base_url=fb_base, api_key=fb_key)
+                data = await self._invoke_single_model(fb_client, fb_model, system_prompt, user_prompt)
+                self.last_used_model = fb_model
+                self.fallback_used = True
+                logger.warning(f"[{agent_name}] Fallback activated: '{self.model}' -> '{fb_model}'")
+                return data
+            except Exception as fb_err:
+                last_err = fb_err
+                logger.warning(f"[{agent_name}] Fallback model '{fb_model}' failed ({fb_err}).")
+
+        raise RuntimeError(f"[{agent_name}] All primary and fallback models failed. Last error: {last_err}")
 
 
 class OutlineAgent(BaseAgent):
