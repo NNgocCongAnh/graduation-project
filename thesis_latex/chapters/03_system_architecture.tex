@@ -4,7 +4,7 @@
 \section{Các Quyết định Kiến trúc Cốt lõi}
 \label{sec:arch_adrs}
 
-Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh giá qua độ phức tạp thuật toán, mà còn thông qua việc cân nhắc thấu đáo các đánh đổi kỹ thuật ở từng tầng thiết kế. Trong quá trình phát triển đồ án, tác giả đã thiết lập 7 bản ghi quyết định kiến trúc (ADR) làm cơ sở lựa chọn công nghệ và đối sánh trực diện với các lựa chọn thay thế như tổng hợp tại Bảng \ref{tab:framework_comparison}:
+Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh giá qua độ phức tạp thuật toán, mà còn thông qua việc cân nhắc thấu đáo các đánh đổi kỹ thuật ở từng tầng thiết kế. Trong quá trình phát triển đồ án, tác giả đã thiết lập 7 bản ghi quyết định kiến trúc (ADR\textsuperscript{2}) làm cơ sở lựa chọn công nghệ và đối sánh trực diện với các lựa chọn thay thế như tổng hợp tại Bảng \ref{tab:framework_comparison}:
 
 \subsection{ADR-001: Lựa chọn Ngôn ngữ Python và Web Framework FastAPI}
 \begin{itemize}[leftmargin=1.5cm]
@@ -78,7 +78,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
         \item \textit{Cơ sở dữ liệu phi quan hệ MongoDB:} Lưu tài liệu JSON tự nhiên nhưng thiếu cơ chế ràng buộc khóa ngoại cưỡng bức và xóa dây chuyền ở tầng lưu trữ giữa hồ sơ vụ án với lịch sử kết án.
         \item \textit{SQLite chế độ WAL kết hợp SQLAlchemy 2.0} (phiên bản cài đặt 2.0.51).
     \end{enumerate}
-    \item \textbf{Quyết định Kiến trúc:} Sử dụng \textbf{SQLite} bật chế độ ghi nhật ký trước (WAL) làm tầng lưu trữ quan hệ nhúng thông qua thư viện ánh xạ đối tượng -- quan hệ \textbf{SQLAlchemy 2.0}.
+    \item \textbf{Quyết định Kiến trúc:} Sử dụng \textbf{SQLite} bật cơ chế ghi nhật ký trước (WAL\textsuperscript{23}) làm tầng lưu trữ quan hệ nhúng thông qua thư viện ánh xạ đối tượng -- quan hệ \textbf{SQLAlchemy 2.0}.
     \item \textbf{Lý do lựa chọn:} Chỉ thị \texttt{PRAGMA journal\_mode=WAL} cho phép nhiều luồng đọc đồng thời không bị khóa bởi thao tác ghi trong chế độ phối hợp nhóm 3 người chơi; \texttt{PRAGMA foreign\_keys=ON} bảo đảm tính toàn vẹn tham chiếu \texttt{ON DELETE CASCADE} giữa bảng \texttt{cases} và \texttt{deduction\_logs} đạt chuẩn ACID; đồng thời toàn bộ cơ sở dữ liệu gói gọn trong một tệp đơn lẻ không cần cài đặt máy chủ phụ trợ.
 \end{itemize}
 
@@ -118,7 +118,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
 Kiến trúc tổng thể của hệ thống (Hình \ref{fig:overall_system_architecture}) được tổ chức theo mô hình ba tầng tách biệt:
 \begin{enumerate}[leftmargin=1.5cm]
     \item \textbf{Tầng Giao diện Người dùng (Unity 6 URP 2D):} Triển khai bàn điều tra bảng ghim, hiển thị hồ sơ nạn nhân, thẻ nghi phạm, vật chứng, hỗ trợ kéo thả nối dây chỉ đỏ, các hộp thoại chuyên đề (báo cáo pháp y, phóng đại ảnh, kết án, phòng chơi nhóm qua mạng cục bộ LAN) và ký xác thực yêu cầu mạng qua giao thức HTTP theo kiến trúc REST.
-    \item \textbf{Tầng Dịch vụ Cổng vào, Bảo mật và Lưu trữ (FastAPI, Pydantic v2 \& SQLite):} Định tuyến các yêu cầu REST API và kết nối WebSocket đa người chơi, xác thực chữ ký yêu cầu bằng mã xác thực thông điệp băm (HMAC) chuẩn SHA-256 kèm kiểm tra chống phát lại tại \texttt{ClientIntegrityMiddleware}, kiểm chuẩn kiểu dữ liệu bằng Pydantic v2, quản lý bộ nhớ đệm truy cập ngẫu nhiên (RAM) và lưu trữ bền vững xuống cơ sở dữ liệu SQLite.
+    \item \textbf{Tầng Dịch vụ Cổng vào, Bảo mật và Lưu trữ (FastAPI, Pydantic v2 \& SQLite):} Định tuyến các yêu cầu REST API và kết nối WebSocket đa người chơi, xác thực chữ ký yêu cầu bằng mã xác thực thông điệp dựa trên hàm băm (HMAC\textsuperscript{8}) kèm giải thuật băm an toàn 256-bit (SHA-256\textsuperscript{20}) kèm kiểm tra chống phát lại tại \texttt{ClientIntegrityMiddleware}, kiểm chuẩn kiểu dữ liệu bằng Pydantic v2, quản lý bộ nhớ truy cập ngẫu nhiên (RAM\textsuperscript{18}) và lưu trữ bền vững xuống cơ sở dữ liệu SQLite.
     \item \textbf{Tầng Lõi Lai Neuro-Symbolic:} Điều phối đường ống 4 tác tử sinh nội dung văn học, thực thi tính toán cửa sổ tử vong Henssge, kiểm tra ràng buộc tất định và thực hiện sửa lỗi cục bộ khi có sai phạm.
 \end{enumerate}
 
@@ -287,7 +287,7 @@ Ba bảng quan hệ cốt lõi được định nghĩa bằng khai báo kiểu t
 \begin{enumerate}[leftmargin=1.5cm]
     \item \textbf{Bảng \texttt{cases} (Lớp \texttt{CaseRecord}):} Lưu trữ hồ sơ vụ án đã sinh, khóa chính tự tăng \texttt{id}, mã định danh duy nhất \texttt{case\_id} đánh chỉ mục, tiêu đề, tóm tắt, các siêu dữ liệu lọc (\texttt{country}, \texttt{era}, \texttt{mystery\_type}), \texttt{culprit\_id}, \texttt{actual\_crime\_time}, cờ \texttt{is\_valid}, điểm số \texttt{validator\_score}, số lượng nghi phạm/vật chứng, toàn văn cấu trúc \texttt{dossier\_json} và mốc thời gian tạo/cập nhật.
     \item \textbf{Bảng \texttt{deduction\_logs} (Lớp \texttt{DeductionRecord}):} Lưu toàn bộ lịch sử kết án của người chơi với khóa ngoại \texttt{case\_id} tham chiếu tới \texttt{cases.case\_id} (\texttt{ondelete="CASCADE"}). Bảng ghi lại đối tượng bị cáo buộc (\texttt{accused\_id}), danh sách vật chứng đã nộp (\texttt{selected\_evidence\_ids\_json}), \texttt{verdict}, trạng thái đúng/sai (\texttt{is\_correct}), các biến đếm chi tiết (\texttt{found\_crucial\_count}, \texttt{total\_crucial\_count}, \texttt{red\_herrings\_selected\_count}, \texttt{irrelevant\_clues\_count}), điểm số \texttt{score} và phản hồi. Dữ liệu này cung cấp API thống kê độ khó qua \texttt{GET /api/case/\{case\_id\}/stats}.
-    \item \textbf{Bảng \texttt{benchmark\_runs} (Lớp \texttt{BenchmarkRunRecord}):} Lưu dữ liệu đo đạc thực nghiệm gồm mã đợt chạy \texttt{run\_id}, tên mô hình \texttt{model\_name}, thứ tự lượt thử \texttt{trial\_index}, các cờ \texttt{schema\_valid}, \texttt{logic\_valid}, \texttt{repair\_applied}, thời gian thực thi \texttt{latency\_seconds} và danh sách vi phạm \texttt{violation\_types\_json}. Khi hàm \texttt{init\_db()} chạy lúc khởi động, hệ thống tự động đồng bộ các tệp JSON cũ từ thư mục \texttt{cases/} và 30 bản ghi từ \texttt{benchmark\_results.json} vào cơ sở dữ liệu SQLite đạt chuẩn nguyên tử, nhất quán, cô lập và bền vững (ACID).
+    \item \textbf{Bảng \texttt{benchmark\_runs} (Lớp \texttt{BenchmarkRunRecord}):} Lưu dữ liệu đo đạc thực nghiệm gồm mã đợt chạy \texttt{run\_id}, tên mô hình \texttt{model\_name}, thứ tự lượt thử \texttt{trial\_index}, các cờ \texttt{schema\_valid}, \texttt{logic\_valid}, \texttt{repair\_applied}, thời gian thực thi \texttt{latency\_seconds} và danh sách vi phạm \texttt{violation\_types\_json}. Khi hàm \texttt{init\_db()} chạy lúc khởi động, hệ thống tự động đồng bộ các tệp JSON cũ từ thư mục \texttt{cases/} và 30 bản ghi từ \texttt{benchmark\_results.json} vào cơ sở dữ liệu SQLite đạt chuẩn tính nguyên tử, nhất quán, cô lập, bền vững (ACID\textsuperscript{1}).
 \end{enumerate}
 
 \section{Động cơ Kiểm định Ràng buộc Ký hiệu}

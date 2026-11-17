@@ -39,7 +39,7 @@ Hệ quả trực tiếp là LLM tối ưu hóa độ trôi chảy thống kê c
 \end{enumerate}
 
 \subsection{Giới hạn của Các Kỹ thuật Kích thích Suy luận Đơn thuần}
-Các kỹ thuật hướng dẫn câu lệnh như suy luận theo chuỗi (CoT) \cite{wei2022chain} hay cây suy nghĩ (\textit{Tree-of-Thoughts}) yêu cầu mô hình tự diễn giải từng bước trung gian trước khi kết luận. Tuy nhiên, các nghiên cứu thực nghiệm chỉ ra rằng CoT vẫn gặp khó khăn khi duy trì tính nhất quán của hệ ràng buộc đóng trên văn bản dài \cite{sprague2024musr, li2024contradoc}. Khi biên soạn một vụ án mạng, LLM có thể viết ra chuỗi lập luận CoT mạch lạc về mặt ngôn từ nhưng vẫn vi phạm tính toán thời gian hoặc gán nhầm mã định danh nhân vật. Vì vậy, việc tách khâu kiểm định logic khỏi cơ chế sinh xác suất của LLM là cần thiết.
+Các kỹ thuật hướng dẫn câu lệnh như kỹ thuật suy luận theo chuỗi (CoT\textsuperscript{5}) \cite{wei2022chain} hay cây suy nghĩ (\textit{Tree-of-Thoughts}) yêu cầu mô hình tự diễn giải từng bước trung gian trước khi kết luận. Tuy nhiên, các nghiên cứu thực nghiệm chỉ ra rằng CoT vẫn gặp khó khăn khi duy trì tính nhất quán của hệ ràng buộc đóng trên văn bản dài \cite{sprague2024musr, li2024contradoc}. Khi biên soạn một vụ án mạng, LLM có thể viết ra chuỗi lập luận CoT mạch lạc về mặt ngôn từ nhưng vẫn vi phạm tính toán thời gian hoặc gán nhầm mã định danh nhân vật. Vì vậy, việc tách khâu kiểm định logic khỏi cơ chế sinh xác suất của LLM là cần thiết.
 
 \section{Phương pháp Tiếp cận Trí tuệ Nhân tạo Neuro-Symbolic}
 \label{sec:theory_neurosymbolic}
@@ -79,7 +79,7 @@ Luồng phối hợp giữa hai thành phần trong đồ án được tổ ch�
 \label{sec:theory_henssge}
 
 \subsection{Cơ sở Sinh học và Bộ ba Dấu hiệu Tử thi}
-Trong y pháp hình sự, việc ước lượng khoảng thời gian sau tử vong (PMI) dựa trên ba biến đổi sinh lý kinh điển \cite{madea2005recent}:
+Trong y pháp hình sự, việc ước lượng khoảng thời gian sau tử vong (PMI\textsuperscript{17}) dựa trên ba biến đổi sinh lý kinh điển \cite{madea2005recent}:
 \begin{enumerate}[leftmargin=1.5cm]
     \item \textbf{Sự làm lạnh thi thể (\textit{algor mortis}):} Quá trình tỏa nhiệt thụ động sau khi quá trình trao đổi chất chấm dứt, đưa thân nhiệt tiệm cận nhiệt độ môi trường.
     \item \textbf{Sự co cứng cơ tử thi (\textit{rigor mortis}):} Hiện tượng co cứng sợi cơ do cạn kiệt nguồn năng lượng phân tử ATP sau chết, thường khởi phát sau 2--4 giờ và đạt cực đại quanh 12 giờ.
@@ -158,7 +158,7 @@ Vì phương trình (\ref{eq:henssge_formula}) là phương trình siêu việt 
 \end{algorithmic}
 \end{algorithm}
 
-Với dung sai tin cậy tiêu chuẩn $\Delta t = \pm 1.5$ giờ từ thời điểm phát hiện thi thể $T_{\text{discovery}}$, cửa sổ thời gian tử vong (TOD) được động cơ ký hiệu tính trực tiếp và gán khóa cứng cho hồ sơ:
+Với dung sai tin cậy tiêu chuẩn $\Delta t = \pm 1.5$ giờ từ thời điểm phát hiện thi thể $T_{\text{discovery}}$, cửa sổ thời gian tử vong (TOD\textsuperscript{21}) được động cơ ký hiệu tính trực tiếp và gán khóa cứng cho hồ sơ:
 \begin{equation}
     TOD = \left[ T_{\text{discovery}} - (t^* + 1.5), \; T_{\text{discovery}} - \max(0, t^* - 1.5) \right]
 \end{equation}
@@ -258,7 +258,7 @@ Việc ứng dụng AI vào đánh giá suy luận và tạo sinh tự sự trin
 Công trình \textit{MuSR} của nhóm nghiên cứu Đại học Texas tại Austin \cite{sprague2024musr} xây dựng bộ dữ liệu đánh giá khả năng suy luận nhiều bước trên văn bản tự sự tự nhiên, trong đó trọng tâm là tập kịch bản án mạng bí ẩn dài khoảng 1,000 từ. MuSR áp dụng quy trình tổng hợp neuro-symbolic từ cây suy luận sang văn bản nhằm tạo bài toán kiểm tra năng lực CoT của GPT-4 và các mô hình tương đương. Kết quả cho thấy ngay cả các mô hình mạnh vẫn gặp sai sót khi theo dõi nhiều mối quan hệ phụ thuộc dài. Tuy nhiên, MuSR được thiết kế như một \textbf{bộ benchmark đánh giá thụ động}, không phải một hệ thống trò chơi tương tác thời gian thực, không tích hợp mô hình nhiệt học y pháp Henssge và không hỗ trợ cơ chế vá lỗi cục bộ theo phản hồi kiểm định.
 
 \subsection{Khung Đa tác tử Deciphering Digital Detectives (Wu và cộng sự, ACL 2024)}
-Công trình \textit{Deciphering Digital Detectives} \cite{wu2024deciphering} nghiên cứu hành vi của các tác tử LLM khi tham gia trò chơi nhập vai trinh thám kịch bản \textit{Jubensha} (dạng kịch bản án mạng nhiều người chơi phổ biến). Các tác giả xây dựng bộ dữ liệu từ kịch bản có sẵn và tổ chức hệ đa tác tử đóng vai nghi phạm, trao đổi thông tin, che giấu động cơ và suy luận tìm hung thủ dưới sự hỗ trợ của máy trạng thái hữu hạn (FSM) hoặc prompt điều phối. Dù làm rõ được hành vi tương tác xã hội của LLM, công trình này tập trung vào việc cho tác tử \textit{chơi trên kịch bản đã soạn sẵn bởi con người}, chưa giải quyết bài toán tự động tạo sinh vụ án mới có kiểm chứng tính giải được bằng đồ thị và ràng buộc vật lý.
+Công trình \textit{Deciphering Digital Detectives} \cite{wu2024deciphering} nghiên cứu hành vi của các tác tử LLM khi tham gia trò chơi nhập vai trinh thám kịch bản \textit{Jubensha} (dạng kịch bản án mạng nhiều người chơi phổ biến). Các tác giả xây dựng bộ dữ liệu từ kịch bản có sẵn và tổ chức hệ đa tác tử đóng vai nghi phạm, trao đổi thông tin, che giấu động cơ và suy luận tìm hung thủ dưới sự hỗ trợ của máy trạng thái hữu hạn (FSM\textsuperscript{6}) hoặc prompt điều phối. Dù làm rõ được hành vi tương tác xã hội của LLM, công trình này tập trung vào việc cho tác tử \textit{chơi trên kịch bản đã soạn sẵn bởi con người}, chưa giải quyết bài toán tự động tạo sinh vụ án mới có kiểm chứng tính giải được bằng đồ thị và ràng buộc vật lý.
 
 \subsection{Hệ thống Phát hiện Tự mâu thuẫn ContraDoc (Li và cộng sự, NAACL 2024)}
 Công trình \textit{ContraDoc} \cite{li2024contradoc} đề xuất tập dữ liệu gán nhãn thủ công nhằm đo lường khả năng phát hiện các mâu thuẫn tự thân bên trong văn bản dài của các LLM. Nghiên cứu chứng minh LLM dễ bỏ sót các xung đột logic ngầm định nằm cách xa nhau theo dòng thời gian hoặc trạng thái sự kiện. Tương tự MuSR, ContraDoc đóng vai trò là bài toán \textbf{phân loại và phát hiện lỗi hậu kiểm trên văn bản tổng quát}, chưa tích hợp vào vòng lặp sinh kịch bản trò chơi có kiến trúc sửa lỗi cục bộ và chấm điểm suy luận người chơi.
