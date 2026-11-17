@@ -17,7 +17,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
         \item \textit{FastAPI (Python 3.13):} Framework hiệu năng cao xây dựng trên chuẩn giao diện máy chủ bất đồng bộ và Pydantic \cite{fastapi2024}.
     \end{enumerate}
     \item \textbf{Quyết định Kiến trúc:} Lựa chọn \textbf{FastAPI trên nền Python 3.13} (phiên bản cài đặt thực tế FastAPI 0.137.1 trên máy chủ Uvicorn 0.49.0).
-    \item \textbf{Lý do lựa chọn:} Vòng lặp sự kiện bất đồng bộ nguyên bản (\texttt{async/await}) cho phép máy chủ xử lý nhiều phiên sinh kịch bản và kết nối WebSocket cùng lúc mà không làm nghẽn tiến trình khi chờ LLM; tích hợp trực tiếp Pydantic v2 ngay tại tầng định tuyến HTTP để tự động từ chối gói tin sai cấu trúc; và tự động sinh tài liệu đặc tả OpenAPI tại \texttt{/docs} phục vụ đồng bộ hợp đồng dữ liệu với Unity Client.
+    \item \textbf{Lý do lựa chọn:} Vòng lặp sự kiện bất đồng bộ nguyên bản (\texttt{async/await}) cho phép máy chủ xử lý nhiều phiên sinh kịch bản và kết nối WebSocket cùng lúc mà không làm nghẽn tiến trình khi chờ LLM; tích hợp trực tiếp Pydantic v2 ngay tại tầng định tuyến HTTP để tự động từ chối gói tin sai cấu trúc; và tự động sinh tài liệu đặc tả OpenAPI tại \texttt{/docs} phục vụ đồng bộ Data Schema với Unity Client.
 \end{itemize}
 
 \subsection{ADR-002: Lựa chọn Thư viện Kiểm chuẩn Dữ liệu Pydantic v2}
@@ -29,7 +29,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
         \item \textit{Marshmallow:} Hỗ trợ kiểm chuẩn lược đồ nhưng thực thi hoàn toàn trên trình thông dịch Python nên tốc độ phân giải chậm hơn đáng kể và buộc lập trình viên phải khai báo tách rời lớp mô hình dữ liệu với lớp lược đồ xác thực.
         \item \textit{Pydantic v2} (phiên bản cài đặt thực tế 2.14.3) \cite{pydantic2024}.
     \end{enumerate}
-    \item \textbf{Quyết định Kiến trúc:} Lựa chọn \textbf{Pydantic v2} làm hợp đồng dữ liệu xuyên suốt từ tầng gọi tác tử LLM đến tầng giao tiếp API.
+    \item \textbf{Quyết định Kiến trúc:} Lựa chọn \textbf{Pydantic v2} làm Data Contract xuyên suốt từ tầng gọi tác tử LLM đến tầng giao tiếp API.
     \item \textbf{Lý do lựa chọn:} Lõi xác thực \texttt{pydantic-core} biên dịch bằng ngôn ngữ Rust mang lại tốc độ phân giải JSON nhanh hơn rõ rệt so với kiểm tra thuần Python; cho phép khai báo ràng buộc miền giá trị trực tiếp trên thuộc tính (như \texttt{Field(ge=30.0, le=200.0)} cho cân nặng và \texttt{Field(ge=0.3, le=2.0)} cho hệ số làm lạnh), kiểm định chuẩn hóa giờ \texttt{HH:MM} qua \texttt{@field\_validator}, cũng như đối sánh biểu thức chính quy (như kiểm tra định dạng giờ \texttt{\textasciicircum(\textbackslash d\{1,2\}):(\textbackslash d\{2\})(?::\textbackslash d\{2\})?\textdollar} hay quy ước mã thực thể \texttt{\textasciicircum SUSP-\textbackslash d\{2\}\textdollar}) để ngắt sớm các dữ liệu hỏng cú pháp trước khi đi vào bộ kiểm định ký hiệu.
 \end{itemize}
 
@@ -41,24 +41,24 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
         \item \textit{Thuần Web React:} Dễ truy cập qua trình duyệt nhưng tốn chi phí đồng bộ thao tác kéo thả kết hợp vẽ dây chỉ đỏ trên cây mô hình tài liệu trình duyệt, và bị cơ chế hộp cát bảo mật của trình duyệt chặn quyền phát gói tin quảng bá UDP ở tầng mạng cục bộ (cổng \texttt{47777} trong \texttt{lan\_discovery.py} và \texttt{LanDiscoveryClient.cs}).
         \item \textit{Unreal Engine 5:} Tối ưu cho đồ họa 3D quy mô lớn nhưng dung lượng bộ cài nặng nề và dư thừa tài nguyên đối với bài toán giao diện bảng ghim 2D/2.5D.
         \item \textit{Godot Engine:} Nhẹ và mã nguồn mở, nhưng hệ thống xử lý hậu kỳ ánh sáng 2D và quy trình đóng gói đồng thời hai đích WebGL và máy trạm chưa thuận tiện bằng hệ sinh thái Unity trong khung thời gian đồ án.
-        \item \textit{Kiến trúc Web API kết hợp Unity 6} (bản hỗ trợ dài hạn 6000.5.8f1) trên đường ống kết xuất phổ quát (URP) 2D \cite{unity2024urp}.
+        \item \textit{Kiến trúc Web API kết hợp Unity 6} (bản hỗ trợ dài hạn 6000.5.8f1) trên Universal Render Pipeline (URP) 2D \cite{unity2024urp}.
     \end{enumerate}
     \item \textbf{Quyết định Kiến trúc:} Tách hệ thống theo mô hình \textbf{Dịch vụ Web phân tán} (\texttt{FastAPI} RESTful API, giao thức HTTP/JSON, WebSockets, cấu hình CORS mở rộng) kết hợp Client \textbf{Unity 6 URP 2D} hỗ trợ xuất bản đa nền tảng (mục tiêu trình duyệt WebGL và tệp thực thi độc lập).
     \item \textbf{Lý do lựa chọn:} Giải pháp này vừa duy trì trọn vẹn kiến trúc dịch vụ Web và khả năng xuất bản WebGL trên trình duyệt, vừa cho phép dựng giao diện gắn với không gian bàn điều tra (\texttt{BankersLampController.cs} điều khiển độ sáng bóng sợi đốt, \texttt{CorkboardManager.cs} kéo thả ảnh Polaroid kèm dây chỉ đỏ động thời gian thực), khóa tỉ lệ hiển thị chuẩn $1920\times 1080$ (16:9) và mở khóa socket UDP phục vụ tự động tìm phòng chơi LAN tại cổng \texttt{47777}.
 \end{itemize}
 
-\subsection{ADR-004: Lựa chọn Đường ống Đa tác tử Tự chủ thay vì Prompt Nguyên khối hay Khung Trừu tượng Nặng}
+\subsection{ADR-004: Lựa chọn Multi-Agent Pipeline thay vì Prompt Nguyên khối hay Framework Cồng kềnh}
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Đặt vấn đề:} Biên soạn một vụ án trinh thám hoàn chỉnh đòi hỏi đồng thời cốt truyện, thông số pháp y, lời khai từng nghi phạm, chứng cứ bẻ gãy ngoại phạm và chuỗi lập luận giải đố.
-    \item \textbf{Các phương án cân nhắc:} (1) Gọi một câu lệnh nguyên khối duy nhất; (2) Sử dụng các khung điều phối đa tác tử cỡ lớn như \texttt{LangChain} hoặc \texttt{AutoGen} vốn chèn nhiều lớp bọc trung gian làm khó kiểm soát chuỗi chỉ dẫn nguyên bản và phát sinh độ trễ phụ trội; (3) Tự cài đặt đường ống gọn nhẹ kế thừa trực tiếp \texttt{AsyncOpenAI}.
+    \item \textbf{Các phương án cân nhắc:} (1) Gọi một câu lệnh nguyên khối duy nhất; (2) Sử dụng các khung điều phối đa tác tử cỡ lớn như \texttt{LangChain} hoặc \texttt{AutoGen} vốn chèn nhiều lớp bọc trung gian làm khó kiểm soát chuỗi chỉ dẫn nguyên bản và phát sinh độ trễ phụ trội; (3) Tự cài đặt pipeline gọn nhẹ kế thừa trực tiếp \texttt{AsyncOpenAI}.
     \item \textbf{Quyết định Kiến trúc:} Phân rã quá trình sinh thành \textbf{4 tác tử chuyên biệt chạy tuần tự}: \texttt{OutlineAgent} $\to$ \texttt{CharacterAgent} $\to$ \texttt{ClueAgent} $\to$ \texttt{DeductionAgent}, cài đặt trực tiếp trên lớp nền \texttt{BaseAgent} trong \texttt{agents.py}.
-    \item \textbf{Lý do lựa chọn:} Chia nhỏ gánh nặng suy luận cho LLM theo từng lược đồ JSON hẹp giúp tỷ lệ hợp lệ cú pháp đạt 100\% trong thực nghiệm; tách biệt khâu thiết lập chân lý gốc ở \texttt{OutlineAgent} với khâu tạo lời khai và manh mối ở các tác tử sau; đồng thời cho phép gắn cơ chế tự động chuyển mạch dự phòng ở từng tác tử (\texttt{FALLBACK\_CANDIDATES}) khi mô hình chính gặp lỗi hạn mức hoặc gián đoạn mạng.
+    \item \textbf{Lý do lựa chọn:} Chia nhỏ gánh nặng suy luận cho LLM theo từng lược đồ JSON hẹp giúp tỷ lệ hợp lệ cú pháp đạt 100\% trong thực nghiệm; tách biệt khâu thiết lập chân lý gốc ở \texttt{OutlineAgent} với khâu tạo lời khai và manh mối ở các tác tử sau; đồng thời cho phép gắn cơ chế tự động fallback ở từng tác tử (\texttt{FALLBACK\_CANDIDATES}) khi mô hình chính gặp lỗi hạn mức hoặc gián đoạn mạng.
 \end{itemize}
 
-\subsection{ADR-005: Lựa chọn Cơ chế Sửa lỗi Cục bộ}
+\subsection{ADR-005: Lựa chọn Cơ chế Vá Lỗi Cục bộ (Local Patch Repair)}
 \begin{itemize}[leftmargin=1.5cm]
-    \item \textbf{Quyết định Kiến trúc:} Thay vì hủy toàn bộ hồ sơ và sinh lại từ đầu khi có lỗi logic, bộ điều phối áp dụng cơ chế sửa lỗi cục bộ có định hướng theo trường \texttt{component} (\texttt{outline}, \texttt{character}, \texttt{clue}) của \texttt{ConstraintViolation}.
-    \item \textbf{Lý do lựa chọn:} Chỉ tái xử lý thành phần phát sinh lỗi với ngữ cảnh thu gọn hằng số $\mathcal{O}(1)$, hạn chế chi phí token và thời gian khôi phục so với tái sinh toàn bộ đường ống $\mathcal{O}(N)$.
+    \item \textbf{Quyết định Kiến trúc:} Thay vì hủy toàn bộ hồ sơ và sinh lại từ đầu khi có lỗi logic, bộ điều phối áp dụng cơ chế vá lỗi cục bộ (Local Patch Repair) có định hướng theo trường \texttt{component} (\texttt{outline}, \texttt{character}, \texttt{clue}) của \texttt{ConstraintViolation}.
+    \item \textbf{Lý do lựa chọn:} Chỉ tái xử lý thành phần phát sinh lỗi với ngữ cảnh thu gọn hằng số $\mathcal{O}(1)$, hạn chế chi phí token và thời gian khôi phục so với tái sinh toàn bộ pipeline $\mathcal{O}(N)$.
 \end{itemize}
 
 \subsection{ADR-006: Điều phối Mô hình qua Cổng Proxy Gateway Cục bộ}
@@ -92,7 +92,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
 \midrule
 \textbf{Web API \& Điều phối} & FastAPI 0.137.1 (ASGI / Uvicorn) & Flask (WSGI), Django, Node.js & Xử lý bất đồng bộ không khóa luồng khi chờ LLM 10--20s; hỗ trợ WebSocket phòng chơi nhóm và đồng bộ OpenAPI với Python AI. \\
 \textbf{Kiểm chuẩn Lược đồ} & Pydantic v2.14.3 (Rust core) & Python \texttt{dataclasses}, Marshmallow & Tốc độ phân giải nhanh nhờ nhân Rust; ép kiểu và bắt lỗi biểu thức chính quy trực tiếp tại biên giới API. \\
-\textbf{Điều phối Đa tác tử} & \texttt{BaseAgent} thuần trên \texttt{AsyncOpenAI} & Prompt nguyên khối, LangChain / AutoGen & Kiểm soát trực tiếp prompt và lược đồ JSON hẹp; giảm lớp bọc trung gian; hỗ trợ chuyển mạch dự phòng theo từng tác tử. \\
+\textbf{Điều phối Đa tác tử} & \texttt{BaseAgent} thuần trên \texttt{AsyncOpenAI} & Prompt nguyên khối, LangChain / AutoGen & Kiểm soát trực tiếp prompt và lược đồ JSON hẹp; giảm lớp bọc trung gian; hỗ trợ cơ chế fallback theo từng tác tử. \\
 \textbf{Lưu trữ Dữ liệu} & SQLite (WAL) + SQLAlchemy 2.0.51 & Tệp JSON rời, PostgreSQL, MongoDB & Đạt chuẩn ACID và khóa ngoại \texttt{CASCADE}; đọc/ghi song song không nghẽn nhờ WAL; nhúng gọn không cần cài máy chủ rời. \\
 \textbf{Client Đa nền tảng} & Unity 6 URP 2D + REST/WebSocket & Thuần React DOM, Unreal 5, Godot & Vượt giới hạn hộp cát trình duyệt để quét phòng LAN qua UDP cổng \texttt{47777}; kết xuất đèn bàn 2D và dây chỉ đỏ mượt, vẫn hỗ trợ WebGL. \\
 \bottomrule
@@ -117,9 +117,9 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
 
 Kiến trúc tổng thể của hệ thống (Hình \ref{fig:overall_system_architecture}) được tổ chức theo mô hình ba tầng tách biệt:
 \begin{enumerate}[leftmargin=1.5cm]
-    \item \textbf{Tầng Giao diện Người dùng (Unity 6 URP 2D):} Triển khai bàn điều tra bảng ghim, hiển thị hồ sơ nạn nhân, thẻ nghi phạm, vật chứng, hỗ trợ kéo thả nối dây chỉ đỏ, các hộp thoại chuyên đề (báo cáo pháp y, phóng đại ảnh, kết án, phòng chơi nhóm qua mạng cục bộ LAN) và ký xác thực yêu cầu mạng qua giao thức HTTP theo kiến trúc REST.
+    \item \textbf{Tầng Giao diện Người dùng (Unity 6 URP 2D):} Triển khai bàn điều tra bảng ghim, hiển thị hồ sơ nạn nhân, thẻ nghi phạm, vật chứng, hỗ trợ kéo thả nối dây chỉ đỏ, các cửa sổ giao diện modal (báo cáo pháp y, phóng đại ảnh, kết án, phòng chơi nhóm qua mạng LAN) và ký xác thực yêu cầu mạng qua giao thức HTTP theo kiến trúc REST.
     \item \textbf{Tầng Dịch vụ Cổng vào, Bảo mật và Lưu trữ (FastAPI, Pydantic v2 \& SQLite):} Định tuyến các yêu cầu REST API và kết nối WebSocket đa người chơi, xác thực chữ ký yêu cầu bằng mã xác thực thông điệp dựa trên hàm băm (HMAC\textsuperscript{8}) kèm giải thuật băm an toàn 256-bit (SHA-256\textsuperscript{20}) kèm kiểm tra chống phát lại tại \texttt{ClientIntegrityMiddleware}, kiểm chuẩn kiểu dữ liệu bằng Pydantic v2, quản lý bộ nhớ truy cập ngẫu nhiên (RAM\textsuperscript{18}) và lưu trữ bền vững xuống cơ sở dữ liệu SQLite.
-    \item \textbf{Tầng Lõi Lai Neuro-Symbolic:} Điều phối đường ống 4 tác tử sinh nội dung văn học, thực thi tính toán cửa sổ tử vong Henssge, kiểm tra ràng buộc tất định và thực hiện sửa lỗi cục bộ khi có sai phạm.
+    \item \textbf{Tầng Lõi Lai Neuro-Symbolic:} Điều phối Multi-Agent Pipeline gồm 4 tác tử sinh nội dung văn học, thực thi tính toán cửa sổ tử vong Henssge, kiểm tra ràng buộc tất định và thực hiện vá lỗi cục bộ khi có sai phạm.
 \end{enumerate}
 
 \begin{figure}[H]
@@ -182,7 +182,7 @@ Khác với các hệ thống đối thoại để LLM tự đánh giá câu tr�
 \end{tabularx}
 \end{table}
 
-\section{Thiết kế Đường ống Đa tác tử}
+\section{Thiết kế Multi-Agent Pipeline}
 \label{sec:arch_multi_agent}
 
 Trong \texttt{agents.py} và \texttt{llm\_service.py}, toàn bộ quy trình sinh kịch bản được thực thi thông qua bốn lớp kế thừa từ \texttt{BaseAgent}, vận hành tuần tự như tổng hợp tại Bảng \ref{tab:multi_agent_mapping}. Lớp \texttt{BaseAgent} chuẩn hóa việc gọi API định dạng JSON (\texttt{response\_format=\{"type": "json\_object"\}}, \texttt{temperature=0.7}) và tiền xử lý loại bỏ khối suy nghĩ nội tại (\texttt{<think>...</think>}) hay ký hiệu markdown trước khi giải mã JSON.
@@ -203,12 +203,12 @@ Trong \texttt{agents.py} và \texttt{llm\_service.py}, toàn bộ quy trình sin
 \end{tabularx}
 \end{table}
 
-\section{Hợp đồng Dữ liệu Thực thể với Pydantic v2}
+\section{Đặc tả Data Schema với Pydantic v2}
 \label{sec:arch_contracts}
 
 Toàn bộ giao tiếp giữa các tác tử LLM, bộ kiểm định, cơ sở dữ liệu và Unity Client đều được chuẩn hóa thông qua các mô hình dữ liệu Pydantic v2 trong \texttt{detective-backend/models.py}. Mã nguồn dưới đây trích xuất trực tiếp các lược đồ thực thể cốt lõi đang vận hành trong hệ thống:
 
-\begin{lstlisting}[language=Python, caption={Trích đoạn Lược đồ Dữ liệu Thực thể trong \texttt{detective-backend/models.py}}]
+\begin{lstlisting}[language=Python, caption={Trích đoạn Data Schema Thực thể trong \texttt{detective-backend/models.py}}]
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 
@@ -290,7 +290,7 @@ Ba bảng quan hệ cốt lõi được định nghĩa bằng khai báo kiểu t
     \item \textbf{Bảng \texttt{benchmark\_runs} (Lớp \texttt{BenchmarkRunRecord}):} Lưu dữ liệu đo đạc thực nghiệm gồm mã đợt chạy \texttt{run\_id}, tên mô hình \texttt{model\_name}, thứ tự lượt thử \texttt{trial\_index}, các cờ \texttt{schema\_valid}, \texttt{logic\_valid}, \texttt{repair\_applied}, thời gian thực thi \texttt{latency\_seconds} và danh sách vi phạm \texttt{violation\_types\_json}. Khi hàm \texttt{init\_db()} chạy lúc khởi động, hệ thống tự động đồng bộ các tệp JSON cũ từ thư mục \texttt{cases/} và 30 bản ghi từ \texttt{benchmark\_results.json} vào cơ sở dữ liệu SQLite đạt chuẩn tính nguyên tử, nhất quán, cô lập, bền vững (ACID\textsuperscript{1}).
 \end{enumerate}
 
-\section{Động cơ Kiểm định Ràng buộc Ký hiệu}
+\section{Động cơ Kiểm định Ký hiệu (Symbolic Validator)}
 \label{sec:arch_validator}
 
 Mọi đối tượng \texttt{CaseDossier} sau giai đoạn lắp ráp sơ bộ đều được đưa qua hàm \texttt{validate\_case\_diagnostics(case)} trong \texttt{validator.py}. Hàm này rà soát năm nhóm kiểm tra và trả về \texttt{ValidationResult} chứa danh sách 7 loại vi phạm tường minh thuộc \texttt{ViolationType} (Bảng \ref{tab:violation_taxonomy}).
@@ -314,13 +314,13 @@ Mọi đối tượng \texttt{CaseDossier} sau giai đoạn lắp ráp sơ bộ 
 \end{tabularx}
 \end{table}
 
-\section{Cơ chế Sửa lỗi Cục bộ}
+\section{Cơ chế Vá Lỗi Cục bộ (Local Patch Repair)}
 \label{sec:arch_patch_repair}
 
 Khi \texttt{validate\_case\_diagnostics(candidate\_dossier)} trả về \texttt{is\_valid = False}, thay vì hủy bỏ toàn bộ hồ sơ đang xây dựng, \texttt{CaseGeneratorService} trong \texttt{llm\_service.py} duyệt qua từng \texttt{ConstraintViolation} để định tuyến tín hiệu phản hồi tới đúng tác tử chịu trách nhiệm theo mã \texttt{component} (Thuật toán \ref{alg:patch_repair}).
 
 \begin{algorithm}[H]
-\caption{Cơ chế Sửa lỗi Cục bộ Định tuyến theo Phân hệ Vi phạm}
+\caption{Cơ chế Vá Lỗi Cục bộ Định tuyến theo Phân hệ Vi phạm}
 \label{alg:patch_repair}
 {\small
 \begin{algorithmic}[1]
@@ -349,7 +349,7 @@ Khi \texttt{validate\_case\_diagnostics(candidate\_dossier)} trả về \texttt{
 Xét chi phí ngữ cảnh khi khắc phục một lỗi logic đơn lẻ giữa hai chiến lược:
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Chiến lược tái sinh toàn bộ:} Nếu gọi lại toàn bộ chuỗi 4 tác tử để tạo vụ án mới từ đầu, lượng token tiêu thụ tỷ lệ với quy mô đầy đủ của hồ sơ $N = T_{\text{Outline}} + T_{\text{Character}} + T_{\text{Clue}} + T_{\text{Deduction}}$, tức độ phức tạp $\mathcal{O}(N)$ (ước tính khoảng 2,500--3,500 tokens cho một vụ án 3 nghi phạm, 3--4 vật chứng).
-    \item \textbf{Chiến lược sửa lỗi cục bộ:} Khi cô lập vi phạm vào đúng một phân hệ (\texttt{outline}, \texttt{character}, hoặc \texttt{clue}), ngữ cảnh gửi cho hàm vá (\texttt{repair\_clues}, \texttt{repair\_suspects}, hoặc \texttt{repair\_tod}) chỉ bao gồm lát cắt dữ liệu tối thiểu của thực thể lỗi và thông điệp chẩn đoán $N_{\text{patch}}$ (ước tính khoảng 300--500 tokens cho phần sửa vật chứng/ngoại phạm hoặc thông số pháp y), đạt độ phức tạp ngữ cảnh hằng số $\mathcal{O}(1)$ trên mỗi vi phạm đơn lẻ và giảm đáng kể chi phí so với sinh lại toàn bộ hồ sơ.
+    \item \textbf{Chiến lược vá lỗi cục bộ (Local Patch Repair):} Khi cô lập vi phạm vào đúng một phân hệ (\texttt{outline}, \texttt{character}, hoặc \texttt{clue}), ngữ cảnh gửi cho hàm vá (\texttt{repair\_clues}, \texttt{repair\_suspects}, hoặc \texttt{repair\_tod}) chỉ bao gồm lát cắt dữ liệu tối thiểu của thực thể lỗi và thông điệp chẩn đoán $N_{\text{patch}}$ (ước tính khoảng 300--500 tokens cho phần sửa vật chứng/ngoại phạm hoặc thông số pháp y), đạt độ phức tạp ngữ cảnh hằng số $\mathcal{O}(1)$ trên mỗi vi phạm đơn lẻ và giảm đáng kể chi phí so với sinh lại toàn bộ hồ sơ.
 \end{itemize}
 
 \section{Thiết kế Giao diện Điều tra trên Unity 6 URP 2D}
