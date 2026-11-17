@@ -51,7 +51,7 @@ Trên tinh thần đánh giá khách quan, hệ thống hiện tại vẫn còn 
 Dựa trên nền tảng mã nguồn hiện có, các hướng nâng cấp tiếp theo được đề xuất gồm:
 
 \subsection{Tích hợp Mô hình Ngôn ngữ Nhỏ Chạy Cục bộ}
-Tiến hành tinh chỉnh các mô hình ngôn ngữ nhỏ mã nguồn mở (như dòng Llama-3 8B hoặc Qwen 2.5 7B) bằng kỹ thuật thích ứng bậc thấp\footnote{Thuật ngữ tiếng Anh: \textit{Small Language Model} (SLM) và kỹ thuật \textit{Low-Rank Adaptation} (LoRA).} trên tập hồ sơ vụ án đã vượt qua kiểm định Pydantic và Henssge. Giải pháp này hướng tới khả năng đóng gói mô hình chạy ngoại tuyến trên máy cá nhân nhằm giảm chi phí gọi API bên ngoài.
+Tiến hành tinh chỉnh các mô hình ngôn ngữ nhỏ mã nguồn mở (như dòng Llama-3 8B hoặc Qwen 2.5 7B) bằng kỹ thuật thích ứng bậc thấp LoRA (\textit{Low-Rank Adaptation}) trên tập hồ sơ vụ án đã vượt qua kiểm định Pydantic và Henssge. Giải pháp này hướng tới khả năng đóng gói mô hình chạy ngoại tuyến trên máy cá nhân nhằm giảm chi phí gọi API bên ngoài.
 
 \subsection{Bổ sung Cơ chế Vá Cú pháp Tham chiếu và Đồ thị Tri thức Động}
 Nâng cấp nhánh \texttt{repair\_clues} bằng thao tác sửa tất định trực tiếp trong mã nguồn đối với các lỗi \texttt{SCHEMA\_ERROR} đơn giản (hoặc ràng buộc danh sách mã hợp lệ trong prompt vá lỗi), đồng thời nghiên cứu sử dụng cơ sở dữ liệu đồ thị Neo4j với ngôn ngữ truy vấn Cypher để hỗ trợ kiểm tra tính giải được cho các kịch bản có nhiều nghi phạm và mắt xích chứng cứ bắc cầu dài hơn.
