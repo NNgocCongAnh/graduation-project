@@ -15,7 +15,12 @@ import json
 import asyncio
 import argparse
 import statistics
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 from models import CaseDossier
 from llm_service import CaseGeneratorService
@@ -34,6 +39,9 @@ async def evaluate_single_trial(service: CaseGeneratorService, theme: str) -> Di
         crucial_clues = [e for e in dossier.evidences if e.is_crucial]
         red_herrings = [e for e in dossier.evidences if e.is_red_herring]
 
+        agent_models = dossier.metadata.agent_models if dossier.metadata else {}
+        fallback_triggered = dossier.metadata.fallback_triggered if dossier.metadata else False
+
         return {
             "success": True,
             "json_valid": True,
@@ -48,6 +56,8 @@ async def evaluate_single_trial(service: CaseGeneratorService, theme: str) -> Di
             "latency_sec": total_lat,
             "title": dossier.title,
             "reasoning_steps": len(dossier.reasoning_chain.steps) if dossier.reasoning_chain else 0,
+            "agent_models": agent_models,
+            "fallback_triggered": fallback_triggered,
             "error": "None" if diag.is_valid else diag.diagnostic_feedback
         }
     except Exception as e:
@@ -66,6 +76,8 @@ async def evaluate_single_trial(service: CaseGeneratorService, theme: str) -> Di
             "latency_sec": total_lat,
             "title": "Failed",
             "reasoning_steps": 0,
+            "agent_models": {},
+            "fallback_triggered": False,
             "error": str(e)
         }
 
@@ -80,7 +92,33 @@ def calc_percentile(data: List[float], percentile: float) -> float:
     return sorted_d[idx]
 
 
-async def run_benchmark(models: List[str], trials: int = 10, theme: str = "Bí ẩn Biệt thự Blackwood") -> List[Dict[str, Any]]:
+def format_fallback_report(primary_model: str, agent_models: Dict[str, str]) -> str:
+    """Format concise per-agent fallback telemetry string for benchmark console output."""
+    if not agent_models:
+        return ""
+    active_models = {
+        k.replace("Agent", ""): v
+        for k, v in agent_models.items()
+        if v and v != "skipped"
+    }
+    if not active_models:
+        return ""
+    distinct_fb = {v for v in active_models.values() if v != primary_model}
+    if not distinct_fb:
+        return ""
+    if len(distinct_fb) == 1 and all(v in distinct_fb for v in active_models.values()):
+        fb_target = next(iter(distinct_fb))
+        return f" | ⚠ Fallback lõi {len(active_models)} Agent -> {fb_target}"
+    details = ", ".join(f"{name}={m}" for name, m in active_models.items())
+    return f" | ⚠ Fallback lõi Agent: {details}"
+
+
+async def run_benchmark(
+    models: List[str],
+    trials: int = 10,
+    theme: str = "Bí ẩn Biệt thự Blackwood",
+    output_file: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """Run benchmark across specified models and print comparative summary with P50/P95 latency."""
     all_results: List[Dict[str, Any]] = []
 
@@ -102,7 +140,8 @@ async def run_benchmark(models: List[str], trials: int = 10, theme: str = "Bí �
 
             status_mark = "✅ PASS" if res["logic_valid"] else "❌ FAIL"
             v_info = f"Vi phạm: {res['violation_types']}" if not res["logic_valid"] else "5/5 Hợp lệ"
-            print(f" -> {status_mark} | Sửa lỗi: {res['patch_retries']} | {res['latency_sec']}s | {v_info}")
+            fb_info = format_fallback_report(model, res.get("agent_models", {})) if res.get("fallback_triggered") else ""
+            print(f" -> {status_mark} | Sửa lỗi: {res['patch_retries']} | {res['latency_sec']}s | {v_info}{fb_info}")
 
     # Generate Academic Telemetry Summary Table
     print("\n" + "=" * 88)
@@ -150,6 +189,15 @@ async def run_benchmark(models: List[str], trials: int = 10, theme: str = "Bí �
 
     print("=" * 88)
 
+    # Print Fallback Telemetry Breakdown
+    fb_runs = [r for r in all_results if r.get("fallback_triggered")]
+    if fb_runs:
+        print("\n--- GHI NHẬN CHUYỂN MẠCH DỰ PHÒNG LÕI AGENT (FALLBACK TELEMETRY) ---")
+        for r in fb_runs:
+            fb_line = format_fallback_report(r["model"], r.get("agent_models", {})).lstrip(" |")
+            status_txt = "Hợp lệ" if r["logic_valid"] else "Vi phạm"
+            print(f"  • {r['model']} [Lượt {r['trial']:02d}]: {fb_line} -> Kết quả: {status_txt}")
+
     # Print Error Taxonomy Breakdown (for Figure 4.2 Pie Chart)
     print("\n--- PHÂN LOẠI LỖI LOGIC & TẦN SUẤT XUẤT HIỆN (CHO HÌNH 4.2 BÁO CÁO) ---")
     if error_taxonomy:
@@ -161,7 +209,7 @@ async def run_benchmark(models: List[str], trials: int = 10, theme: str = "Bí �
         print("  • Không ghi nhận vi phạm logic nào. Toàn bộ kịch bản đạt chuẩn 100%!")
 
     # Save to JSON
-    output_path = os.path.join(os.path.dirname(__file__), "benchmark_results.json")
+    output_path = output_file or os.path.join(os.path.dirname(__file__), "benchmark_results.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     print(f"\n[+] Đã lưu toàn bộ telemetry thực nghiệm vào: {output_path}")
@@ -174,14 +222,15 @@ def main():
     parser.add_argument(
         "--models",
         nargs="+",
-        default=["gh/gpt-4o-mini", "gh/gpt-4o", "ollama/gemma4:31b-cloud"],
+        default=["gh/gpt-4o-mini", "gh/gpt-4o", "gemini/gemma-4-31b-it"],
         help="Danh sách các mô hình cần đánh giá"
     )
     parser.add_argument("--trials", type=int, default=10, help="Số lượt thử nghiệm cho mỗi mô hình")
     parser.add_argument("--theme", type=str, default="Bí ẩn Biệt thự Blackwood", help="Chủ đề vụ án")
+    parser.add_argument("--output", type=str, default=None, help="Đường dẫn tệp JSON đầu ra")
 
     args = parser.parse_args()
-    asyncio.run(run_benchmark(models=args.models, trials=args.trials, theme=args.theme))
+    asyncio.run(run_benchmark(models=args.models, trials=args.trials, theme=args.theme, output_file=args.output))
 
 
 if __name__ == "__main__":

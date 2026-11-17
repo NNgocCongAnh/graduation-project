@@ -1,163 +1,110 @@
-# ĐỒ ÁN TỐT NGHIỆP: NGHIÊN CỨU ỨNG DỤNG AGENT TẠO KỊCH BẢN TRÒ CHƠI TRINH THÁM (UNSOLVED CASE FILES AI)
+# ĐỒ ÁN TỐT NGHIỆP ĐẠI HỌC — UNSOLVED CASE FILES AI
 
-## 📌 Giới thiệu đề tài
-Đề tài đồ án tốt nghiệp tập trung nghiên cứu và ứng dụng **Large Language Models (LLM) & Agentic Architecture** nhằm tự động sinh kịch bản và hồ sơ vụ án trinh thám tương tác theo phong cách **"Unsolved Case Files"**.
+**Đề tài:** *Nghiên cứu và xây dựng trò chơi trinh thám giải đố trên nền tảng Web, ứng dụng mô hình ngôn ngữ lớn (LLM) để sinh tự động các bộ hồ sơ vụ án có tính logic và nhất quán*  
+*(Hướng tiếp cận Neuro-Symbolic kết hợp Hệ đa tác tử và Bộ kiểm định hình thức)*
 
-Hệ thống cho phép người chơi hóa thân thành thám tử, tiếp cận hồ sơ vụ án gồm: thông tin nạn nhân, danh sách nghi phạm với động cơ/alibi, báo cáo pháp y hiện trường, chứng cứ vật lý và chuỗi sự kiện timeline. Người chơi thu thập manh mối, xâu chuỗi thông tin trên bảng điều tra (Corkboard) và đưa ra phán đoán hung thủ.
+- **Sinh viên thực hiện:** Nguyễn Ngọc Công Anh — MSSV: `22010201` — Lớp: `K16-KHMT`
+- **Cán bộ hướng dẫn:** TS. Nguyễn Văn Tánh — Khoa Khoa học máy tính, Trường Đại học Phenikaa
+
+---
+
+## 📦 Tài liệu & Sản phẩm Bàn giao Chính thức (Thư mục Gốc)
+
+| Sản phẩm | Tệp / Liên kết | Mô tả |
+|---|---|---|
+| **Báo cáo Đồ án (PDF)** | [`BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf`](./BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf) | Bản biên dịch hoàn chỉnh từ LaTeX (5 chương + phụ lục tham khảo) |
+| **Báo cáo Đồ án (Word)** | [`BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx`](./BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx) | Bản tài liệu Microsoft Word đồng bộ đầy đủ bảng biểu và hình vẽ |
+| **Slide Bảo vệ (PowerPoint)** | [`BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx`](./BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx) | Bộ 23 slide thuyết trình kèm ghi chú trình bày (Speaker Notes) |
+| **Notebook Thực nghiệm** | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Tổng hợp 30 phiên benchmark, kiểm chứng Henssge/đồ thị & Smart Fallback |
+| **Bản cài đặt Game (.zip)** | [GitHub Releases (`v1.0.0`)](https://github.com/NNgocCongAnh/graduation-project/releases) | Gói trò chơi `UnsolvedCaseFiles_v1.0.0.zip` (Unity 6 URP 2D + DLL phụ thuộc) |
 
 ---
 
 ## 🏗️ Kiến trúc Hệ thống
 
-Dự án được xây dựng theo mô hình Client-Server phân tầng kết hợp AI Generation Pipeline & Validation:
-
-```
-[ Frontend (React + Vite) ] <---> [ Backend API (FastAPI) ] <---> [ Database (PostgreSQL / SQLite) ]
-                                            │
-                                            ▼
-                                  [ AI Agent Pipeline ]
-                                  ├── 1. Khởi tạo cốt truyện & Nạn nhân
-                                  ├── 2. Sinh nghi phạm & Động cơ / Alibi
-                                  ├── 3. Sinh dòng thời gian (Timeline)
-                                  ├── 4. Sinh chứng cứ & Báo cáo pháp y
-                                  └── 5. Validator Engine (Kiểm tra logic & tính nhất quán)
-                                            │
-                                            ▼
-                                  [ LLM Gateway (9Router / OpenAI / OpenRouter) ]
-```
-
-### 1. Backend (FastAPI & Python 3.11+)
-- **FastAPI**: Cung cấp RESTful API hiệu năng cao quản lý game state, tạo vụ án mới, tra cứu hồ sơ và kiểm tra giả thuyết phá án.
-- **SQLAlchemy 2.0 & Pydantic v2**: Quản lý ORM models (`Case`, `Character`, `TimelineEvent`, `Evidence`) và Structured Output validation cho LLM.
-- **Case Generation Pipeline**: Quy trình tuần tự nhiều bước (Multi-step Agentic Pipeline) với các prompt chuyên biệt để sinh hồ sơ vụ án chặt chẽ.
-- **Consistency Validator Engine**: Bộ kiểm tra luật cứng (Rule-based) và logic giúp loại bỏ mâu thuẫn về thời gian tử vong, ngoại phạm (alibi), hung khí và lời khai.
-
-### 2. Frontend (React 18 & TailwindCSS)
-- **Interactive Corkboard UI**: Bảng điều tra trinh thám trực quan với các thẻ ghim nghi phạm, chứng cứ, ghi chú và dây nối đỏ liên kết manh mối.
-- **Detective Notebook & Documents**: Xem báo cáo pháp y (Autopsy report), hồ sơ thẩm vấn, chi tiết vật chứng.
-- **Accusation System**: Form đối chất và đưa ra cáo buộc hung thủ kèm lập luận phá án.
-
-### 3. Container & Hạ tầng (Docker & Docker Compose)
-- **PostgreSQL 16**: Cơ sở dữ liệu quan hệ lưu trữ trạng thái vụ án.
-- **pgAdmin 4**: Giao diện trực quan quản lý CSDL.
-- **Docker Compose**: Đóng gói và chạy toàn bộ hệ thống với một câu lệnh.
-
----
-
-## 📁 Cấu trúc Thư mục
+Hệ thống vận hành theo mô hình **Dịch vụ Web phân tán** kết hợp **Lõi lai Neuro-Symbolic** và **Client đa nền tảng**:
 
 ```text
-├── backend/
-│   ├── app/
-│   │   ├── api/          # API Routers (case_router.py, ...)
-│   │   ├── core/         # Config biến môi trường, kết nối Database
-│   │   ├── models/       # SQLAlchemy ORM Models (Case, Character, Evidence, Timeline)
-│   │   ├── schemas/      # Pydantic Schemas định dạng JSON cho LLM
-│   │   ├── services/     # LLM Pipeline Service & Consistency Validator Service
-│   │   └── main.py       # Điểm khởi chạy ứng dụng FastAPI
-│   ├── tests/            # Unit tests (Pytest)
-│   ├── Dockerfile        # Dockerfile cho Backend
-│   └── requirements.txt  # Danh sách thư viện Python
-├── frontend/
-│   ├── public/           # Tài nguyên tĩnh & hình ảnh minh họa (Mugshots, Evidence)
-│   ├── src/
-│   │   ├── components/   # Các thành phần UI (CorkBoard, Modals, Notebook, Cards)
-│   │   ├── App.jsx       # Component chính quản lý trạng thái trò chơi
-│   │   ├── App.css       # Custom styles
-│   │   └── main.jsx      # Điểm khởi chạy React Vite
-│   ├── Dockerfile        # Dockerfile cho Frontend
-│   ├── package.json      # Danh sách dependencies Frontend
-│   └── vite.config.js    # Cấu hình Vite
-├── .env.example          # Mẫu cấu hình biến môi trường
-├── docker-compose.yml    # Cấu hình khởi chạy toàn bộ dịch vụ Docker
-└── README.md             # Tài liệu dự án
+[ Unity 6 URP 2D Client / V0 React Web Prototype ]
+            │  REST API (HTTP/JSON + HMAC-SHA-256) & WebSocket (/ws/rooms/{room_id})
+            ▼
+[ FastAPI 0.137.1 Backend (ASGI / Uvicorn) + Pydantic v2 + SQLite WAL (SQLAlchemy 2.0) ]
+            │
+            ├── 1. OutlineAgent   ──► Cốt truyện, Victim & GroundTruth -> Khóa TOD bằng Henssge (Bisection)
+            ├── 2. CharacterAgent ──► Nghi phạm & Lời khai ngoại phạm (SUSP-01..SUSP-03)
+            ├── 3. ClueAgent      ──► Vật chứng then chốt & Nghi binh (EV-01..EV-04)
+            ├── 4. Bộ kiểm định   ──► validate_case_diagnostics (7 ViolationType) + Sửa lỗi cục bộ O(1)
+            └── 5. DeductionAgent ──► Chuỗi suy luận đa bước (ReasoningChain)
+            │
+            ▼
+[ 9Router Gateway (:20128) / Google Gemini & Gemma / OpenAI GPT / Local Ollama (:11434) ]
+```
+
+* **Smart Per-Agent Fallback (`agents.py`):** Khi mô hình chính gặp lỗi hạn mức hoặc gián đoạn kết nối, từng tác tử tự động chuyển mạch theo chuỗi dự phòng (`gemini/gemma-4-31b-it` → `gh/gpt-3.5-turbo-0613` → `gh/gpt-4o-mini` → `gemma4:e4b-it-qat` cục bộ) và ghi nhận lại trong `GenerationMetadata.agent_models`.
+
+---
+
+## 📁 Cấu trúc Thư mục Chính
+
+```text
+├── BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf
+├── BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx
+├── BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx
+├── benchmark_evaluation.ipynb
+├── detective-backend/          # Backend FastAPI, 4 Agents, Henssge Validator, SQLite WAL, Unit Tests
+│   ├── agents.py               # OutlineAgent, CharacterAgent, ClueAgent, DeductionAgent + Per-Agent Fallback
+│   ├── llm_service.py          # CaseGeneratorService & Localized Patch Repair O(1)
+│   ├── validator.py            # Henssge Bisection Solver, Bipartite Checks & Deterministic Scoring
+│   ├── database.py             # SQLAlchemy 2.0 WAL (cases, deduction_logs, benchmark_runs)
+│   ├── security.py             # HMAC-SHA-256 & Anti-Replay Middleware (60s window)
+│   ├── benchmark_runner.py     # Script chạy benchmark đa mô hình & log fallback từng Agent
+│   └── main.py                 # FastAPI Endpoints & WebSocket Co-op Manager
+├── Unity/My project/           # Client Unity 6 (6000.5.8f1) URP 2D (Corkboard, Henssge Modal, LAN Co-op)
+├── thesis_latex/               # Mã nguồn LaTeX báo cáo đồ án & script generate_thesis_charts.py
+├── V0/                         # Nguyên mẫu giao diện Web React ban đầu (V0/frontend/)
+├── docker-compose.yml          # Cấu hình chạy container Docker
+└── README.md
 ```
 
 ---
 
-## 🚀 Hướng dẫn Cài đặt & Chạy ứng dụng
+## 🚀 Hướng dẫn Khởi chạy Nhanh
 
-### 1. Yêu cầu hệ thống
-- Python 3.11+
-- Node.js 18+ & npm
-- Docker & Docker Compose (tùy chọn nhưng khuyến nghị)
-
-### 2. Cấu hình biến môi trường
-Sao chép file `.env.example` thành `.env` và cập nhật thông tin:
+### 1. Chạy Backend (`detective-backend`)
 ```bash
-cp .env.example .env
-```
-
-Các thông số cấu hình chính:
-- `DATABASE_URL`: Đường dẫn kết nối CSDL (SQLite local hoặc PostgreSQL).
-- `LLM_API_BASE`: Endpoint OpenAI-compatible gateway (ví dụ: `http://localhost:20128/v1` hoặc OpenRouter).
-- `LLM_API_KEY`: Khóa xác thực API LLM.
-- `LLM_MODEL`: Model LLM sử dụng (ví dụ: `openrouter/nvidia/nemotron-3-super-120b-a12b:free`, `gpt-4o`, ...).
-
----
-
-### 3. Khởi chạy bằng Docker Compose (Khuyến nghị)
-Chạy toàn bộ Backend, Frontend, PostgreSQL và pgAdmin:
-```bash
-docker-compose up -d --build
-```
-- Frontend: `http://localhost:5173`
-- Backend Swagger Docs: `http://localhost:8000/docs`
-- pgAdmin: `http://localhost:5050` (Email: `admin@detective.com`, Pass: `admin`)
-
----
-
-### 4. Khởi chạy thủ công (Development Mode)
-
-#### Chạy Backend:
-```bash
-cd backend
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/macOS:
-# source venv/bin/activate
-
+cd detective-backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+* Swagger OpenAPI: `http://localhost:8000/docs`
+* Cấu hình mô hình mặc định qua `detective-backend/.env` (`LLM_API_BASE`, `LLM_API_KEY`, `LLM_MODEL`).
 
-#### Chạy Frontend:
+### 2. Chạy Benchmark & Kiểm thử (Pytest / Jupyter)
 ```bash
-cd frontend
-npm install
-npm run dev
+# Kiểm thử đơn vị các mô-đun cốt lõi
+python -m pytest detective-backend/test_henssge.py detective-backend/test_validator.py detective-backend/test_database.py detective-backend/test_security.py
+
+# Hoặc mở và chạy trực tiếp benchmark_evaluation.ipynb tại thư mục gốc
 ```
 
 ---
 
-## 🕵️ Chơi co-op trong mạng LAN (tối đa 3 người)
+## 🕵️ Chơi Co-op trong mạng LAN (tối đa 3 người)
 
 **Máy chủ (1 máy):**
-1. Chạy backend cho phép máy khác kết nối:
+1. Khởi chạy backend lắng nghe mạng nội bộ:
    ```bash
    cd detective-backend
    python -m uvicorn main:app --host 0.0.0.0 --port 8000
    ```
-2. Lần đầu, cho phép Python qua Windows Firewall ở mạng **Private**: TCP 8000 (game) và UDP 47777 (tự tìm máy chủ).
-3. Mở game, nhấn **L** → **TỰ LÀM MÁY CHỦ**. Modal hiện "IP của máy này" để đọc cho bạn chơi.
+2. Lần đầu, cho phép Python qua Windows Firewall ở mạng **Private**: TCP `8000` (game/WebSocket) và UDP `47777` (tự động tìm phòng LAN).
+3. Mở game, nhấn **L** → **TỰ LÀM MÁY CHỦ**.
 
-**Máy khách (tối đa 2 máy):** mở game, nhấn **L** → **TÌM MÁY CHỦ** (hoặc gõ IP máy chủ) → nhập cùng **Mã phòng** → **KẾT NỐI**.
+**Máy khách (tối đa 2 máy):** Mở game, nhấn **L** → **TÌM MÁY CHỦ** (hoặc nhập IP máy chủ) → nhập cùng **Mã phòng** → **KẾT NỐI**.
 
 | Phím | Chức năng |
 |---|---|
-| giữ **V** | Nói (voice, nên đeo tai nghe) |
-| **T** | Chat chữ |
-| **L** | Phòng LAN |
-| **Esc** | Đóng chat / modal |
-
-Đồng bộ trong phòng: vụ án đang điều tra, vị trí thẻ trên bảng, chat và voice. Người vào sau nhận đúng trạng thái hiện tại. Người thứ 4 bị từ chối ("phòng đầy"). Voice là PCM 16 kHz qua WebSocket (≈32 KB/s mỗi người nói), không cần tài khoản hay dịch vụ ngoài. Có thể dùng Discord thay thế bằng cách đơn giản là không giữ V.
-
----
-
-## 🧪 Kiểm thử (Testing)
-Chạy bộ kiểm thử backend với Pytest:
-```bash
-cd backend
-pytest tests/
-```
+| Giữ **V** | Thoại trực tiếp (PCM 16 kHz qua WebSocket) |
+| **T** | Trò chuyện văn bản |
+| **L** | Mở phòng chơi LAN |
+| **Esc** | Đóng hộp thoại |

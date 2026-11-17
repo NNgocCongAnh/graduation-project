@@ -486,6 +486,7 @@ def init_db(seed_cases_dir: Optional[str] = None):
         return
 
     migrated_count = 0
+    benchmark_migrated = 0
     with SessionLocal() as db:
         for fname in os.listdir(seed_cases_dir):
             if fname.endswith(".json"):
@@ -503,7 +504,35 @@ def init_db(seed_cases_dir: Optional[str] = None):
                 except Exception as e:
                     logger.warning(f"Could not migrate legacy case '{fname}': {e}")
 
-    logger.info(f"Database initialization complete. Migrated {migrated_count} cases from disk.")
+        # Populate benchmark_runs from benchmark_results.json if empty
+        existing_runs = db.execute(select(func.count(BenchmarkRunRecord.id))).scalar_one()
+        benchmark_json_path = os.path.join(DB_DIR, "benchmark_results.json")
+        if existing_runs == 0 and os.path.exists(benchmark_json_path):
+            try:
+                with open(benchmark_json_path, "r", encoding="utf-8") as f:
+                    runs_data = json.load(f)
+                for idx, item in enumerate(runs_data, start=1):
+                    record = BenchmarkRunRecord(
+                        run_id="benchmark_30_trials_v1",
+                        model_name=str(item.get("model", "unknown")),
+                        trial_index=int(item.get("trial", idx)),
+                        case_id=item.get("case_id"),
+                        schema_valid=bool(item.get("json_valid", True)),
+                        logic_valid=bool(item.get("logic_valid", True)),
+                        repair_applied=bool(int(item.get("patch_retries", 0)) > 0),
+                        latency_seconds=float(item.get("latency_sec", 0.0)),
+                        violation_types_json=json.dumps(item.get("violation_types", []), ensure_ascii=False),
+                    )
+                    db.add(record)
+                    benchmark_migrated += 1
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                logger.warning(f"Could not migrate benchmark_results.json: {e}")
+
+    logger.info(
+        f"Database initialization complete. Migrated {migrated_count} cases and {benchmark_migrated} benchmark runs from disk."
+    )
 
 
 if __name__ == "__main__":

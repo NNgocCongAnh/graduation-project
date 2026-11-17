@@ -36,7 +36,7 @@ services:
   # 3. FastAPI Backend Container (Nối với Local Proxy 9Router tại cổng 20128)
   backend:
     build:
-      context: ./backend
+      context: ./detective-backend
       dockerfile: Dockerfile
     container_name: detective_backend
     restart: always

@@ -31,6 +31,7 @@ from database import (
     log_deduction_to_db,
     get_case_statistics
 )
+from security import ClientIntegrityMiddleware
 
 
 # Logging Configuration
@@ -128,6 +129,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Enforce Game Client Integrity & HMAC-SHA256 Anti-Tamper Security
+app.add_middleware(ClientIntegrityMiddleware)
+
 # Mount Static Files Directory for Curated & Cached Case Assets
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -203,6 +207,18 @@ class GenerateCaseRequest(BaseModel):
         default=None,
         description="Chủ đề tự do (tùy chọn - nếu để trống hoặc để 'string' hệ thống sẽ tự động ghép từ Quốc gia, Thời kỳ và Địa điểm)."
     )
+    model: Optional[str] = Field(
+        default=None,
+        description="Mã mô hình LLM chỉ định (ví dụ: 'meta-llama/llama-3.3-70b-instruct:free', 'google/gemini-2.0-flash-exp:free', 'gh/gpt-4o-mini')."
+    )
+    api_base: Optional[str] = Field(
+        default=None,
+        description="Endpoint Gateway LLM (ví dụ: 'https://openrouter.ai/api/v1' hoặc 'http://localhost:20128/v1')."
+    )
+    api_key: Optional[str] = Field(
+        default=None,
+        description="Khóa xác thực API tương ứng."
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -211,10 +227,143 @@ class GenerateCaseRequest(BaseModel):
                 "era": "Hiện đại (2020s)",
                 "setting_type": "",
                 "mystery_type": "Án mạng phòng kín (Locked-Room Mystery)",
-                "theme": ""
+                "theme": "",
+                "model": "meta-llama/llama-3.3-70b-instruct:free"
             }
         }
     }
+
+
+# Danh mục các mô hình AI phục vụ Game & Nghiên cứu (Ưu tiên mô hình Free hàng ngày)
+AVAILABLE_MODELS = [
+    {
+        "id": "gemini/gemma-4-31b-it",
+        "name": "Gemma 4 31B Instruct (Gemini Provider)",
+        "category": "free",
+        "provider": "Google Gemini / 9Router",
+        "is_free": True,
+        "recommended": True,
+        "badge": "⭐ MẶC ĐỊNH",
+        "description": "Mô hình Gemma 4 31B chạy qua nhà cung cấp Gemini (hỗ trợ gắn API Key nâng cấp qua 9Router)."
+    },
+    {
+        "id": "gemma4:e4b-it-qat",
+        "name": "Gemma 4 E4B Local (Offline Ollama)",
+        "category": "local",
+        "provider": "Local Ollama (RTX 3050)",
+        "is_free": True,
+        "recommended": True,
+        "badge": "💻 OFFLINE",
+        "description": "Mô hình Gemma 4 cỡ nhỏ chạy cục bộ hoàn toàn miễn phí và không cần Internet (dùng làm fallback cuối)."
+    },
+    {
+        "id": "meta-llama/llama-3.3-70b-instruct:free",
+        "name": "Llama 3.3 70B Instruct (Free)",
+        "category": "free",
+        "provider": "OpenRouter",
+        "is_free": True,
+        "recommended": True,
+        "badge": "⭐ KHUYÊN DÙNG",
+        "description": "Mô hình mã nguồn mở 70B mạnh nhất hiện nay, hoàn toàn miễn phí hàng ngày, suy luận tiếng Việt xuất sắc."
+    },
+    {
+        "id": "google/gemini-2.0-flash-exp:free",
+        "name": "Gemini 2.0 Flash (Free)",
+        "category": "free",
+        "provider": "OpenRouter / Google",
+        "is_free": True,
+        "recommended": True,
+        "badge": "⚡ SIÊU TỐC",
+        "description": "Thế hệ mới nhất từ Google DeepMind, phản hồi cực nhanh dưới 5s, miễn phí hàng ngày."
+    },
+    {
+        "id": "google/gemini-2.0-flash-thinking-exp:free",
+        "name": "Gemini 2.0 Flash Thinking (Free)",
+        "category": "free",
+        "provider": "OpenRouter / Google",
+        "is_free": True,
+        "recommended": True,
+        "badge": "🧠 SUY LUẬN SÂU",
+        "description": "Mô hình suy luận chuỗi tư duy (Chain-of-Thought) độc quyền, phân tích logic vụ án rất chặt chẽ."
+    },
+    {
+        "id": "deepseek/deepseek-r1:free",
+        "name": "DeepSeek R1 Reasoning (Free)",
+        "category": "free",
+        "provider": "OpenRouter / DeepSeek",
+        "is_free": True,
+        "recommended": True,
+        "badge": "🎯 TOÁN & LOGIC",
+        "description": "Mô hình suy luận tương đương OpenAI o1, tư duy logic y pháp cực mạnh, miễn phí hàng ngày."
+    },
+    {
+        "id": "deepseek/deepseek-chat:free",
+        "name": "DeepSeek V3 Chat (Free)",
+        "category": "free",
+        "provider": "OpenRouter / DeepSeek",
+        "is_free": True,
+        "recommended": False,
+        "badge": "FREE",
+        "description": "Mô hình MoE 671B tham số đỉnh cao, văn phong tiếng Việt rất tự nhiên."
+    },
+    {
+        "id": "qwen/qwen-2.5-72b-instruct:free",
+        "name": "Qwen 2.5 72B Instruct (Free)",
+        "category": "free",
+        "provider": "OpenRouter / Alibaba",
+        "is_free": True,
+        "recommended": False,
+        "badge": "FREE",
+        "description": "Mô hình 72B từ Alibaba, tuân thủ Pydantic Schema JSON cực kỳ chuẩn xác."
+    },
+    {
+        "id": "nvidia/nemotron-3-super-120b-a12b:free",
+        "name": "NVIDIA Nemotron 3 120B (Free)",
+        "category": "free",
+        "provider": "OpenRouter / NVIDIA",
+        "is_free": True,
+        "recommended": False,
+        "badge": "FREE",
+        "description": "Mô hình siêu tham số của NVIDIA, phân tích bối cảnh rất chi tiết."
+    },
+    {
+        "id": "gh/gpt-4o-mini",
+        "name": "GPT-4o-Mini (Research Benchmark)",
+        "category": "research",
+        "provider": "GitHub Models / OpenAI",
+        "is_free": False,
+        "recommended": True,
+        "badge": "🎓 BÀI BÁO",
+        "description": "Mô hình đo đạc trong Luận văn Tốt nghiệp: Schema Valid 100%, Logic Pass 100%, P50 10.88s."
+    },
+    {
+        "id": "gh/gpt-4o",
+        "name": "GPT-4o Flagship (Research Benchmark)",
+        "category": "research",
+        "provider": "GitHub Models / OpenAI",
+        "is_free": False,
+        "recommended": False,
+        "badge": "🎓 BÀI BÁO",
+        "description": "Mô hình cờ đầu trong Luận văn: SOTA Reasoning, P50 19.53s, ca nghiên cứu Lượt 5."
+    },
+    {
+        "id": "ollama/gemma4:31b-cloud",
+        "name": "Gemma 4 31B Cloud (Research Benchmark)",
+        "category": "research",
+        "provider": "Ollama / Open-Weights",
+        "is_free": True,
+        "recommended": True,
+        "badge": "🎓 BÀI BÁO",
+        "description": "Mô hình đối sánh mã nguồn mở trong Luận văn: P50 10.73s, Logic Pass 100%."
+    }
+]
+
+
+class UpdateSettingsRequest(BaseModel):
+    """Payload to update LLM configuration at runtime."""
+    model: Optional[str] = Field(default=None, description="Mã mô hình LLM mong muốn")
+    api_base: Optional[str] = Field(default=None, description="Endpoint API Gateway")
+    api_key: Optional[str] = Field(default=None, description="API Key")
 
 
 def _clean_field(val: Optional[str]) -> Optional[str]:
@@ -339,6 +488,46 @@ def get_case_stats(case_id: str):
     return get_case_statistics(case_id)
 
 
+@app.get("/api/settings/models")
+def get_available_models():
+    """Retrieve catalog of AI models: OpenRouter free models and research benchmark models."""
+    return {
+        "active_model": case_generator.model,
+        "active_api_base": case_generator.api_base,
+        "models": AVAILABLE_MODELS
+    }
+
+
+@app.get("/api/settings")
+def get_current_settings():
+    """Get active LLM runtime configuration."""
+    key = case_generator.api_key or ""
+    masked_key = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "***"
+    return {
+        "model": case_generator.model,
+        "api_base": case_generator.api_base,
+        "api_key_masked": masked_key,
+        "available_models_count": len(AVAILABLE_MODELS)
+    }
+
+
+@app.post("/api/settings")
+def update_settings(payload: UpdateSettingsRequest):
+    """Dynamically switch active LLM model or API credentials at runtime."""
+    new_model = _clean_field(payload.model)
+    new_base = _clean_field(payload.api_base)
+    new_key = _clean_field(payload.api_key)
+
+    case_generator.update_config(model=new_model, api_base=new_base, api_key=new_key)
+    logger.info(f"Updated backend AI settings: model={case_generator.model}")
+    return {
+        "status": "success",
+        "message": f"Cấu hình mô hình AI đã được cập nhật thành '{case_generator.model}'",
+        "model": case_generator.model,
+        "api_base": case_generator.api_base
+    }
+
+
 @app.post("/api/case/generate", response_model=CaseDossier)
 async def generate_case(payload: GenerateCaseRequest = Body(default_factory=GenerateCaseRequest)):
     """Generate a new logically verified Case Dossier via 4-step LLM pipeline and save to disk."""
@@ -350,6 +539,20 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
         location = _clean_field(payload.setting_type)
         era = _clean_field(payload.era)
         mystery = _clean_field(payload.mystery_type)
+
+        # Handle per-request model override
+        req_model = _clean_field(payload.model)
+        req_base = _clean_field(payload.api_base)
+        req_key = _clean_field(payload.api_key)
+
+        if req_model or req_base or req_key:
+            active_gen = CaseGeneratorService(
+                api_base=req_base or case_generator.api_base,
+                api_key=req_key or case_generator.api_key,
+                model=req_model or case_generator.model
+            )
+        else:
+            active_gen = case_generator
 
         # If no custom free-text theme provided, automatically synthesize from realistic country/era/location presets
         if not raw_theme:
@@ -373,8 +576,8 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
             if country and country != "Ngẫu nhiên" and country.lower() not in theme.lower():
                 theme += f" (Bối cảnh: {country}, thời kỳ: {era or 'Hiện đại'}, nhân vật mang tên người {country})"
 
-        logger.info(f"Generating case with synthesized theme: '{theme}'")
-        case = await case_generator.generate_case(theme=theme)
+        logger.info(f"Generating case with synthesized theme: '{theme}' (Model: {active_gen.model})")
+        case = await active_gen.generate_case(theme=theme)
         # Enrich with semantic assets
         asset_service.enrich_case_dossier(case)
         # Save to memory cache, SQLite database, and persistent disk storage

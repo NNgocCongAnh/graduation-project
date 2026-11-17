@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -34,7 +35,21 @@ public class GameController : MonoBehaviour
         if (apiManager == null) apiManager = DetectiveAPIManager.Instance ?? FindObjectOfType<DetectiveAPIManager>();
         if (corkboardManager == null) corkboardManager = FindObjectOfType<CorkboardManager>();
 
-        StartCoroutine(LoadInitialCaseRoutine());
+        // Đảm bảo bảng trinh thám và các hồ sơ luôn có dữ liệu vụ án mặc định (0s latency),
+        // tránh tình trạng bảng bị trống trơn khi vừa khởi động hoặc khi người chơi tắt menu chính.
+        if (currentCase == null)
+        {
+            CaseDossier bundled = DetectiveAPIManager.LoadLocalSampleCase();
+            if (bundled != null)
+            {
+                Debug.Log("[GameController] Initialized default sample case into corkboard.");
+                ApplyCase(bundled, announceToRoom: false);
+            }
+            else
+            {
+                StartCoroutine(LoadInitialCaseRoutine());
+            }
+        }
     }
 
     public IEnumerator LoadInitialCaseRoutine()
@@ -145,7 +160,13 @@ public class GameController : MonoBehaviour
 
         corkboardManager.ClearBoard();
 
-        // 1. Instantiate Suspect Cards
+        // 1. Instantiate Victim Card (with black mourning ribbon)
+        if (currentCase.victim != null)
+        {
+            corkboardManager.AddVictimCard(currentCase.victim);
+        }
+
+        // 2. Instantiate Suspect Cards
         if (currentCase.suspects != null)
         {
             foreach (var suspect in currentCase.suspects)
@@ -154,7 +175,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        // 2. Instantiate Evidence Cards
+        // 3. Instantiate Evidence Cards
         if (currentCase.evidences != null)
         {
             foreach (var evidence in currentCase.evidences)
@@ -163,8 +184,29 @@ public class GameController : MonoBehaviour
             }
         }
 
-        // 3. Connect related cards with detective red strings
+        // 4. Connect related cards with detective red strings
+        Canvas.ForceUpdateCanvases();
         corkboardManager.UpdateRedStrings();
+
+        // 5. Gắn tương tác cho Tập Hồ Sơ Mật (Manila Dossier Folder) trên bàn điều tra
+        GameObject manilaFolder = GameObject.Find("Manila_Dossier_Folder");
+        if (manilaFolder != null)
+        {
+            Button btn = manilaFolder.GetComponent<Button>();
+            if (btn == null) btn = manilaFolder.AddComponent<Button>();
+            UnityEngine.UI.Image img = manilaFolder.GetComponent<UnityEngine.UI.Image>();
+            if (img != null) { img.raycastTarget = true; btn.targetGraphic = img; }
+            btn.transition = Selectable.Transition.ColorTint;
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() =>
+            {
+                if (currentCase != null && currentCase.suspects != null && currentCase.suspects.Count > 0)
+                {
+                    Texture2D tex = corkboardManager != null ? corkboardManager.GetCardTexture(currentCase.suspects[0].id) : null;
+                    EvidenceDetailModal.Instance?.ShowSuspect(currentCase.suspects[0], tex);
+                }
+            });
+        }
     }
 
     /// <summary>

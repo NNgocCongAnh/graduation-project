@@ -65,16 +65,40 @@ SUSPECT_ARCHETYPE_RULES: List[Dict] = [
 # Semantic Keyword Dictionaries for Evidence Archetypes
 EVIDENCE_ARCHETYPE_RULES: List[Dict] = [
     {
+        "filename": "evidence_knife.png",
+        "keywords": ["dao", "rạch thư", "kiếm", "knife", "dagger", "hung khí", "vết đâm", "vết chém", "lưỡi dao", "máu"]
+    },
+    {
+        "filename": "evidence_sedative.png",
+        "keywords": ["thuốc", "an thần", "độc", "poison", "lọ", "chai", "sedative", "viên", "liều lượng", "dược", "chất độc"]
+    },
+    {
         "filename": "pocket_watch_broken.png",
         "keywords": ["đồng hồ", "watch", "clock", "thời gian", "kim đồng hồ", "bỏ túi", "timepiece", "mặt kính vỡ"]
     },
     {
+        "filename": "evidence_revolver.png",
+        "keywords": ["súng", "đạn", "gun", "revolver", "pistol", "khẩu súng", "vết bắn", "nòng súng"]
+    },
+    {
+        "filename": "evidence_letter.png",
+        "keywords": ["thư", "bức thư", "giấy", "di chúc", "tài liệu", "nhật ký", "bản ghi", "letter", "note", "đe dọa"]
+    },
+    {
+        "filename": "evidence_rope.png",
+        "keywords": ["dây", "thừng", "siết", "cổ", "rope", "thòng lọng", "sợi dây"]
+    },
+    {
+        "filename": "evidence_key.png",
+        "keywords": ["chìa", "khóa", "key", "ổ khóa", "chùm chìa"]
+    },
+    {
         "filename": "evidence_glass.png",
-        "keywords": ["dao", "knife", "dagger", "hung khí", "kính", "mặt kính", "thủy tinh", "mảnh vỡ", "kính mắt", "cửa sổ", "glass", "lens", "spectacles"]
+        "keywords": ["kính", "mặt kính", "thủy tinh", "mảnh vỡ", "kính mắt", "cửa sổ", "glass", "lens", "spectacles"]
     },
     {
         "filename": "evidence_teacup.png",
-        "keywords": ["tách", "chén", "cốc", "trà", "cà phê", "ly", "uống", "cup", "teacup", "coffee", "bình trà", "chất độc", "an thần", "thuốc"]
+        "keywords": ["tách", "chén", "cốc", "trà", "cà phê", "ly", "uống", "cup", "teacup", "coffee", "bình trà"]
     }
 ]
 

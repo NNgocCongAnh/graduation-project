@@ -1,0 +1,103 @@
+\chapter{TỔNG QUAN VÀ PHÁT BIỂU BÀI TOÁN}
+\label{ch:introduction}
+
+\section{Bối cảnh nghiên cứu và Tính cấp thiết}
+\label{sec:intro_context}
+
+Trong lịch sử hơn bốn thập kỷ phát triển của ngành công nghiệp trò chơi điện tử và khoa học máy tính ứng dụng trong giải trí tương tác, kỹ thuật sinh nội dung thủ tục (PCG) luôn được coi là một trong những trụ cột công nghệ then chốt \cite{summerville2018procedural}. Khởi nguồn từ những tựa game kinh điển như \textit{Rogue} (1980) hay \textit{NetHack} (1987), PCG cho phép các nhà phát triển sử dụng các thuật toán tất định hoặc ngẫu nhiên có kiểm soát (như nhiễu Perlin, phân rã không gian nhị phân\footnote{Thuật ngữ tiếng Anh: \textit{Binary Space Partitioning} (BSP).}, hay máy ôtômat tế bào) để kiến tạo nên các mê cung, địa hình và vị trí vật phẩm mà không cần sự can thiệp thủ công của con người \cite{short2017procedural}. Mục tiêu trọng tâm của PCG là gia tăng giá trị chơi lại của trò chơi, đồng thời cắt giảm chi phí sản xuất nội dung đồ họa và kịch bản.
+
+Tuy nhiên, trong suốt nhiều thập kỷ, phạm vi áp dụng của PCG truyền thống chủ yếu dừng lại ở các nội dung mang tính cấu trúc không gian hình học hoặc các hệ thống nhiệm vụ đơn giản dựa trên văn phạm đồ thị. Khi bước vào địa hạt của nghệ thuật kể chuyện tương tác và đặc biệt là thể loại trò chơi trinh thám suy diễn, các thuật toán PCG cổ điển bộc lộ nhiều hạn chế. Một kịch bản trinh thám không đơn thuần là sự sắp đặt ngẫu nhiên của các căn phòng, mà là một mạng lưới quan hệ xã hội phức tạp, đan xen giữa động cơ tâm lý, các chứng cứ ngoại phạm có chủ đích và chuỗi nhân quả chặt chẽ kết nối từ hành vi phạm tội tới dấu vết tại hiện trường.
+
+Sự phát triển nhanh chóng của các mô hình ngôn ngữ lớn (LLM) dựa trên kiến trúc Transformer \cite{vaswani2017attention} từ năm 2022 đã mở ra hướng tiếp cận mới cho ngành kỹ nghệ trò chơi. Nhờ quá trình tiền huấn luyện trên các kho ngữ liệu văn bản quy mô lớn, các mô hình tiên tiến hiện nay như GPT-4 \cite{achiam2023gpt4} hay Gemma \cite{gemmateam2024gemma} đã thể hiện năng lực xử lý ngôn ngữ tự nhiên tốt, khả năng nhập vai linh hoạt, mô tả văn cảnh giàu tính biểu cảm và thiết lập hội thoại nhân vật tự nhiên. Điều này thúc đẩy cộng đồng nghiên cứu trí tuệ nhân tạo (AI) hướng tới mục tiêu tự động hóa quy trình sáng tác các kịch bản trinh thám đa dạng, nơi mỗi phiên chơi là một vụ án độc lập được tạo sinh động.
+
+Mặc dù vậy, khoảng cách từ một đoạn văn bản do LLM sinh ra có vẻ trôi chảy bề mặt đến một kịch bản trò chơi trinh thám thực sự có thể giải được vẫn là một thách thức khoa học lớn. Thể loại trinh thám suy diễn đòi hỏi tính toán logic hình thức nghiêm ngặt, nơi mọi mâu thuẫn thời gian dù chỉ vài phút, hay sai lệch vài độ C trong thân nhiệt thi thể, cũng đủ làm sụp đổ chuỗi suy luận của người chơi. Do đó, việc nghiên cứu một phương pháp tiếp cận lai kết hợp năng lực sáng tạo ngữ nghĩa của LLM với các cơ chế kiểm chứng toán học tất định là yêu cầu cấp thiết cả về mặt lý thuyết lẫn ứng dụng thực tiễn.
+
+\section{Khoảng trống thực tiễn: Giới hạn của LLM trong Suy luận Hình thức}
+\label{sec:intro_limitations}
+
+Khi áp dụng phương pháp tạo sinh nguyên khối -- yêu cầu một mô hình ngôn ngữ lớn đơn lẻ sinh ra toàn bộ hồ sơ vụ án thông qua một câu lệnh duy nhất -- hệ thống thường gặp ba rào cản mang tính bản chất:
+
+\subsection{Hiện tượng Ảo giác Nhân quả và Mâu thuẫn Thời gian}
+Về mặt toán học, các LLM hiện đại vận hành như những bộ dự đoán token kế tiếp theo phân phối xác suất tự quy hồi:
+\begin{equation}
+    P(w_1, w_2, \dots, w_n) = \prod_{i=1}^n P(w_i \mid w_1, \dots, w_{i-1})
+\end{equation}
+
+Bản chất của cơ chế này là tối ưu hóa sự trôi chảy bề mặt và tính hợp lý thống kê của chuỗi văn bản, chứ không duy trì một mô hình trạng thái thế giới vật lý nhất quán bên trong \cite{marcus2020next}. Khi xử lý chuỗi suy luận nhân quả nhiều bước \cite{pearl2009causality}, các sai số xác suất nhỏ ở từng bước dễ tích lũy theo chiều dài văn bản, dẫn đến các mâu thuẫn phi lý:
+\begin{itemize}[leftmargin=1.5cm]
+    \item \textbf{Mâu thuẫn nhiệt học pháp y:} LLM có thể mô tả nạn nhân tử vong lúc 20:00 tối hôm trước, nhưng trong báo cáo khám nghiệm tử thi lúc 08:00 sáng hôm sau tại phòng $18^\circ\text{C}$ lại gán thân nhiệt thi thể là $36.5^\circ\text{C}$, vi phạm quy luật truyền nhiệt sinh học.
+    \item \textbf{Mâu thuẫn không gian -- thời gian:} Một nghi phạm được mô tả có mặt tại quán cà phê cách hiện trường 30 km vào lúc 21:15, nhưng lời khai ở đoạn sau lại khẳng định nhân vật này trực tiếp có mặt tại hiện trường lúc 21:20.
+\end{itemize}
+
+\subsection{Vi phạm Nguyên tắc Trinh thám Công bằng}
+Trong lịch sử văn học trinh thám cổ điển, vào năm 1929, học giả Ronald Knox đã công bố Mười điều răn của tiểu thuyết trinh thám\footnote{Thuật ngữ tiếng Anh: \textit{Knox's Decalogue} và quy tắc \textit{Fair-play Mystery}.} \cite{knox1929ten}. Nguyên tắc cốt lõi của trinh thám công bằng quy định rằng người chơi phải được trao cơ hội bình đẳng với thám tử trong việc khám phá chân tướng vụ án:
+\begin{enumerate}[label=(\roman*)]
+    \item Toàn bộ các manh mối cần thiết để suy ra thủ phạm phải được trình bày tường minh trong hồ sơ vụ án;
+    \item Không xuất hiện yếu tố siêu nhiên, chất độc giả tưởng chưa từng được khoa học biết đến, hay sự trùng hợp ngẫu nhiên vô căn cứ;
+    \item Tồn tại chuỗi chứng cứ đủ mạnh để bác bỏ lời khai ngoại phạm của đúng một thủ phạm duy nhất mà không gây nhập nhằng với người vô tội.
+\end{enumerate}
+
+Khi hoạt động độc lập, LLM không có cơ chế kiểm chứng hình thức để tự đánh giá xem kịch bản sinh ra có bảo đảm tính công bằng hay không. Mô hình dễ rơi vào một trong hai thái cực: tạo ra bằng chứng quá lộ liễu khiến trò chơi mất tính thử thách, hoặc bỏ sót chứng cứ bẻ gãy ngoại phạm, biến vụ án thành bài toán không có lời giải.
+
+\subsection{Chi phí Tính toán và Độ trễ Phục hồi Lỗi}
+Trong trò chơi tương tác, độ trễ phản hồi là yếu tố ảnh hưởng trực tiếp tới trải nghiệm người dùng. Nếu một kịch bản sinh ra bị phát hiện lỗi mâu thuẫn thời gian, cách xử lý đơn giản là loại bỏ toàn bộ kết quả và gọi LLM tái sinh lại từ đầu. Quá trình tái sinh toàn phần vừa làm tăng đáng kể lượng token tiêu thụ, vừa kéo dài thời gian chờ đợi của người chơi, ảnh hưởng tiêu cực đến tính khả dụng của hệ thống phần mềm.
+
+\section{Mục tiêu và Các Câu hỏi Nghiên cứu}
+\label{sec:intro_objectives}
+
+\subsection{Mục tiêu Tổng quát}
+Đồ án hướng tới mục tiêu thiết kế, cài đặt và đánh giá thực nghiệm một khung kiến trúc lai Neuro-Symbolic\footnote{Thuật ngữ chỉ hướng tiếp cận AI kết hợp giữa mạng nơ-ron xác suất (\textit{Neural}) và suy luận ký hiệu tất định (\textit{Symbolic}).} có khả năng tạo sinh tự động và kiểm định các kịch bản trinh thám phòng kín có thể giải được, đáp ứng yêu cầu công bằng cho người chơi, đồng thời hạn chế chi phí token và độ trễ phục hồi lỗi.
+
+\subsection{Các Câu hỏi Nghiên cứu}
+Để hiện thực hóa mục tiêu trên, tôi tập trung trả lời ba câu hỏi nghiên cứu trọng tâm:
+
+\begin{itemize}[leftmargin=1.5cm]
+    \item[\textbf{RQ1:}] \textbf{(Kiến trúc Phân rã Đa tác tử)} \textit{Làm thế nào để phân rã quy trình sáng tác vụ án thành chuỗi các tác tử chuyên biệt tuần tự nhằm giảm tải nhận thức cho LLM, hạn chế ảo giác và tách biệt rõ ràng giữa trạng thái chân lý gốc với dữ liệu hồ sơ trình bày cho người chơi?}
+    
+    \item[\textbf{RQ2:}] \textbf{(Ràng buộc Ký hiệu và Tính Giải được)} \textit{Làm thế nào để hình thức hóa quy luật hạ nhiệt thi thể y pháp theo mô hình Henssge và cấu trúc quan hệ chứng cứ -- nghi phạm dưới dạng đồ thị hai phía làm bộ lọc kiểm định tất định, bảo đảm các kịch bản đạt chuẩn có nghiệm suy luận hợp lệ và nhất quán?}
+    
+    \item[\textbf{RQ3:}] \textbf{(Tối ưu Chi phí Sửa lỗi)} \textit{Cơ chế sửa lỗi cục bộ\footnote{Thuật ngữ tiếng Anh: \textit{Localized Patch Repair}.} với độ phức tạp ngữ cảnh hằng số $\mathcal{O}(1)$ giúp cô lập vi phạm và tiết kiệm tài nguyên tính toán như thế nào so với việc tái sinh toàn bộ kịch bản $\mathcal{O}(N)$?}
+\end{itemize}
+
+\section{Đối tượng và Phạm vi Nghiên cứu}
+\label{sec:intro_scope}
+
+\subsection{Đối tượng Nghiên cứu}
+\begin{itemize}[leftmargin=1.5cm]
+    \item Các dòng LLM tiêu biểu thuộc ba nhóm: mô hình thương mại hiệu năng cao (\texttt{gh/gpt-4o}), mô hình thương mại tối ưu chi phí (\texttt{gh/gpt-4o-mini}), và mô hình trọng số mở thế hệ mới (\texttt{ollama/gemma4:31b-cloud}).
+    \item Kiến trúc Neuro-Symbolic AI và lý thuyết nhận thức kép.
+    \item Phương trình truyền nhiệt hai hàm mũ của Henssge trong giám định y pháp xác định thời gian tử vong.
+    \item Mô hình hóa quan hệ chứng cứ -- nghi phạm bằng đồ thị hai phía.
+    \item Kiểm chuẩn dữ liệu chặt chẽ với Pydantic v2, lưu trữ quan hệ SQLite (SQLAlchemy 2.0) trên FastAPI và giao diện game Unity 6 trên đường ống kết xuất phổ quát (URP) 2D.
+\end{itemize}
+
+\subsection{Phạm vi Nghiên cứu và Đóng băng Phạm vi}
+Để bảo đảm tính khả thi và chất lượng kỹ thuật của sản phẩm trong khung thời gian đồ án tốt nghiệp, tôi áp dụng nguyên tắc đóng băng phạm vi như sau:
+\begin{itemize}[leftmargin=1.5cm]
+    \item \textbf{Về thể loại vụ án:} Tập trung chuyên sâu vào mô hình \textbf{vụ án phòng kín cổ điển} với không gian hiện trường xác định; số lượng nghi phạm từ 2 đến 5 người (mặc định 3 nghi phạm trong mỗi kịch bản sinh tự động) và từ 3 đến 4 vật chứng hiện trường (tối thiểu 2 vật chứng theo ràng buộc lược đồ).
+    \item \textbf{Về cơ chế điều tra:} Mô phỏng lối chơi của dòng trò chơi \textit{Unsolved Case Files}. Dữ liệu vụ án được trình bày dưới dạng hồ sơ tĩnh gồm báo cáo pháp y, lời khai ngoại phạm, ảnh chụp và vật chứng. Hệ thống không mở tính năng trò chuyện tự do với các nhân vật không phải người chơi (NPC) nhằm tránh rủi ro người chơi bẻ khóa ngữ cảnh và làm sai lệch chuẩn công bằng suy luận.
+    \item \textbf{Về kiến trúc nền tảng Web và hiển thị đa nền tảng:} Hệ thống vận hành theo mô hình dịch vụ Web phân tán với lõi RESTful API trên \texttt{FastAPI} (giao thức HTTP/JSON, WebSockets, cấu hình CORS và tài liệu đặc tả OpenAPI tại \texttt{/docs}), kế thừa từ nguyên mẫu giao diện Web React (\texttt{V0/frontend/}) và mở rộng lên Client trò chơi trên \textbf{Unity 6 URP 2D} ở độ phân giải chuẩn 16:9 ($1920\times 1080$). Thiết kế này cho phép đồng bộ chơi đơn hoặc phối hợp nhóm tối đa 3 thám tử qua mạng cục bộ (LAN), đồng thời tương thích xuất bản trực tiếp sang chuẩn WebGL\footnote{Thuật ngữ tiếng Anh: \textit{Web Graphics Library} (WebGL) -- chuẩn kết xuất đồ họa tương tác trực tiếp trên trình duyệt thông qua WebAssembly và HTML5.} trên trình duyệt lẫn tệp thực thi độc lập, mang lại trải nghiệm bảng ghim điều tra trực quan\footnote{Thuật ngữ chuyên ngành: \textit{Diegetic Corkboard UI} -- giao diện gắn liền với vật thể trong không gian trò chơi.}.
+\end{itemize}
+
+\section{Đóng góp của Đồ án}
+\label{sec:intro_contributions}
+
+Đồ án đạt được bốn đóng góp chính về mặt học thuật và kỹ thuật hệ thống:
+\begin{enumerate}[leftmargin=1.5cm]
+    \item \textbf{Thiết kế kiến trúc Neuro-Symbolic với 4 tác tử tuần tự:} Cài đặt đường ống sinh kịch bản gồm \texttt{OutlineAgent}, \texttt{CharacterAgent}, \texttt{ClueAgent} và \texttt{DeductionAgent}, tách biệt quá trình thiết lập chân lý nền tảng với khâu diễn giải và kiểm chứng tất định.
+    \item \textbf{Hình thức hóa quy tắc trinh thám công bằng:} Tích hợp giải thuật chia đôi tìm nghiệm cho phương trình nhiệt học Henssge vào hàm xác thực cứng và biểu diễn đồ thị hai phía để kiểm tra tính giải được của lời khai ngoại phạm.
+    \item \textbf{Xây dựng cơ chế sửa lỗi cục bộ có định hướng:} Cho phép bộ kiểm định phát hiện chính xác phân hệ phát sinh vi phạm (\texttt{outline}, \texttt{character}, \texttt{clue}) và chỉ gửi ngữ cảnh thu hẹp tới tác tử tương ứng để sửa chữa với chi phí ngữ cảnh $\mathcal{O}(1)$.
+    \item \textbf{Thực nghiệm định lượng và hoàn thiện sản phẩm đầu-cuối:} Thực hiện đối sánh thực nghiệm qua 30 phiên sinh kịch bản trên 3 mô hình LLM, lưu vết vào cơ sở dữ liệu SQLite, đồng thời hoàn thiện bộ kiểm thử tự động và trò chơi chạy trên Unity 6 URP 2D.
+\end{enumerate}
+
+\section{Bố cục của Báo cáo Luận văn}
+\label{sec:intro_structure}
+
+Phần còn lại của báo cáo đồ án được tổ chức thành năm chương:
+\begin{itemize}[leftmargin=1.5cm]
+    \item \textbf{Chương 1 -- Tổng quan và Phát biểu bài toán:} Trình bày bối cảnh nghiên cứu, những hạn chế của LLM đơn khối, các câu hỏi nghiên cứu, phạm vi đề tài và đóng góp chính.
+    \item \textbf{Chương 2 -- Cơ sở lý thuyết và Các công trình liên quan:} Trình bày nền tảng lý thuyết về Transformer, kiến trúc Neuro-Symbolic, mô hình nhiệt học thi thể Henssge, đồ thị hai phía và đối chiếu với các nghiên cứu quốc tế liên quan.
+    \item \textbf{Chương 3 -- Phân tích và Thiết kế Kiến trúc Hệ thống:} Phân tích các quyết định kiến trúc, luồng xử lý sinh án và xác thực kết án tất định, thiết kế 4 tác tử, hợp đồng dữ liệu Pydantic v2, lược đồ cơ sở dữ liệu SQLite, bộ kiểm định ký hiệu, thuật toán sửa lỗi cục bộ và thiết kế giao diện Unity 2.5D.
+    \item \textbf{Chương 4 -- Cài đặt Hệ thống và Đánh giá Thực nghiệm:} Mô tả môi trường phần cứng và phần mềm thực tế, bộ chỉ số đo lường, kết quả đối sánh 30 phiên thử nghiệm trên 3 mô hình, phân tích tình huống lỗi tham chiếu thực tế và đánh giá hiệu năng.
+    \item \textbf{Chương 5 -- Kết luận và Hướng phát triển:} Tổng kết kết quả đối chiếu theo từng câu hỏi nghiên cứu, nêu rõ các hạn chế còn tồn tại và đề xuất hướng mở rộng tiếp theo.
+\end{itemize}
