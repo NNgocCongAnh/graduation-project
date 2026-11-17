@@ -68,7 +68,7 @@ Trong trò chơi tương tác, độ trễ phản hồi là yếu tố ảnh hư
     \item Kiến trúc Neuro-Symbolic AI và lý thuyết nhận thức kép.
     \item Phương trình truyền nhiệt hai hàm mũ của Henssge trong giám định y pháp xác định thời gian tử vong.
     \item Mô hình hóa quan hệ chứng cứ -- nghi phạm bằng đồ thị hai phía.
-    \item Kiểm chuẩn dữ liệu chặt chẽ với Pydantic v2, lưu trữ quan hệ SQLite (SQLAlchemy 2.0) trên FastAPI và giao diện game Unity 6 trên đường ống kết xuất phổ quát (URP\textsuperscript{22}) 2D.
+    \item Kiểm chuẩn dữ liệu chặt chẽ với Pydantic v2, lưu trữ quan hệ SQLite (SQLAlchemy 2.0) trên FastAPI và giao diện game Unity 6 trên Universal Render Pipeline (URP\textsuperscript{22}) 2D.
 \end{itemize}
 
 \subsection{Phạm vi Nghiên cứu và Đóng băng Phạm vi}
@@ -84,7 +84,7 @@ Trong trò chơi tương tác, độ trễ phản hồi là yếu tố ảnh hư
 
 Đồ án đạt được bốn đóng góp chính về mặt học thuật và kỹ thuật hệ thống:
 \begin{enumerate}[leftmargin=1.5cm]
-    \item \textbf{Thiết kế kiến trúc Neuro-Symbolic với 4 tác tử tuần tự:} Cài đặt đường ống sinh kịch bản gồm \texttt{OutlineAgent}, \texttt{CharacterAgent}, \texttt{ClueAgent} và \texttt{DeductionAgent}, tách biệt quá trình thiết lập chân lý nền tảng với khâu diễn giải và kiểm chứng tất định.
+    \item \textbf{Thiết kế kiến trúc Neuro-Symbolic với 4 tác tử tuần tự:} Cài đặt Multi-Agent Pipeline gồm \texttt{OutlineAgent}, \texttt{CharacterAgent}, \texttt{ClueAgent} và \texttt{DeductionAgent}, tách biệt quá trình thiết lập chân lý nền tảng với khâu diễn giải và kiểm chứng tất định.
     \item \textbf{Hình thức hóa quy tắc trinh thám công bằng:} Tích hợp giải thuật chia đôi tìm nghiệm cho phương trình nhiệt học Henssge vào hàm xác thực cứng và biểu diễn đồ thị hai phía để kiểm tra tính giải được của lời khai ngoại phạm.
     \item \textbf{Xây dựng cơ chế sửa lỗi cục bộ có định hướng:} Cho phép bộ kiểm định phát hiện chính xác phân hệ phát sinh vi phạm (\texttt{outline}, \texttt{character}, \texttt{clue}) và chỉ gửi ngữ cảnh thu hẹp tới tác tử tương ứng để sửa chữa với chi phí ngữ cảnh $\mathcal{O}(1)$.
     \item \textbf{Thực nghiệm định lượng và hoàn thiện sản phẩm đầu-cuối:} Thực hiện đối sánh thực nghiệm qua 30 phiên sinh kịch bản trên 3 mô hình LLM, lưu vết vào cơ sở dữ liệu SQLite, đồng thời hoàn thiện bộ kiểm thử tự động và trò chơi chạy trên Unity 6 URP 2D.
@@ -97,7 +97,7 @@ Phần còn lại của báo cáo đồ án được tổ chức thành năm ch�
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Chương 1 -- Tổng quan và Phát biểu bài toán:} Trình bày bối cảnh nghiên cứu, những hạn chế của LLM đơn khối, các câu hỏi nghiên cứu, phạm vi đề tài và đóng góp chính.
     \item \textbf{Chương 2 -- Cơ sở lý thuyết và Các công trình liên quan:} Trình bày nền tảng lý thuyết về Transformer, kiến trúc Neuro-Symbolic, mô hình nhiệt học thi thể Henssge, đồ thị hai phía và đối chiếu với các nghiên cứu quốc tế liên quan.
-    \item \textbf{Chương 3 -- Phân tích và Thiết kế Kiến trúc Hệ thống:} Phân tích các quyết định kiến trúc, luồng xử lý sinh án và xác thực kết án tất định, thiết kế 4 tác tử, hợp đồng dữ liệu Pydantic v2, lược đồ cơ sở dữ liệu SQLite, bộ kiểm định ký hiệu, thuật toán sửa lỗi cục bộ và thiết kế giao diện Unity 2.5D.
+    \item \textbf{Chương 3 -- Phân tích và Thiết kế Kiến trúc Hệ thống:} Phân tích các quyết định kiến trúc, luồng xử lý sinh án và xác thực kết án tất định, thiết kế Multi-Agent Pipeline 4 tác tử, đặc tả Data Schema với Pydantic v2, cơ sở dữ liệu SQLite, bộ kiểm định ký hiệu, cơ chế vá lỗi cục bộ và thiết kế giao diện Unity 2.5D.
     \item \textbf{Chương 4 -- Cài đặt Hệ thống và Đánh giá Thực nghiệm:} Mô tả môi trường phần cứng và phần mềm thực tế, bộ chỉ số đo lường, kết quả đối sánh 30 phiên thử nghiệm trên 3 mô hình, phân tích tình huống lỗi tham chiếu thực tế và đánh giá hiệu năng.
     \item \textbf{Chương 5 -- Kết luận và Hướng phát triển:} Tổng kết kết quả đối chiếu theo từng câu hỏi nghiên cứu, nêu rõ các hạn chế còn tồn tại và đề xuất hướng mở rộng tiếp theo.
 \end{itemize}

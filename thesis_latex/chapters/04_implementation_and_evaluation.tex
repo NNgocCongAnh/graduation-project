@@ -19,14 +19,14 @@
 \subsection{Môi trường Phần mềm và Thư viện Phụ thuộc}
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Máy chủ Backend:} Python 3.13.13 (64-bit); Web Framework FastAPI 0.137.1; máy chủ Uvicorn 0.49.0; kiểm chuẩn dữ liệu Pydantic 2.14.3; lưu trữ quan hệ SQLite (chế độ WAL) qua SQLAlchemy 2.0.51; thư viện kết nối mô hình OpenAI 2.46.0 và \texttt{httpx 0.27.2}.
-    \item \textbf{Client Trò chơi:} Unity 6 (bản hỗ trợ dài hạn \texttt{6000.5.8f1}); đường ống kết xuất URP 2D; ngôn ngữ kịch bản C\# (.NET Standard 2.1); độ phân giải mục tiêu $1920\times 1080$ (tỉ lệ khung hình 16:9).
+    \item \textbf{Client Trò chơi:} Unity 6 (bản hỗ trợ dài hạn \texttt{6000.5.8f1}); Universal Render Pipeline (URP 2D); ngôn ngữ kịch bản C\# (.NET Standard 2.1); độ phân giải mục tiêu $1920\times 1080$ (tỉ lệ khung hình 16:9).
     \item \textbf{Cổng Điều phối Mô hình:} Proxy Gateway cục bộ (\texttt{9Router}) tại địa chỉ \url{http://localhost:20128/v1}, hỗ trợ chuẩn hóa API đa nhà cung cấp và ghi nhận thời gian phản hồi.
 \end{itemize}
 
 \section{Bộ Tiêu chí và Chỉ số Đánh giá Thực nghiệm}
 \label{sec:eval_metrics}
 
-Để lượng hóa hiệu quả hoạt động của đường ống tạo sinh và bộ kiểm định, tôi sử dụng năm chỉ số đánh giá định lượng sau:
+Để lượng hóa hiệu quả hoạt động của pipeline tạo sinh và bộ kiểm định, tôi sử dụng năm chỉ số đánh giá định lượng sau:
 
 \begin{enumerate}[leftmargin=1.5cm]
     \item \textbf{Tỷ lệ Hợp lệ Cú pháp Schema ($R_{\text{schema}}$):} Tỷ lệ hồ sơ vượt qua giải mã cấu trúc JSON của Pydantic v2 mà không phát sinh ngoại lệ kiểu dữ liệu:
