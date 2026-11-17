@@ -468,7 +468,7 @@ public class TitleMenuModal : MonoBehaviour
         rt.offsetMax = new Vector2(-12f, -2f);
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 13;
         txt.color = TextWhite;
         txt.alignment = TextAnchor.MiddleLeft;
@@ -533,7 +533,7 @@ public class TitleMenuModal : MonoBehaviour
         rt.offsetMax = new Vector2(-16f, -4f);
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 14;
         txt.fontStyle = FontStyle.Bold;
         txt.color = TextWhite;
@@ -551,7 +551,7 @@ public class TitleMenuModal : MonoBehaviour
         rt.sizeDelta = new Vector2(540f, 32f);
 
         Text txt = go.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = size;
         txt.color = color;
         txt.fontStyle = style;

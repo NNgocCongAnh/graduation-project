@@ -150,12 +150,14 @@ public class CorkboardManager : MonoBehaviour
         rtrt.anchorMax = Vector2.one;
         rtrt.sizeDelta = Vector2.zero;
         Text rtxt = ribbonTxtGo.GetComponent<Text>();
-        rtxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        rtxt.font = DetectiveAssetBank.GetDefaultUIFont();
         rtxt.fontSize = 10;
         rtxt.fontStyle = FontStyle.Bold;
         rtxt.alignment = TextAnchor.MiddleCenter;
         rtxt.color = new Color(0.95f, 0.85f, 0.85f);
         rtxt.text = "TỬ THI";
+        rtxt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        rtxt.verticalOverflow = VerticalWrapMode.Overflow;
 
         // Nạp ảnh chân dung thật sắc nét (Lord Arthur Blackwood portrait 536KB)
         RawImage rawImg = card.GetComponentInChildren<RawImage>();
@@ -486,11 +488,13 @@ public class CorkboardManager : MonoBehaviour
         txtRt.sizeDelta = Vector2.zero;
 
         toastBannerText = txtGo.GetComponent<Text>();
-        toastBannerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        toastBannerText.font = DetectiveAssetBank.GetDefaultUIFont();
         toastBannerText.fontSize = 13;
         toastBannerText.fontStyle = FontStyle.Bold;
         toastBannerText.alignment = TextAnchor.MiddleCenter;
         toastBannerText.color = new Color(0.96f, 0.85f, 0.45f);
+        toastBannerText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        toastBannerText.verticalOverflow = VerticalWrapMode.Overflow;
 
         bannerBg.SetActive(false);
     }

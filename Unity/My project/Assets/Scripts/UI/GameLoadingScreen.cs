@@ -161,7 +161,7 @@ public class GameLoadingScreen : MonoBehaviour
         spinner.anchoredPosition = new Vector2(0f, 85f);
         spinner.sizeDelta = new Vector2(70f, 70f);
         Text spinTxt = spinGo.GetComponent<Text>();
-        spinTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        spinTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         spinTxt.fontSize = 42;
         spinTxt.alignment = TextAnchor.MiddleCenter;
         spinTxt.color = GoldColor;
@@ -174,7 +174,7 @@ public class GameLoadingScreen : MonoBehaviour
         mrt.anchoredPosition = new Vector2(0f, 25f);
         mrt.sizeDelta = new Vector2(540f, 32f);
         mainStatusText = mainTxtGo.GetComponent<Text>();
-        mainStatusText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        mainStatusText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         mainStatusText.fontSize = 18;
         mainStatusText.fontStyle = FontStyle.Bold;
         mainStatusText.alignment = TextAnchor.MiddleCenter;
@@ -188,7 +188,7 @@ public class GameLoadingScreen : MonoBehaviour
         srt.anchoredPosition = new Vector2(0f, -15f);
         srt.sizeDelta = new Vector2(540f, 28f);
         subStatusText = subTxtGo.GetComponent<Text>();
-        subStatusText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        subStatusText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         subStatusText.fontSize = 13;
         subStatusText.alignment = TextAnchor.MiddleCenter;
         subStatusText.color = TextWhite;
@@ -234,7 +234,7 @@ public class GameLoadingScreen : MonoBehaviour
         hrt.anchoredPosition = new Vector2(0f, -110f);
         hrt.sizeDelta = new Vector2(500f, 24f);
         Text hintTxt = hintGo.GetComponent<Text>();
-        hintTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        hintTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         hintTxt.fontSize = 11;
         hintTxt.fontStyle = FontStyle.Italic;
         hintTxt.alignment = TextAnchor.MiddleCenter;

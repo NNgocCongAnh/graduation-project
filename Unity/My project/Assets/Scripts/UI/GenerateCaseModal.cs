@@ -391,7 +391,7 @@ public class GenerateCaseModal : MonoBehaviour
         fbrt.anchoredPosition = new Vector2(0f, -155f);
         fbrt.sizeDelta = new Vector2(640f, 36f);
         feedbackText = fbGo.GetComponent<Text>();
-        feedbackText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        feedbackText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         feedbackText.fontSize = 11;
         feedbackText.alignment = TextAnchor.MiddleCenter;
         feedbackText.color = new Color(1f, 0.45f, 0.45f);
@@ -430,7 +430,7 @@ public class GenerateCaseModal : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 11;
         txt.fontStyle = FontStyle.Bold;
         txt.color = TextWhite;
@@ -458,7 +458,7 @@ public class GenerateCaseModal : MonoBehaviour
         lrt.offsetMax = new Vector2(-28f, -2f);
 
         Text label = labelGo.GetComponent<Text>();
-        label.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         label.fontSize = 12;
         label.color = TextWhite;
         label.alignment = TextAnchor.MiddleLeft;
@@ -533,7 +533,7 @@ public class GenerateCaseModal : MonoBehaviour
         ilrt.offsetMax = new Vector2(-10f, -2f);
 
         Text itemTxt = itemLabel.GetComponent<Text>();
-        itemTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        itemTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         itemTxt.fontSize = 12;
         itemTxt.color = TextWhite;
         itemTxt.alignment = TextAnchor.MiddleLeft;
@@ -569,7 +569,7 @@ public class GenerateCaseModal : MonoBehaviour
         trt.offsetMax = new Vector2(-10f, -2f);
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 12;
         txt.color = TextWhite;
         txt.alignment = TextAnchor.MiddleLeft;
@@ -584,7 +584,7 @@ public class GenerateCaseModal : MonoBehaviour
         phrt.offsetMax = new Vector2(-10f, -2f);
 
         Text phTxt = phGo.GetComponent<Text>();
-        phTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        phTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         phTxt.fontSize = 12;
         phTxt.fontStyle = FontStyle.Italic;
         phTxt.color = TextMuted;
@@ -618,7 +618,7 @@ public class GenerateCaseModal : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 10;
         txt.color = TextWhite;
         txt.alignment = TextAnchor.MiddleCenter;
@@ -649,7 +649,7 @@ public class GenerateCaseModal : MonoBehaviour
         trt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 12;
         txt.fontStyle = FontStyle.Bold;
         txt.color = Color.white;
@@ -666,7 +666,7 @@ public class GenerateCaseModal : MonoBehaviour
         rt.sizeDelta = sizeDelta;
 
         Text txt = go.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = size;
         txt.color = color;
         txt.fontStyle = style;

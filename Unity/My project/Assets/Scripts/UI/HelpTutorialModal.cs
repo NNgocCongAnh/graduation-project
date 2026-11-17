@@ -168,7 +168,7 @@ public class HelpTutorialModal : MonoBehaviour
         RectTransform rt = NewRect("Label", parent);
         if (height > 0) rt.gameObject.AddComponent<LayoutElement>().preferredHeight = height;
         Text t = rt.gameObject.AddComponent<Text>();
-        t.font = font != null ? font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.font = font != null ? font : DetectiveAssetBank.GetDefaultUIFont();
         t.text = text;
         t.fontSize = size;
         t.color = color;
@@ -193,7 +193,7 @@ public class HelpTutorialModal : MonoBehaviour
         RectTransform labelRt = NewRect("Text", rt);
         Stretch(labelRt);
         Text t = labelRt.gameObject.AddComponent<Text>();
-        t.font = font != null ? font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        t.font = font != null ? font : DetectiveAssetBank.GetDefaultUIFont();
         t.text = text;
         t.fontSize = 12;
         t.fontStyle = FontStyle.Bold;

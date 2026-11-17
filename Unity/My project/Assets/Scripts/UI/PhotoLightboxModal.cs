@@ -128,7 +128,7 @@ public class PhotoLightboxModal : MonoBehaviour
         pinRt.anchoredPosition = new Vector2(0f, 268f);
         pinRt.sizeDelta = new Vector2(36f, 36f);
         Text pinTxt = pinGo.GetComponent<Text>();
-        pinTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        pinTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         pinTxt.fontSize = 24;
         pinTxt.alignment = TextAnchor.MiddleCenter;
         pinTxt.color = new Color(0.85f, 0.15f, 0.15f);
@@ -150,7 +150,7 @@ public class PhotoLightboxModal : MonoBehaviour
         captionRt.anchoredPosition = new Vector2(0f, -225f);
         captionRt.sizeDelta = new Vector2(440f, 40f);
         captionText = captionGo.GetComponent<Text>();
-        captionText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        captionText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         captionText.fontSize = 16;
         captionText.fontStyle = FontStyle.Bold;
         captionText.alignment = TextAnchor.MiddleCenter;
@@ -173,7 +173,7 @@ public class PhotoLightboxModal : MonoBehaviour
         ctRt.anchorMax = Vector2.one;
         ctRt.sizeDelta = Vector2.zero;
         Text closeTxt = closeTxtGo.GetComponent<Text>();
-        closeTxt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        closeTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         closeTxt.fontSize = 20;
         closeTxt.fontStyle = FontStyle.Bold;
         closeTxt.alignment = TextAnchor.MiddleCenter;
