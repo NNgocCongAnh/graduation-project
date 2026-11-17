@@ -227,24 +227,27 @@ Trong phần mềm thực tế (\texttt{validator.py} và \texttt{case\_graph.py
 \section{Hình thức hóa Nguyên tắc Trinh thám Công bằng Knox}
 \label{sec:theory_knox}
 
-Bảng \ref{tab:knox_formalization} đối chiếu việc ánh xạ các quy tắc kinh điển trong Mười điều răn của Ronald Knox (1929) \cite{knox1929ten} sang các ràng buộc kỹ thuật được cài đặt trong mã nguồn hệ thống:
+Mười điều răn của Ronald Knox (1929) \cite{knox1929ten} vốn là bộ quy chuẩn kinh điển của văn học trinh thám suy diễn công bằng, quy định các nguyên tắc để người chơi có cơ hội bình đẳng với thám tử trong việc phá án. Bảng \ref{tab:knox_formalization} đối chiếu việc ánh xạ đầy đủ 10 quy tắc kinh điển của Knox sang các ràng buộc kỹ thuật và bất biến toán học được cài đặt trong mã nguồn hệ thống:
 
 \begin{table}[H]
 \centering
-\caption{Ánh xạ Các Quy tắc Trinh thám Knox sang Ràng buộc Hệ thống}
+\small
+\caption{Ánh xạ Mười Điều răn Trinh thám Knox (1929) sang Ràng buộc Hệ thống}
 \label{tab:knox_formalization}
-\begin{tabularx}{\textwidth}{p{1.4cm} p{6.2cm} X}
+\begin{tabularx}{\textwidth}{p{1.4cm} p{5.6cm} X}
 \toprule
-\textbf{Điều} & \textbf{Quy tắc Văn học Knox (1929)} & \textbf{Ràng buộc Hệ thống Tương ứng} \\
+\textbf{Điều} & \textbf{Quy tắc Văn học Knox (1929)} & \textbf{Ràng buộc Kỹ thuật Tương ứng trong Hệ thống} \\
 \midrule
-\textbf{Điều 1} & Không có yếu tố siêu nhiên hay ma quái can thiệp vào vụ án. & Thời điểm tử vong và hạ thân nhiệt phải thỏa mãn phương trình nhiệt học Henssge. \\
-\textbf{Điều 2} & Không dùng các chất độc giả tưởng chưa được khoa học biết đến. & Vũ khí và nguyên nhân tử vong phải là vật thể hoặc cơ chế vật lý có thật. \\
-\textbf{Điều 3} & Không giấu lối đi bí mật chưa từng được mô tả trước. & Toàn bộ địa điểm hiện trường và vị trí thu giữ vật chứng được công bố trong hồ sơ. \\
-\textbf{Điều 4} & Thủ phạm phải xuất hiện từ đầu, không thêm nhân vật lúc kết thúc. & Toàn bộ nghi phạm cố định trong $V_S$; ràng buộc \texttt{culprit\_id} phải thuộc tập $\{s.\text{id}\}$. \\
-\textbf{Điều 5} & Thám tử điều tra không được tự mình là hung thủ. & Vai trò người chơi tách biệt hoàn toàn với danh sách nghi phạm $V_S$. \\
-\textbf{Điều 6} & Không phá án nhờ trực giác hay trùng hợp ngẫu nhiên. & Hàm chấm điểm yêu cầu chọn đúng $s^*$ đồng thời nộp ít nhất một vật chứng thuộc $\mathcal{C}_{\text{crucial}}$. \\
-\textbf{Điều 7} & Không dùng anh chị em sinh đôi chưa báo trước làm ngoại phạm giả. & Kiểm tra trùng lặp mã định danh trên toàn bộ tập nghi phạm và vật chứng. \\
-\textbf{Điều 8} & Không giấu giếm người chơi các manh mối quan trọng. & Toàn bộ các vật chứng trong $V_E$ đều được truyền và hiển thị trên bảng điều tra. \\
+\textbf{Điều 1} & Thủ phạm phải xuất hiện từ đầu, không thêm nhân vật bất ngờ lúc kết thúc. & Toàn bộ nghi phạm cố định trong $V_S$ từ \texttt{CharacterAgent}; ràng buộc \texttt{culprit\_id} bắt buộc thuộc tập $\{s.\text{id}\}$. \\
+\textbf{Điều 2} & Không có yếu tố siêu nhiên hay ma quái can thiệp vào vụ án. & Mốc thời gian tử vong và hạ thân nhiệt phải tuân thủ nghiêm ngặt phương trình nhiệt học Henssge; bác bỏ kịch bản phi vật lý. \\
+\textbf{Điều 3} & Không che giấu lối đi bí mật hay không gian ẩn chưa từng được mô tả trước. & Toàn bộ địa điểm hiện trường và vị trí thu giữ vật chứng được công bố minh bạch trong hồ sơ; không có địa điểm ẩn. \\
+\textbf{Điều 4} & Không dùng các chất độc giả tưởng chưa từng được khoa học biết đến. & Vũ khí và nguyên nhân tử vong trong \texttt{Victim} và \texttt{Evidence} phải là vật thể hoặc cơ chế vật lý/sinh học có thật. \\
+\textbf{Điều 5} & Không dùng nhân vật ngoại lai định kiến làm thủ phạm gán ghép vô căn cứ. & Toàn bộ liên kết chứng cứ (\texttt{linked\_suspect\_id}) phải trỏ tới nghi phạm hợp lệ trong $V_S$; chặn lọc lỗi mã ngoại lai như \texttt{"UNKNOWN"}. \\
+\textbf{Điều 6} & Không phá án nhờ sự trùng hợp ngẫu nhiên may rủi hay trực giác mơ hồ. & Hàm chấm điểm yêu cầu chọn đúng $s^*$ đồng thời nộp ít nhất một vật chứng then chốt thuộc $\mathcal{C}_{\text{crucial}}$ bẻ gãy ngoại phạm. \\
+\textbf{Điều 7} & Thám tử tiến hành điều tra không được tự mình là hung thủ giấu mặt. & Định danh và vai trò người chơi (Thám tử) tách biệt hoàn toàn với tập nghi phạm $V_S$ và dữ liệu chân lý gốc \texttt{GroundTruth}. \\
+\textbf{Điều 8} & Toàn bộ manh mối thám tử tìm thấy phải được trình bày ngay cho người chơi. & Toàn bộ các vật chứng trong $V_E$ sau kiểm định đều được đồng bộ và hiển thị đầy đủ trên bảng ghim điều tra của Unity Client. \\
+\textbf{Điều 9} & Nhân vật đồng hành quan sát trung thực, không giấu dữ kiện với người chơi. & Toàn bộ báo cáo pháp y, biên bản thẩm vấn và ghi chú hiện trường đều được công khai minh bạch giữa các thám tử (kể cả chế độ LAN). \\
+\textbf{Điều 10} & Không dùng anh chị em sinh đôi hay người thế thân chưa báo trước làm ngoại phạm giả. & Kiểm tra tính duy nhất của mã định danh nhân vật; mỗi nghi phạm là một thực thể độc lập với lịch trình và sinh trắc riêng biệt. \\
 \bottomrule
 \end{tabularx}
 \end{table}
