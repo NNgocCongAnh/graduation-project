@@ -1,11 +1,11 @@
-\chapter{CƠ SỞ LÝ THUYẾT VÀ CÁC CÔNG TRÌNH LIÊN QUAN}
+\chapter{Cơ sở Lý thuyết và Các công trình Liên quan}
 \label{ch:theory}
 
 \section{Mô hình Ngôn ngữ Lớn và Giới hạn trong Suy luận Ký hiệu}
 \label{sec:theory_llm}
 
 \subsection{Kiến trúc Transformer và Cơ chế Tự chú ý}
-Các mô hình ngôn ngữ lớn (LLM) hiện đại phần lớn được xây dựng trên nền tảng kiến trúc mạng nơ-ron Transformer do Vaswani và các cộng sự giới thiệu năm 2017 \cite{vaswani2017attention}. Trọng tâm của kiến trúc này là cơ chế tự chú ý đa đầu (\textit{Multi-Head Self-Attention}), cho phép mô hình tính toán mức độ phụ thuộc ngữ cảnh giữa mọi cặp token trong chuỗi đầu vào theo phương thức song song, khắc phục điểm nghẽn xử lý tuần tự của các mạng nơ-ron hồi quy (RNN) và mạng bộ nhớ dài-ngắn (LSTM) truyền thống.
+Các mô hình ngôn ngữ lớn (LLM) hiện đại phần lớn được xây dựng trên nền tảng kiến trúc mạng nơ-ron Transformer do Vaswani và các cộng sự giới thiệu năm 2017 \cite{vaswani2017attention}. Trọng tâm của kiến trúc này là cơ chế tự chú ý đa đầu, cho phép mô hình tính toán mức độ phụ thuộc ngữ cảnh giữa mọi cặp token trong chuỗi đầu vào theo phương thức song song, khắc phục điểm nghẽn xử lý tuần tự của các mạng nơ-ron hồi quy (RNN) và mạng bộ nhớ dài-ngắn (LSTM) truyền thống.
 
 Phép tính tự chú ý tích vô hướng có chuẩn hóa được định nghĩa toán học như sau:
 \begin{equation}
@@ -26,7 +26,7 @@ Khi thực hiện tác vụ tạo sinh văn bản, các LLM như GPT-4 hay Gemma
 \end{equation}
 trong đó $z_t$ là vector logit đầu ra của Transformer, $\tau$ là tham số nhiệt độ điều chỉnh mức độ ngẫu nhiên, và $\Theta$ là tập trọng số của mô hình.
 
-Hàm mục tiêu huấn luyện dựa trên nguyên lý cực đại hóa hàm hợp lý (\textit{Maximum Likelihood Estimation}) trên tập ngữ liệu:
+Hàm mục tiêu huấn luyện dựa trên nguyên lý cực đại hóa hàm hợp lý trên tập ngữ liệu:
 \begin{equation}
     \mathcal{L}(\Theta) = - \sum_{i=1}^N \log P(w_i \mid w_{<i}; \Theta)
 \end{equation}
@@ -45,7 +45,7 @@ Các kỹ thuật hướng dẫn câu lệnh như kỹ thuật suy luận theo c
 \label{sec:theory_neurosymbolic}
 
 \subsection{Lý thuyết Quá trình Kép và Phân loại Kiến trúc Kautz}
-Trong tâm lý học nhận thức, Daniel Kahneman đề xuất Lý thuyết Quá trình Kép (\textit{Dual-Process Theory}) \cite{kahneman2011thinking}, phân biệt hai phương thức xử lý thông tin: Hệ thống 1 (\textit{System 1}) trực giác, phản ứng nhanh và Hệ thống 2 (\textit{System 2}) logic, thận trọng:
+Trong tâm lý học nhận thức, Daniel Kahneman đề xuất Lý thuyết Quá trình Kép \cite{kahneman2011thinking}, phân biệt hai phương thức xử lý thông tin: Hệ thống 1 trực giác, phản ứng nhanh và Hệ thống 2 logic, thận trọng:
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Hệ thống 1 (Nhanh, Trực giác):} Xử lý tự động các tác vụ nhận dạng mẫu hình, liên tưởng ngữ nghĩa và tạo sinh ngôn ngữ tự nhiên.
     \item \textbf{Hệ thống 2 (Chậm, Phân tích):} Đòi hỏi kiểm chứng có hệ thống, vận hành trên quy tắc hình thức, tính toán số học và đối chiếu giả thuyết.
@@ -81,9 +81,9 @@ Luồng phối hợp giữa hai thành phần trong đồ án được tổ ch�
 \subsection{Cơ sở Sinh học và Bộ ba Dấu hiệu Tử thi}
 Trong y pháp hình sự, việc ước lượng khoảng thời gian sau tử vong (PMI\textsuperscript{17}) dựa trên ba biến đổi sinh lý kinh điển \cite{madea2005recent}:
 \begin{enumerate}[leftmargin=1.5cm]
-    \item \textbf{Sự làm lạnh thi thể (\textit{algor mortis}):} Quá trình tỏa nhiệt thụ động sau khi quá trình trao đổi chất chấm dứt, đưa thân nhiệt tiệm cận nhiệt độ môi trường.
-    \item \textbf{Sự co cứng cơ tử thi (\textit{rigor mortis}):} Hiện tượng co cứng sợi cơ do cạn kiệt nguồn năng lượng phân tử ATP sau chết, thường khởi phát sau 2--4 giờ và đạt cực đại quanh 12 giờ.
-    \item \textbf{Sự hoen ố tử thi (\textit{livor mortis}):} Sự lắng đọng hồng cầu theo trọng lực tại vùng thấp của cơ thể, dần cố định màu sắc sau 6--8 giờ.
+    \item \textbf{Sự làm lạnh thi thể:} Quá trình tỏa nhiệt thụ động sau khi quá trình trao đổi chất chấm dứt, đưa thân nhiệt tiệm cận nhiệt độ môi trường.
+    \item \textbf{Sự co cứng cơ tử thi:} Hiện tượng co cứng sợi cơ do cạn kiệt nguồn năng lượng phân tử ATP sau chết, thường khởi phát sau 2--4 giờ và đạt cực đại quanh 12 giờ.
+    \item \textbf{Sự hoen ố tử thi:} Sự lắng đọng hồng cầu theo trọng lực tại vùng thấp của cơ thể, dần cố định màu sắc sau 6--8 giờ.
 \end{enumerate}
 
 Trong ba dấu hiệu nêu trên, tốc độ hạ thân nhiệt trực tràng là đại lượng phù hợp nhất để mô hình hóa định lượng trong 24--48 giờ đầu tiên.
@@ -128,7 +128,7 @@ Các giá trị điển hình của $C$ theo quy chuẩn y pháp: $C = 1.0$ (qu�
 \end{figure}
 
 \subsection{Thuật toán Chia đôi Tìm Nghiệm Số và Cửa sổ Tử vong TOD}
-Vì phương trình (\ref{eq:henssge_formula}) là phương trình siêu việt đối với $t$ nhưng hàm $\Phi(t)$ đơn điệu giảm ngặt trên $[0, 48]$ giờ từ giá trị $\Phi(0) = 1$, hệ thống sử dụng phương pháp chia đôi (\textit{bisection method}) trên miền $[0, 48]$ giờ với sai số hội tụ $\epsilon = 10^{-4}$ và tối đa $N_{\text{max}} = 100$ bước lặp để tìm nghiệm duy nhất $t^*$ (Thuật toán \ref{alg:henssge_bisection}).
+Vì phương trình (\ref{eq:henssge_formula}) là phương trình siêu việt đối với $t$ nhưng hàm $\Phi(t)$ đơn điệu giảm ngặt trên $[0, 48]$ giờ từ giá trị $\Phi(0) = 1$, hệ thống sử dụng phương pháp chia đôi trên miền $[0, 48]$ giờ với sai số hội tụ $\epsilon = 10^{-4}$ và tối đa $N_{\text{max}} = 100$ bước lặp để tìm nghiệm duy nhất $t^*$ (Thuật toán \ref{alg:henssge_bisection}).
 
 \begin{algorithm}[H]
 \caption{Tìm Nghiệm Thời gian Tử vong Henssge Bằng Phương pháp Chia đôi}

@@ -1,4 +1,4 @@
-\chapter{PHÂN TÍCH VÀ THIẾT KẾ KIẾN TRÚC HỆ THỐNG}
+\chapter{Phân tích và Thiết kế Kiến trúc Hệ thống}
 \label{ch:architecture}
 
 \section{Các Quyết định Kiến trúc Cốt lõi}
@@ -38,7 +38,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
     \item \textbf{Đặt vấn đề:} Ở giai đoạn thử nghiệm ban đầu, tôi đã xây dựng nguyên mẫu giao diện Web bằng React (\texttt{V0/frontend/}). Tuy nhiên, khi chuyển sang hoàn thiện trải nghiệm bàn làm việc thám tử với ánh sáng động, nhiều lớp thẻ ảnh kéo thả, dây chỉ đỏ co giãn và tính năng tìm phòng chơi mạng cục bộ LAN không cần nhập địa chỉ IP thủ công, nguyên mẫu thuần trình duyệt bộc lộ nhiều giới hạn kỹ thuật.
     \item \textbf{Các phương án cân nhắc:}
     \begin{enumerate}
-        \item \textit{Thuần Web React:} Dễ truy cập qua trình duyệt nhưng tốn chi phí đồng bộ thao tác kéo thả kết hợp vẽ dây chỉ đỏ trên cây mô hình tài liệu trình duyệt, và bị cơ chế hộp cát bảo mật của trình duyệt (\textit{browser sandbox}) chặn quyền phát gói tin quảng bá UDP ở tầng mạng cục bộ (cổng \texttt{47777} trong \texttt{lan\_discovery.py} và \texttt{LanDiscoveryClient.cs}).
+        \item \textit{Thuần Web React:} Dễ truy cập qua trình duyệt nhưng tốn chi phí đồng bộ thao tác kéo thả kết hợp vẽ dây chỉ đỏ trên cây mô hình tài liệu trình duyệt, và bị cơ chế hộp cát bảo mật của trình duyệt chặn quyền phát gói tin quảng bá UDP ở tầng mạng cục bộ (cổng \texttt{47777} trong \texttt{lan\_discovery.py} và \texttt{LanDiscoveryClient.cs}).
         \item \textit{Unreal Engine 5:} Tối ưu cho đồ họa 3D quy mô lớn nhưng dung lượng bộ cài nặng nề và dư thừa tài nguyên đối với bài toán giao diện bảng ghim 2D/2.5D.
         \item \textit{Godot Engine:} Nhẹ và mã nguồn mở, nhưng hệ thống xử lý hậu kỳ ánh sáng 2D và quy trình đóng gói đồng thời hai đích WebGL và máy trạm chưa thuận tiện bằng hệ sinh thái Unity trong khung thời gian đồ án.
         \item \textit{Kiến trúc Web API kết hợp Unity 6} (bản hỗ trợ dài hạn 6000.5.8f1) trên đường ống kết xuất phổ quát (URP) 2D \cite{unity2024urp}.

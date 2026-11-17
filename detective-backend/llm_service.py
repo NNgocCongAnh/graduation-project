@@ -264,7 +264,7 @@ class CaseGeneratorService:
                     id="EV-02",
                     title="Dao rạch thư bạc dính vết máu",
                     location="Trong ống thông gió gian bếp",
-                    description="Dao rạch thư mạ bạc khắc gia huy William, có vết máu khô khớp ADN nạn nhân.",
+                    description="Dao rạch thư mạ bạc khắc gia huy Blackwood vốn đặt trên bàn thư phòng nạn nhân, có vết máu khô khớp ADN nạn nhân.",
                     linked_suspect_id="SUSP-01",
                     is_crucial=True,
                     is_red_herring=False
@@ -273,7 +273,7 @@ class CaseGeneratorService:
                     id="EV-03",
                     title="Hộp thuốc an thần dở dang",
                     location="Bàn trang điểm phòng khách",
-                    description="Lọ thuốc an thần do Bác sĩ Julian kê đơn sáng cùng ngày, chưa bóc seal.",
+                    description="Lọ thuốc an thần Diazepam 5mg do Bác sĩ gia đình kê đơn, còn nguyên niêm phong màng nhôm bên trong.",
                     linked_suspect_id="SUSP-02",
                     is_crucial=False,
                     is_red_herring=True
