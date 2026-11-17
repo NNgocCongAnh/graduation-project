@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Ngân hàng Tài nguyên Trinh thám & Thuật toán Khớp Semantic Asset:
@@ -250,5 +251,100 @@ public static class DetectiveAssetBank
         tex.SetPixels(pixels);
         tex.Apply();
         return tex;
+    }
+
+    private static Font cachedDefaultFont;
+
+    /// <summary>
+    /// Cung cấp font UI mặc định 100% không bao giờ null qua 5 tầng cơ chế dự phòng:
+    /// 1. Resources.Load font nhúng dự án (Fonts/DetectiveFont).
+    /// 2. Tìm font đã nhúng trong scene (Text components trong SampleScene).
+    /// 3. Resources.GetBuiltinResource ("Arial.ttf").
+    /// 4. Resources.GetBuiltinResource ("LegacyRuntime.ttf").
+    /// 5. Tạo Dynamic Font từ hệ điều hành Windows (Arial, Segoe UI, Tahoma, v.v.).
+    /// </summary>
+    public static Font GetDefaultUIFont()
+    {
+        if (cachedDefaultFont != null) return cachedDefaultFont;
+
+        // 1. Thử nạp từ Resources/Fonts/DetectiveFont
+        try
+        {
+            Font resFont = Resources.Load<Font>("Fonts/DetectiveFont");
+            if (resFont != null)
+            {
+                cachedDefaultFont = resFont;
+                Debug.Log($"[DetectiveAssetBank] Successfully loaded Resources font: {resFont.name}");
+                return cachedDefaultFont;
+            }
+        }
+        catch { }
+
+        // 2. Quét tìm Text bất kỳ trong scene đã được Unity serialize font thành công
+        try
+        {
+#if UNITY_2022_2_OR_NEWER
+            Text[] sceneTexts = UnityEngine.Object.FindObjectsByType<Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+#else
+            Text[] sceneTexts = UnityEngine.Object.FindObjectsOfType<Text>(true);
+#endif
+            if (sceneTexts != null)
+            {
+                foreach (var t in sceneTexts)
+                {
+                    if (t != null && t.font != null)
+                    {
+                        cachedDefaultFont = t.font;
+                        Debug.Log($"[DetectiveAssetBank] Successfully acquired scene font: {cachedDefaultFont.name}");
+                        return cachedDefaultFont;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 3. Thử Resources.GetBuiltinResource<Font>("Arial.ttf")
+        try
+        {
+            Font builtinArial = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            if (builtinArial != null)
+            {
+                cachedDefaultFont = builtinArial;
+                return cachedDefaultFont;
+            }
+        }
+        catch { }
+
+        // 4. Thử Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
+        try
+        {
+            Font builtinLegacy = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (builtinLegacy != null)
+            {
+                cachedDefaultFont = builtinLegacy;
+                return cachedDefaultFont;
+            }
+        }
+        catch { }
+
+        // 5. Tạo dynamic font từ Windows OS
+        string[] osFontNames = new string[] { "Arial", "Segoe UI", "Calibri", "Tahoma", "Verdana" };
+        foreach (string fn in osFontNames)
+        {
+            try
+            {
+                Font osFont = Font.CreateDynamicFontFromOSFont(fn, 14);
+                if (osFont != null)
+                {
+                    cachedDefaultFont = osFont;
+                    Debug.Log($"[DetectiveAssetBank] Successfully created dynamic OS font: {fn}");
+                    return cachedDefaultFont;
+                }
+            }
+            catch { }
+        }
+
+        Debug.LogError("[DetectiveAssetBank] CRITICAL: Could not find or load ANY font!");
+        return null;
     }
 }

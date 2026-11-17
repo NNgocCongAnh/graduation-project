@@ -56,7 +56,7 @@ public class EvidenceDetailModal : MonoBehaviour
     private void Awake()
     {
         _instance = this;
-        uiFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        uiFont = DetectiveAssetBank.GetDefaultUIFont();
 
         // Tắt triệt để giao diện đen cũ của scene nếu có
         if (modalRoot != null && modalRoot != gameObject)
@@ -197,12 +197,15 @@ public class EvidenceDetailModal : MonoBehaviour
         trt.sizeDelta = Vector2.zero;
 
         Text txt = txtGo.GetComponent<Text>();
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
         txt.font = uiFont;
         txt.fontSize = 18;
         txt.fontStyle = FontStyle.Bold;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.color = Color.white;
         txt.text = "✕";
+        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
     }
 
     /// <summary>
@@ -536,6 +539,8 @@ public class EvidenceDetailModal : MonoBehaviour
         rt.anchorMax = anchorMax;
         rt.sizeDelta = Vector2.zero;
 
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
+
         Text txt = txtGo.GetComponent<Text>();
         txt.font = uiFont;
         txt.fontSize = fontSize;
@@ -543,6 +548,9 @@ public class EvidenceDetailModal : MonoBehaviour
         txt.color = color;
         txt.text = content;
         txt.supportRichText = true;
+        txt.horizontalOverflow = HorizontalWrapMode.Wrap;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        txt.raycastTarget = false;
 
         return txt;
     }
@@ -584,6 +592,8 @@ public class EvidenceDetailModal : MonoBehaviour
         trt.anchorMax = Vector2.one;
         trt.sizeDelta = Vector2.zero;
 
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
+
         Text txt = txtGo.GetComponent<Text>();
         txt.font = uiFont;
         txt.fontSize = 11;
@@ -591,6 +601,9 @@ public class EvidenceDetailModal : MonoBehaviour
         txt.alignment = TextAnchor.MiddleCenter;
         txt.color = stampColor;
         txt.text = stampText;
+        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        txt.raycastTarget = false;
     }
 
     private void OnPhotoZoomClicked()

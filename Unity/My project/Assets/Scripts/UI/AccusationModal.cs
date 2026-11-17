@@ -160,7 +160,7 @@ public class AccusationModal : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = DetectiveAssetBank.GetDefaultUIFont();
 
         // 1. Cảnh báo khi chưa chọn nghi phạm
         GameObject warnGo = new GameObject("WarningLabel", typeof(RectTransform), typeof(Text));

@@ -91,7 +91,7 @@ public class InGamePauseModal : MonoBehaviour
         toastRt.anchoredPosition = new Vector2(0f, 128f);
         toastRt.sizeDelta = new Vector2(400f, 24f);
         toastText = toastGo.GetComponent<Text>();
-        toastText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        toastText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         toastText.fontSize = 13;
         toastText.alignment = TextAnchor.MiddleCenter;
         toastText.color = new Color(0.4f, 0.9f, 0.5f);
@@ -240,7 +240,7 @@ public class InGamePauseModal : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 14;
         txt.fontStyle = FontStyle.Bold;
         txt.color = TextWhite;
@@ -257,7 +257,7 @@ public class InGamePauseModal : MonoBehaviour
         rt.sizeDelta = sizeDelta;
 
         Text txt = go.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = size;
         txt.color = color;
         txt.fontStyle = style;

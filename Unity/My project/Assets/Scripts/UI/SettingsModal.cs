@@ -393,7 +393,7 @@ public class SettingsModal : MonoBehaviour
         ctr.anchoredPosition = new Vector2(0f, -125f);
         ctr.sizeDelta = new Vector2(560f, 36f);
         currentTrackText = ctg.GetComponent<Text>();
-        currentTrackText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        currentTrackText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         currentTrackText.fontSize = 11;
         currentTrackText.alignment = TextAnchor.MiddleCenter;
         currentTrackText.color = TitleGold;
@@ -513,7 +513,7 @@ public class SettingsModal : MonoBehaviour
         strt.anchoredPosition = new Vector2(0f, -125f);
         strt.sizeDelta = new Vector2(560f, 24f);
         aiStatusText = stg.GetComponent<Text>();
-        aiStatusText.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        aiStatusText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         aiStatusText.fontSize = 12;
         aiStatusText.alignment = TextAnchor.MiddleCenter;
         aiStatusText.color = new Color(0.4f, 0.9f, 0.5f);
@@ -601,7 +601,7 @@ public class SettingsModal : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 13;
         txt.fontStyle = FontStyle.Bold;
         txt.color = TextColor;
@@ -628,7 +628,7 @@ public class SettingsModal : MonoBehaviour
         rt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 11;
         txt.color = TextColor;
         txt.alignment = TextAnchor.MiddleCenter;
@@ -656,7 +656,7 @@ public class SettingsModal : MonoBehaviour
         trt.sizeDelta = Vector2.zero;
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 14;
         txt.fontStyle = FontStyle.Bold;
         txt.color = Color.white;
@@ -695,7 +695,7 @@ public class SettingsModal : MonoBehaviour
         trt.offsetMax = new Vector2(-8f, -2f);
 
         Text txt = textGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 12;
         txt.color = TextColor;
         txt.alignment = TextAnchor.MiddleLeft;
@@ -787,7 +787,7 @@ public class SettingsModal : MonoBehaviour
         lrt.offsetMax = Vector2.zero;
 
         Text txt = labelGo.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = 13;
         txt.color = TextColor;
         txt.alignment = TextAnchor.MiddleLeft;
@@ -806,7 +806,7 @@ public class SettingsModal : MonoBehaviour
         rt.sizeDelta = sizeDelta;
 
         Text txt = go.GetComponent<Text>();
-        txt.font = font ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        txt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         txt.fontSize = size;
         txt.color = color;
         txt.fontStyle = style;

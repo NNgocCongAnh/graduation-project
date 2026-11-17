@@ -55,7 +55,7 @@ public class AutopsyReportModal : MonoBehaviour
     private void Awake()
     {
         _instance = this;
-        uiFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        uiFont = DetectiveAssetBank.GetDefaultUIFont();
 
         if (modalRoot != null && modalRoot != gameObject)
         {
@@ -200,12 +200,15 @@ public class AutopsyReportModal : MonoBehaviour
         trt.sizeDelta = Vector2.zero;
 
         Text txt = txtGo.GetComponent<Text>();
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
         txt.font = uiFont;
         txt.fontSize = 18;
         txt.fontStyle = FontStyle.Bold;
         txt.alignment = TextAnchor.MiddleCenter;
         txt.color = Color.white;
         txt.text = "✕";
+        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
     }
 
     /// <summary>
@@ -336,11 +339,14 @@ public class AutopsyReportModal : MonoBehaviour
             wmrt.sizeDelta = new Vector2(120f, 24f);
 
             Text wmt = woundMarker.GetComponent<Text>();
+            if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
             wmt.font = uiFont;
             wmt.fontSize = 11;
             wmt.fontStyle = FontStyle.Bold;
             wmt.color = InkRed;
             wmt.text = "🔴 Vết đâm 8.5cm";
+            wmt.horizontalOverflow = HorizontalWrapMode.Overflow;
+            wmt.verticalOverflow = VerticalWrapMode.Overflow;
         }
 
         // =========================================================================
@@ -413,6 +419,8 @@ public class AutopsyReportModal : MonoBehaviour
         rt.anchorMax = anchorMax;
         rt.sizeDelta = Vector2.zero;
 
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
+
         Text txt = txtGo.GetComponent<Text>();
         txt.font = uiFont;
         txt.fontSize = fontSize;
@@ -420,6 +428,9 @@ public class AutopsyReportModal : MonoBehaviour
         txt.color = color;
         txt.text = content;
         txt.supportRichText = true;
+        txt.horizontalOverflow = HorizontalWrapMode.Wrap;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        txt.raycastTarget = false;
 
         return txt;
     }
@@ -461,6 +472,8 @@ public class AutopsyReportModal : MonoBehaviour
         trt.anchorMax = Vector2.one;
         trt.sizeDelta = Vector2.zero;
 
+        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
+
         Text txt = txtGo.GetComponent<Text>();
         txt.font = uiFont;
         txt.fontSize = 10;
@@ -468,5 +481,8 @@ public class AutopsyReportModal : MonoBehaviour
         txt.alignment = TextAnchor.MiddleCenter;
         txt.color = stampColor;
         txt.text = stampText;
+        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        txt.raycastTarget = false;
     }
 }

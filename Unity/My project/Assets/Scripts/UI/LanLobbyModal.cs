@@ -299,7 +299,7 @@ public class LanLobbyModal : MonoBehaviour
     {
         RectTransform rt = NewRect(name, parent);
         Text text = rt.gameObject.AddComponent<Text>();
-        text.font = font != null ? font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = font != null ? font : DetectiveAssetBank.GetDefaultUIFont();
         text.text = content;
         text.fontSize = size;
         text.color = color;
