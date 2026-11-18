@@ -1,72 +1,104 @@
-# Environment & Secrets
+# ==============================================================================
+# GITIGNORE - UNSOLVED CASE FILES AI (GRADUATION THESIS RELEASE)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Antigravity & Agent Internal Configuration (EXCLUDE)
+# ------------------------------------------------------------------------------
+.agents/
+.gemini/
+.claude/
+AGENTS.md
+.codegraph/
+.mcp.json
+presentation_web/
+V0/
+Prepare(Trước khi đăng ký)/
+design/
+production/
+docs/
+project.yaml
+render.yaml
+convert_to_word.py
+generate_comprehensive_presentation.py
+100_CAU_HOI_PHAN_BIEN_KHOA_LUAN_TOT_NGHIEP.md
+
+# ------------------------------------------------------------------------------
+# 2. LaTeX Source Code & Build Artifacts (EXCLUDE SOURCE FOLDER)
+# ------------------------------------------------------------------------------
+thesis_latex/
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.toc
+*.lof
+*.lot
+*.out
+*.blg
+*.synctex.gz
+
+# ------------------------------------------------------------------------------
+# 3. Environment & Secrets (EXCLUDE REAL SECRETS)
+# ------------------------------------------------------------------------------
 .env
 .env.local
 .env.*.local
+detective-backend/.env
 !.env.example
+!detective-backend/.env.example
 
-# Databases & local storage
+# ------------------------------------------------------------------------------
+# 4. Databases, Large Zips & Builds
+# ------------------------------------------------------------------------------
 *.db
 *.db-wal
 *.db-shm
 *.sqlite
 *.sqlite3
-detective-backend/static/cache/
-detective-backend/test_outputs*/
-detective-backend/cases/CASE-HP-*.json
+*.zip
+[Bb]uild/
+[Bb]uilds/
+*.vbs
+CHAY_GAME_AN_CONSOLE.vbs
+CHAY_PLAYTEST_GAME.bat
+DONG_GOI_*.bat
+KHOI_DONG_SERVER_BACKEND.bat
+XEM_SUY_LUAN_HAI_PHONG.bat
+HUONG_DAN_DEPLOY_CLOUD_FREE.md
 
-# Python
+# Python caches
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
 .pytest_cache/
 .coverage
 htmlcov/
+detective_server.spec
+*copy*.ipynb
+detective-backend/test_outputs*/
+detective-backend/generated_*.json
+detective-backend/cases/CASE-HP-*.json
+detective-backend/cases/CASE-3*.json
+detective-backend/cases/CASE-A*.json
+detective-backend/cases/CASE-B*.json
+detective-backend/cases/CASE-D*.json
+detective-backend/demo_haiphong_case.py
+detective-backend/fetch_and_build_real_assets.py
+detective-backend/normalize_case_assets.py
+detective-backend/playtest_case.py
+detective-backend/show_case.py
+detective-backend/verify_case.py
+detective-backend/figures/
+build_*.txt
+unity_build.log
 
-# Node & Frontend
-node_modules/
-dist/
-dist-ssr/
-*.local
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-# IDE & Workspace configurations
-.vscode/
-.obsidian/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# OS junk
-.DS_Store
-Thumbs.db
-
-# Documentation & Preparation (Draft files, Word, Excel, PDF, Archives)
-Prepare(Trước khi đăng ký)/
-*.docx
-*.pdf
-*.xlsx
-*.zip
-
-# Whitelist official thesis deliverables & compiled outputs
-!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf
-!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx
-!/BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx
-!/benchmark_evaluation.ipynb
-!/thesis_latex/main.pdf
-
-# Unity generated files
+# ------------------------------------------------------------------------------
+# 5. Unity Generated Files & Intermediate Builds
+# ------------------------------------------------------------------------------
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
-[Bb]uild/
-[Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 [Mm]emoryCaptures/
@@ -85,65 +117,30 @@ Prepare(Trước khi đăng ký)/
 *.mdb
 *.opendb
 *.VC.db
-
-# Unity crash recovery & scene backups
 **/Assets/_Recovery/
 **/Assets/_Recovery.meta
 *.unity.bak
 *.unity.bak.meta
-
-# Tool indexes / local MCP config / Internal agent workspace / Drafts & helper scripts
-.codegraph/
-.mcp.json
-.agents/
-.claude/
-presentation_web/
-production/
-design/
-project.yaml
-V0/
-docs/
-render.yaml
-docker-compose.yml
-convert_to_word.py
-generate_comprehensive_presentation.py
-thesis_latex/generate_advanced_figures.py
-thesis_latex/generate_thesis_charts.py
-*.bat
-*.vbs
-detective-backend/test_*.py
-detective-backend/test_outputs*/
-detective-backend/demo_haiphong_case.py
-detective-backend/fetch_and_build_real_assets.py
-detective-backend/normalize_case_assets.py
-detective-backend/playtest_case.py
-detective-backend/show_case.py
-detective-backend/verify_case.py
-detective-backend/figures/
-detective-backend/Dockerfile
 Unity/My project/Assets/Snapshots*
 Unity/My project/Assets/Editor/*.py*
+Unity/My project/Assets/Editor/*.py.meta
 
-# LaTeX build artifacts
-thesis_latex/*.aux
-thesis_latex/*.log
-thesis_latex/*.fls
-thesis_latex/*.fdb_latexmk
-thesis_latex/*.toc
-thesis_latex/*.lof
-thesis_latex/*.lot
-thesis_latex/*.out
-thesis_latex/*.blg
-thesis_latex/*.synctex.gz
+# IDE & Editor junk
+.vscode/
+.obsidian/
+.idea/
+.DS_Store
+Thumbs.db
 
-# Temp logs
-*.log
-build_*.txt
-
-# Root screenshot / UI test captures
-/*.png
-
-# Markdown files (Keep README.md only)
-/*.md
+# ------------------------------------------------------------------------------
+# 6. Deliverable Whitelist (ALLOW ESSENTIALS)
+# ------------------------------------------------------------------------------
+!docker-compose.yml
+!detective-backend/Dockerfile
+!CHAY_GAME_TRON_GOI.bat
+!detective-backend/cases/CASE-2026-001.json
+!/BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf
+!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf
+!/BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx
+!/benchmark_evaluation.ipynb
 !/README.md
-

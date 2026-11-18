@@ -36,6 +36,7 @@ public class HelpTutorialModal : MonoBehaviour
 
     public void Open()
     {
+        gameObject.SetActive(true);
         if (root == null) BuildUI();
         transform.SetAsLastSibling();
         root.gameObject.SetActive(true);
@@ -44,6 +45,7 @@ public class HelpTutorialModal : MonoBehaviour
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     // ------------------------------------------------------------------
@@ -101,8 +103,8 @@ public class HelpTutorialModal : MonoBehaviour
         CreateStepCard(row2, "3. TÌM CHỨNG CỨ BẺ ALIBI", 
             "• Click các thẻ vật chứng hiện trường.\n• Tìm chứng cứ then chốt mâu thuẫn trực tiếp với alibi của kẻ nói dối trong giờ chết.");
 
-        CreateStepCard(row2, "4. NỘP LỆNH BẮT GIỮ", 
-            "• Mở Lệnh bắt giữ (bìa da đỏ đô bên dưới).\n• Chọn đúng Hung thủ + Tick ít nhất 1 chứng cứ then chốt bẻ alibi rồi bấm Nộp!");
+        CreateStepCard(row2, "4. 3 PHONG BÌ MỤC TIÊU & BẮT GIỮ", 
+            "• Mở Lệnh bắt giữ (bìa da đỏ đô bên dưới).\n• Hoàn thành 3 phong bì mục tiêu (Minh oan -> Bẻ Alibi -> Bắt giữ) rồi nộp Tòa án!");
 
         // --- SPECIAL PROPS & HOTKEYS ---
         CreateLabel(panel, "💡 TƯƠNG TÁC ĐẠO CỤ & BẢNG PHÍM TẮT NHANH (HOTKEYS)", 13, HighlightColor, FontStyle.Bold, 20);
@@ -119,7 +121,7 @@ public class HelpTutorialModal : MonoBehaviour
         CreateLabel(infoBox, "• NỐI CHỈ ĐỎ THỦ CÔNG: Bấm vào Đinh ghim trên thẻ A rồi bấm vào Đinh ghim thẻ B để nối dây. Bấm lại để gỡ.", 12, new Color(1f, 0.45f, 0.45f), FontStyle.Normal, 16);
         CreateLabel(infoBox, "• PHÓNG TO ẢNH: Bấm trực tiếp vào ảnh Polaroid trên bảng (hoặc Chuột phải vào thẻ) để zoom Lightbox.", 12, new Color(0.95f, 0.85f, 0.45f), FontStyle.Normal, 16);
         CreateLabel(infoBox, "• ĐÈN BÀN BANKER: Bấm chuột trực tiếp vào chao đèn ngọc bích để bật/tắt đèn tạo không khí Noir.", 12, TextColor, FontStyle.Normal, 16);
-        CreateLabel(infoBox, "• PHÍM TẮT: O = Cài đặt | N = Đổi nhạc Conan | H = Sổ tay | T = Chat | ESC = Menu / Đóng cửa sổ", 12, MutedColor, FontStyle.Normal, 16);
+        CreateLabel(infoBox, "• PHÍM TẮT: B = Bàn giao án | O = Cài đặt | N = Đổi nhạc Conan | H = Sổ tay | T = Chat | ESC = Menu / Đóng", 12, MutedColor, FontStyle.Normal, 16);
 
         // --- CLOSE BUTTON ---
         RectTransform btnRow = NewRect("BtnRow", panel);

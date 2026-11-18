@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./detective-backend
+      dockerfile: Dockerfile
+    container_name: detective-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.example
+    environment:
+      - PORT=8000
+      - LLM_API_BASE=http://host.docker.internal:20128/v1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./detective-backend/detective.db:/app/detective.db
+      - ./detective-backend/cases:/app/cases
+      - ./detective-backend/static/assets:/app/static/assets
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

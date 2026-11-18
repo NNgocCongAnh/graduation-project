@@ -1056,7 +1056,8 @@ public class SetupDetectiveRoom : Editor
         GameObject modal = CreateUIElement("Accusation_Modal", canvasTransform);
         StretchToParent(modal.GetComponent<RectTransform>());
         Image bg = modal.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0.85f);
+        bg.color = Color.clear;
+        bg.raycastTarget = false;
 
         GameObject box = CreateUIElement("Accusation_Box", modal.transform);
         Image boxImg = box.AddComponent<Image>();
@@ -1248,8 +1249,8 @@ public class SetupDetectiveRoom : Editor
         GameObject modal = CreateUIElement("Autopsy_Report_Modal", canvasTransform);
         StretchToParent(modal.GetComponent<RectTransform>());
         Image bg = modal.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0.85f);
-        bg.raycastTarget = true;
+        bg.color = Color.clear;
+        bg.raycastTarget = false;
 
         GameObject box = CreateUIElement("Autopsy_Box", modal.transform);
         Image boxImg = box.AddComponent<Image>();
@@ -1518,8 +1519,8 @@ public class SetupDetectiveRoom : Editor
         GameObject modal = CreateUIElement("Generate_Case_Modal", canvasTransform);
         StretchToParent(modal.GetComponent<RectTransform>());
         Image bg = modal.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0.85f);
-        bg.raycastTarget = true;
+        bg.color = Color.clear;
+        bg.raycastTarget = false;
 
         GameObject box = CreateUIElement("Generator_Box", modal.transform);
         Image boxImg = box.AddComponent<Image>();

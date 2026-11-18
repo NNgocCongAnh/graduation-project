@@ -40,6 +40,17 @@ public class TitleMenuModal : MonoBehaviour
                                 (loadSaveSubPanel != null && loadSaveSubPanel.activeSelf) ||
                                 (coopSubPanel != null && coopSubPanel.activeSelf);
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
+        {
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
+        }
+    }
+
     public void Initialize(Font uiFont)
     {
         font = uiFont;
@@ -135,6 +146,7 @@ public class TitleMenuModal : MonoBehaviour
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     private void Update()

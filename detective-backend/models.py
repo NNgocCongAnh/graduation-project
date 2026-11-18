@@ -33,6 +33,10 @@ class ForensicData(BaseModel):
     body_weight_kg: float = Field(default=70.0, ge=30.0, le=200.0, description="Body mass M (kg) for the Henssge cooling constant.")
     cooling_factor: float = Field(default=1.0, ge=0.3, le=2.0, description="Henssge corrective factor C (1.0 clothed/still air, 0.75-0.9 naked, 1.1-1.2 covered, 0.5 still water).")
     discovery_time: Optional[str] = Field(default=None, description="Time the body was found and rectal temperature measured (HH:MM). Anchors the Henssge TOD window.")
+    rigor_mortis_state: Optional[str] = Field(default=None, description="Detailed rigor mortis progression.")
+    cause_of_death: Optional[str] = Field(default=None, description="Formal forensic cause of death.")
+    manner_of_death: Optional[str] = Field(default=None, description="Forensic manner of death (Homicide, etc.).")
+    clothing_state: Optional[str] = Field(default=None, description="Victim clothing and textile status.")
 
     @field_validator("discovery_time")
     @classmethod
@@ -53,6 +57,8 @@ class Victim(BaseModel):
     age: int = Field(..., ge=1, le=120, description="Age of the victim.")
     occupation: str = Field(..., description="Occupation/Social standing of the victim.")
     forensic_data: ForensicData = Field(..., description="Forensic autopsy notes and measurements.")
+    gender: Optional[str] = Field(default="Nam", description="Gender of the victim.")
+    residence: Optional[str] = Field(default=None, description="Primary residence of the victim.")
 
 
 class Suspect(BaseModel):
@@ -68,6 +74,12 @@ class Suspect(BaseModel):
     secret_innocent_fact: Optional[str] = Field(default=None, description="Innocent secret creating a red-herring conflict.")
     is_culprit: bool = Field(default=False, description="Secret flag indicating if this suspect is the actual killer.")
     image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the portrait photograph.")
+    gender: Optional[str] = Field(default="Nam", description="Gender of the suspect.")
+    relationship_to_victim: Optional[str] = Field(default=None, description="Relationship with victim.")
+    residence: Optional[str] = Field(default=None, description="Residence address or room location.")
+    statement: Optional[str] = Field(default=None, description="Full verbatim formal interrogation statement.")
+    timeline_claimed: Optional[str] = Field(default=None, description="Claimed movement timeline string.")
+    interview_notes: Optional[str] = Field(default=None, description="Confidential interrogation notes by detective.")
 
     @field_validator("alibi_start", "alibi_end")
     @classmethod
@@ -91,6 +103,10 @@ class Evidence(BaseModel):
     is_crucial: bool = Field(default=False, description="Whether this evidence is a key clue to break the case.")
     is_red_herring: bool = Field(default=False, description="Whether this clue is intentionally deceptive pointing to an innocent suspect.")
     image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the physical evidence photograph.")
+    is_weapon: Optional[bool] = Field(default=False, description="Whether this evidence is the murder weapon.")
+    fingerprint_analysis: Optional[str] = Field(default=None, description="Latent fingerprint forensic analysis report.")
+    blood_dna_analysis: Optional[str] = Field(default=None, description="Serological and DNA forensic analysis report.")
+    physical_condition: Optional[str] = Field(default=None, description="Detailed physical condition and mechanical traits.")
 
 
 

@@ -8,106 +8,102 @@
 
 ---
 
-## 📊 Tiến độ Thực hiện & Danh mục Kết quả Bàn giao
+## 📊 Danh mục Kết quả & Tài liệu Bàn giao
 
-Dự án đã hoàn thành **100% các hạng mục giai đoạn nghiên cứu, cài đặt và kiểm thử định lượng**, sẵn sàng cho buổi báo cáo tiến độ và hoàn thiện bản thảo:
+Dự án đã hoàn tất **100% các hạng mục nghiên cứu, phát triển phần mềm và đánh giá thực nghiệm**, phục vụ buổi bảo vệ khóa luận tốt nghiệp:
 
-| Hạng mục Yêu cầu | Tệp / Thư mục trên Repo | Trạng thái | Ghi chú |
-|---|---|---|---|
-| **Bản thảo Báo cáo (Word)** | [`BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx`](./BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx) | ✅ Hoàn tất (100%) | Bản mềm `.docx` đầy đủ 5 chương, bảng biểu & hình vẽ để giảng viên nhận xét |
-| **Bản mềm Báo cáo (PDF)** | [`BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf`](./BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf) | ✅ Hoàn tất (63 trang) | Bản biên dịch trực tiếp từ mã nguồn LaTeX (`thesis_latex/`) |
-| **Mã nguồn LaTeX Luận văn** | [`thesis_latex/`](./thesis_latex) | ✅ Hoàn tất (100%) | Gồm `main.tex`, 5 chương `chapters/`, `references.bib` và thư mục ảnh `figures/` |
-| **Slide Báo cáo Tiến độ** | [`BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx`](./BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx) | ✅ Hoàn tất (23 slides) | Trình bày kiến trúc, giải thuật và kết quả thực nghiệm (kèm Speaker Notes) |
-| **Kết quả Thực nghiệm** | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | ✅ Hoàn tất (100%) | Tổng hợp 30 phiên đối sánh 3 LLM, kiểm chứng Henssge & Smart Per-Agent Fallback |
-| **Mã nguồn Backend AI** | [`detective-backend/`](./detective-backend) | ✅ Hoàn tất (100%) | FastAPI (ASGI), 4 Agents + Fallback, Henssge Bisection, Đồ thị hai phía, SQLite WAL |
-| **Mã nguồn & Tài nguyên Game** | [`Unity/My project/`](./Unity/My%20project) | ✅ Hoàn tất (100%) | Unity 6 URP 2D Client (Bảng ghim Corkboard, Pháp y Henssge, Co-op LAN 3 người) |
-| **Bản đóng gói Chơi thử (.zip)** | [GitHub Releases (`v1.0.0`)](https://github.com/NNgocCongAnh/graduation-project/releases/tag/v1.0.0) | ✅ Đã phát hành | Tải `UnsolvedCaseFiles_v1.0.0.zip`, giải nén và chạy `UnsolvedCaseFiles.exe` |
+| Hạng mục | Tệp / Thư mục trên Kho chứa | Mô tả |
+| :--- | :--- | :--- |
+| **Bản mềm Luận văn (PDF)** | [`BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf`](./BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf) | Bản báo cáo hoàn chỉnh 5 chương theo quy chuẩn Đại học Phenikaa |
+| **Slide Thuyết trình** | [`BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx`](./BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx) | Bộ slide báo cáo tiến độ và bảo vệ khóa luận tốt nghiệp |
+| **Kết quả Thực nghiệm** | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Sổ tay Jupyter tổng hợp 30 phiên thực nghiệm đối sánh 3 mô hình LLM |
+| **Mã nguồn Backend AI** | [`detective-backend/`](./detective-backend) | FastAPI ASGI, 4 Specialized Agents, Validator Henssge & Bipartite Matching |
+| **Mã nguồn Game Client** | [`Unity/My project/`](./Unity/My%20project) | Unity 6 URP (Bàn trinh thám, Corkboard, Hồ sơ pháp y, Quy trình 3 phong bì) |
+| **Khởi chạy Docker** | [`docker-compose.yml`](./docker-compose.yml) | Cấu hình Docker Compose khởi chạy trọn gói máy chủ chỉ với 1 lệnh |
+| **Mẫu Biến môi trường** | [`.env.example`](./.env.example) | Mẫu cấu hình an toàn cho OpenRouter, 9Router, Google AI Studio hoặc Ollama |
 
 ---
 
-## 🏗️ Kiến trúc Hệ thống
+## 🏗️ Kiến trúc Hệ thống (Neuro-Symbolic Multi-Agent)
 
-Hệ thống vận hành theo mô hình **Dịch vụ Web phân tán** kết hợp **Lõi lai Neuro-Symbolic** và **Client đa nền tảng**:
+Hệ thống kết hợp sức mạnh biểu đạt ngữ nghĩa của **Mô hình Ngôn ngữ Lớn (LLM)** với tính chính xác toán học của **Bộ kiểm định Biểu tượng (Symbolic Validator)**:
 
 ```text
-[ Unity 6 URP 2D Client (WebGL / Desktop EXE) ]
-            │  REST API (HTTP/JSON + HMAC-SHA-256) & WebSocket (/ws/rooms/{room_id})
-            ▼
-[ FastAPI 0.137.1 Backend (ASGI / Uvicorn) + Pydantic v2 + SQLite WAL (SQLAlchemy 2.0) ]
-            │
-            ├── 1. OutlineAgent   ──► Cốt truyện, Victim & GroundTruth -> Khóa TOD bằng Henssge (Bisection)
-            ├── 2. CharacterAgent ──► Nghi phạm & Lời khai ngoại phạm (SUSP-01..SUSP-03)
-            ├── 3. ClueAgent      ──► Vật chứng then chốt & Nghi binh (EV-01..EV-04)
-            ├── 4. Bộ kiểm định   ──► validate_case_diagnostics (7 ViolationType) + Sửa lỗi cục bộ O(1)
-            └── 5. DeductionAgent ──► Chuỗi suy luận đa bước (ReasoningChain)
-            │
-            ▼
-[ 9Router Gateway (:20128) / Google Gemini & Gemma / OpenAI GPT / Local Ollama (:11434) ]
-```
-
-* **Smart Per-Agent Fallback (`agents.py`):** Khi mô hình chính gặp lỗi hạn mức hoặc gián đoạn kết nối, từng tác tử tự động chuyển mạch theo chuỗi dự phòng (`gemini/gemma-4-31b-it` → `gh/gpt-3.5-turbo-0613` → `gh/gpt-4o-mini` → `gemma4:e4b-it-qat` cục bộ) và ghi nhận lại trong `GenerationMetadata.agent_models`.
-
----
-
-## 📁 Cấu trúc Kho chứa GitHub
-
-```text
-├── BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.docx   # Bản thảo Word nhận xét
-├── BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf    # Bản mềm PDF hoàn chỉnh (63 trang)
-├── BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx                     # Bộ 23 slide báo cáo
-├── benchmark_evaluation.ipynb                            # Notebook thực nghiệm & kiểm chứng
-├── detective-backend/                                    # Backend FastAPI, 4 Agents, Validator & SQLite WAL
-│   ├── agents.py                                         # Outline/Character/Clue/Deduction + Per-Agent Fallback
-│   ├── llm_service.py                                    # Điều phối pipeline & Vá lỗi cục bộ O(1)
-│   ├── validator.py                                      # Henssge Bisection, Đồ thị hai phía & Chấm điểm
-│   ├── database.py                                       # SQLAlchemy 2.0 WAL (cases, deduction_logs, benchmark_runs)
-│   ├── security.py                                       # Middleware xác thực HMAC-SHA-256 (cửa sổ 60s)
-│   ├── benchmark_runner.py                               # Bộ chạy benchmark đa mô hình
-│   └── main.py                                           # FastAPI Endpoints & WebSocket Co-op Manager
-├── Unity/My project/                                     # Client Unity 6 (6000.5.8f1) URP 2D & Tài nguyên
-├── thesis_latex/                                         # Mã nguồn LaTeX của luận văn & thư mục figures/
-└── README.md
+[ Unity 6 URP 2D/3D Client (Desktop EXE / WebGL) ]
+             │  REST API (HTTP/JSON + HMAC-SHA-256) & WebSocket (/ws/rooms/{room_id})
+             ▼
+[ FastAPI Backend (ASGI / Uvicorn) + Pydantic v2 + SQLite WAL ]
+             │
+             ├── 1. OutlineAgent   ──► Cốt truyện, Nạn nhân & Khóa giờ tử vong Henssge (Bisection)
+             ├── 2. CharacterAgent ──► Nghi phạm & Lời khai ngoại phạm (Zero-spoiler, không sơ hở rẻ tiền)
+             ├── 3. ClueAgent      ──► 5 vật chứng khách quan & Mâu thuẫn môi trường (EV-01..EV-05)
+             ├── 4. Bộ kiểm định   ──► validate_case_diagnostics (Henssge + Đồ thị hai phía Bipartite)
+             │                         └── Localized Patch Repair (Sửa cục bộ thành phần lỗi O(1))
+             └── 5. DeductionAgent ──► Chuỗi suy luận đa chặng (4-Hop Reasoning Chain)
+             │
+             ▼
+[ Cloud LLM Gateway (OpenAI GPT-4o-mini / Google AI Studio Gemini / 9Router / Ollama) ]
 ```
 
 ---
 
-## 🚀 Hướng dẫn Khởi chạy & Thực nghiệm Nhanh
+## 🚀 Hướng dẫn Cài đặt & Khởi chạy
 
-### 1. Khởi chạy Backend (`detective-backend`)
+### Cách 1: Khởi chạy bằng Docker Compose (Khuyến nghị cho Server / Tester)
+Yêu cầu: Đã cài đặt Docker và Docker Compose.
 ```bash
-cd detective-backend
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-* Tài liệu OpenAPI (Swagger): `http://localhost:8000/docs`
-* Cấu hình mô hình qua biến môi trường trong `.env` (`LLM_API_BASE`, `LLM_API_KEY`, `LLM_MODEL`).
+# 1. Sao chép file cấu hình môi trường
+cp .env.example .env
 
-### 2. Chạy Đánh giá Thực nghiệm & Benchmark
-```bash
-# Chạy benchmark đa mô hình qua dòng lệnh
-python detective-backend/benchmark_runner.py --models gemini/gemma-4-31b-it gh/gpt-4o-mini --trials 10
-
-# Hoặc mở và chạy trực tiếp benchmark_evaluation.ipynb tại thư mục gốc
+# 2. Khởi chạy toàn bộ dịch vụ backend bằng Docker
+docker compose up --build -d
 ```
+* Backend API hoạt động tại: `http://localhost:8000/docs`
+* Kiểm tra trạng thái máy chủ: `http://localhost:8000/api/health`
 
 ---
 
-## 🕵️ Chơi Co-op trong mạng LAN (tối đa 3 người)
-
-**Máy chủ (1 máy):**
-1. Khởi chạy backend lắng nghe mạng nội bộ:
-   ```bash
-   cd detective-backend
-   python -m uvicorn main:app --host 0.0.0.0 --port 8000
+### Cách 2: Khởi chạy 1-Click trên Windows (Cho người chơi Game)
+1. Nhấp đúp chuột vào file:
+   ```text
+   CHAY_GAME_TRON_GOI.bat
    ```
-2. Cho phép Python qua Windows Firewall ở mạng **Private**: TCP `8000` (game/WebSocket) và UDP `47777` (tự động tìm phòng LAN).
-3. Mở game (`UnsolvedCaseFiles.exe`), nhấn **L** → **TỰ LÀM MÁY CHỦ**.
+2. Hệ thống sẽ tự động bật máy chủ Backend FastAPI chạy ngầm và mở game Unity `UnsolvedCaseFiles.exe`.
 
-**Máy khách (tối đa 2 máy):** Mở game, nhấn **L** → **TÌM MÁY CHỦ** (hoặc nhập IP máy chủ) → nhập cùng **Mã phòng** → **KẾT NỐI**.
+---
 
-| Phím | Chức năng |
-|---|---|
-| Giữ **V** | Thoại trực tiếp (PCM 16 kHz qua WebSocket) |
-| **T** | Trò chuyện văn bản |
-| **L** | Mở phòng chơi LAN |
-| **Esc** | Đóng hộp thoại |
+### Cách 3: Khởi chạy Thủ công bằng Python (Dành cho Lập trình viên)
+```bash
+# 1. Cài đặt môi trường Backend
+cd detective-backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+# 2. Khởi chạy FastAPI Backend
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+---
+
+## 🎮 Cơ chế Chơi & Quy trình Điều tra Phá án
+
+Game mô phỏng chân thực quy trình phá án của một tập hồ sơ vụ án lạnh (*Cold Case File*):
+1. **📁 Tờ Giới thiệu Vụ án (Briefing Sheet - Phím B):** Đọc tóm tắt nhân thân nạn nhân, mốc thời gian và biên bản ghi chép của sĩ quan đầu tiên tiếp cận hiện trường.
+2. **🩺 Báo cáo Pháp y Khám nghiệm Tử thi (Autopsy - Phím M):** Đọc nhiệt độ trực tràng, nhiệt độ môi trường và tính toán khung giờ tử vong thực tế theo định luật nguội lạnh Henssge ($t^*$) để phá hiện trường giả.
+3. **📌 Bảng ghim Manh mối (Corkboard):** Soi ảnh chân dung nghi phạm, lời khai ngoại phạm (alibi) và đối chiếu 5 vật chứng hiện trường (EV-01 đến EV-05).
+4. **✉️ Hệ thống 3 Phong bì Mục tiêu (Objective Envelopes - Phím A):**
+   - **Phong bì 1:** Chứng minh nghi phạm vô tội (Exonerate) dựa trên alibi độc lập để mở khóa Phong bì 2.
+   - **Phong bì 2:** Vạch trần hiện trường giả & Tìm hung khí thật sự (bẻ gãy alibi hung thủ).
+   - **Phong bì 3:** Phát lệnh bắt giữ chính thức (Arrest Warrant) $\rightarrow$ Khởi tố hung thủ và xem phần **Tái hiện toàn cảnh vụ án (Bonus Solution)**.
+
+---
+
+## 🔬 Kết quả Đánh giá Thực nghiệm (Chương 4 Luận văn)
+
+Thực nghiệm đo đạc 30 phiên độc lập trên phần cứng nghiên cứu:
+* **Mô hình triển khai (`gh/gpt-4o-mini`):** Tỷ lệ hợp lệ logic đạt **100%**, độ trễ trung bình $10.98\text{ s}$.
+* **Mô hình đối chuẩn (`ollama/gemma4:31b-cloud`):** Tỷ lệ hợp lệ logic **100%**, độ trễ trung bình $11.66\text{ s}$.
+* **Sai số thời gian tử vong (Henssge):** Đạt **0%** nhờ tầng giải số vi phân bisection độc lập.
+* **Cơ chế sửa lỗi cục bộ (Localized Patch Repair):** Tiết kiệm **65%** thời gian suy luận so với việc tạo sinh lại toàn bộ kịch bản khi phát hiện vi phạm ràng buộc.
+Chi tiết số liệu đối sánh và biểu đồ có trong file [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb).

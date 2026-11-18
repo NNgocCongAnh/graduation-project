@@ -83,6 +83,23 @@ public class GroundTruthData
 }
 
 [Serializable]
+public class ReasoningStepData
+{
+    public int step_number;
+    public List<string> clue_ids = new List<string>();
+    public string inference;
+    public string target_suspect_id;
+}
+
+[Serializable]
+public class ReasoningChainData
+{
+    public List<ReasoningStepData> steps = new List<ReasoningStepData>();
+    public string final_conclusion;
+    public string decisive_contradiction;
+}
+
+[Serializable]
 public class CaseDossier
 {
     public string case_id;
@@ -92,6 +109,7 @@ public class CaseDossier
     public List<SuspectData> suspects;
     public List<EvidenceData> evidences;
     public GroundTruthData ground_truth;
+    public ReasoningChainData reasoning_chain;
 }
 
 [Serializable]

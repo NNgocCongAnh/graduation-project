@@ -57,10 +57,14 @@ public class AutopsyReportModal : MonoBehaviour
         _instance = this;
         uiFont = DetectiveAssetBank.GetDefaultUIFont();
 
-        if (modalRoot != null && modalRoot != gameObject)
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
         {
-            modalRoot.SetActive(false);
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
         }
+
+        if (modalRoot != null) modalRoot.SetActive(false);
     }
 
     private void Update()
@@ -127,10 +131,11 @@ public class AutopsyReportModal : MonoBehaviour
         {
             paperRootGo.SetActive(false);
         }
-        if (modalRoot != null && modalRoot != gameObject)
+        if (modalRoot != null)
         {
             modalRoot.SetActive(false);
         }
+        gameObject.SetActive(false);
     }
 
     private void EnsurePaperRoot()
