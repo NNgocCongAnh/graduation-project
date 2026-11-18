@@ -326,16 +326,33 @@ class CharacterAgent(BaseAgent):
     async def generate(self, victim: Victim, ground_truth: GroundTruth, theme: str) -> List[Suspect]:
         guidance = _get_setting_guidance(theme)
         mechanic = _get_mystery_style_mechanic(theme)
+
+        # Parse crime time to provide realistic relative guidance
+        c_time = ground_truth.actual_crime_time or "20:40"
+        try:
+            c_h, c_m = map(int, c_time.split(':'))
+            crime_mins = c_h * 60 + c_m
+        except Exception:
+            crime_mins = 20 * 60 + 40
+        sug_culprit_start = f"{max(0, crime_mins - 25) // 60:02d}:{max(0, crime_mins - 25) % 60:02d}"
+        sug_culprit_end = f"{min(1439, crime_mins + 35) // 60:02d}:{min(1439, crime_mins + 35) % 60:02d}"
+        sug_innocent1_start = f"{max(0, crime_mins - 50) // 60:02d}:{max(0, crime_mins - 50) % 60:02d}"
+        sug_innocent1_end = f"{min(1439, crime_mins + 15) // 60:02d}:{min(1439, crime_mins + 15) % 60:02d}"
+        sug_innocent2_start = f"{max(0, crime_mins + 10) // 60:02d}:{max(0, crime_mins + 10) % 60:02d}"
+        sug_innocent2_end = f"{min(1439, crime_mins + 70) // 60:02d}:{min(1439, crime_mins + 70) % 60:02d}"
+
         system_prompt = (
             "You are a Character Specialist in detective fiction (CharacterAgent). "
             "Generate 3 distinct, realistic suspects (SUSP-01, SUSP-02, SUSP-03). "
             "CRITICAL CULTURAL RULE: All suspect names MUST match the cultural background and nationality of the Victim (e.g. if Victim is Vietnamese, ALL suspect names MUST be authentic Vietnamese names. If British/Western, all names must be British). "
             "CRITICAL SETTING INTEGRITY RULE: Suspect occupations, residences, and alibi locations MUST strictly conform to the Setting Guidelines below. If the setting is a train, hospital, or ship, NEVER use manor/mansion tropes ('quản gia', 'thư phòng', 'lầu hai', 'lò sưởi', 'ban công'). "
+            "CRITICAL STATEMENT ACTION & RICHNESS RULE: Every suspect's `statement` MUST describe concrete tasks, physical actions, and sensory interactions (e.g. 'đang pha ấm trà hoa cúc và kiểm kê 15 kiện hàng số 4', 'đang ghi chép sổ lộ trình chuyến tàu và nghe thấy tiếp viên gõ cửa khoang bên', 'đang sửa chữa van áp suất đồng hồ số 2'). TUYỆT ĐỐI KHÔNG chỉ nói cộc lốc 'Tôi ở phòng X từ giờ Y đến Z'. Lời khai phải có đồ vật cụ thể, âm thanh hoặc người đi qua để người chơi có dữ kiện bóc tách mâu thuẫn. "
+            "CRITICAL TIMELINE INTEGRITY RULE: For SUSP-01 (Culprit), `alibi_start` and `alibi_end` MUST strictly bracket actual_crime_time (e.g. start 15-30 mins BEFORE crime time, end 30-50 mins AFTER crime time). `statement` MUST open with the EXACT interval 'Từ [alibi_start] đến [alibi_end], tôi đang [hành động cụ thể] tại [vị trí]...'. TUYỆT ĐỐI KHÔNG gán mốc giờ trong statement lệch khỏi alibi_start và alibi_end. "
             "CRITICAL MYSTERY DEDUCTION MECHANIC: Align suspects' timelines and statements with the Mystery Deduction Mechanic provided below. "
             "STRICT ANTI-GIVEAWAY / FAIR-PLAY RULES: "
             "1. SUSP-01 MUST have is_culprit = True (matches GroundTruth). "
             "2. SUSP-02 and SUSP-03 MUST have is_culprit = False. "
-            "3. NO PHYSICAL SMOKING GUNS ON SUSPECTS: TUYỆT ĐỐI KHÔNG gán vết thương rớm máu, đứt tay, băng bó ngón tay, quần áo rách hay vết máu cho bất kỳ nghi phạm nào! Hung thủ SUSP-01 phải tỏ ra điềm tĩnh, ngoại hình gọn gàng, có vị thế đáng tin cậy. interview_notes chỉ mô tả phong thái tâm lý, thái độ điềm tĩnh hoặc né tránh ánh mắt khi bị hỏi sâu về lịch trình, và nhóm máu thông thường (không được biến nhóm máu thành chìa khóa suy luận đơn giản). "
+            "3. NO PHYSICAL SMOKING GUNS ON SUSPECTS: TUYỆT ĐỐI KHÔNG gán vết thương rớm máu, đứt tay, băng bó ngón tay, quần áo rách hay vết máu cho bất kỳ nghi phạm nào! Hung thủ SUSP-01 phải tỏ ra điềm tĩnh, ngoại hình gọn gàng, có vị thế đáng tin cậy. interview_notes chỉ mô tả phong thái tâm lý, thái độ điềm tĩnh hoặc né tránh ánh mắt khi bị hỏi sâu về lịch trình, và nhóm máu thông thường. "
             "4. SUSP-01's alibi statement claims an activity or location during actual_crime_time that seems completely plausible, but contains the specific documentary or environmental impossibility defined in the Mystery Deduction Mechanic (e.g. claiming a phone call while train is in a tunnel, or having dinner while delayed toxin was digesting). "
             "5. SUSP-02 and SUSP-03 MUST have strong motives and suspicious behavior (red herrings) that make them appear guilty, but their whereabouts during the ACTUAL Henssge crime window are verified by independent logs (witnesses, telephone switchboard, distant tickets)."
         )
@@ -362,11 +379,11 @@ Output JSON (all professions and residences MUST strictly fit {theme}):
       "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
       "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
       "motive": "<Động cơ gây án cụ thể>",
-      "statement": "<Lời khai chi tiết về hoạt động ngoại phạm trong bối cảnh>",
-      "timeline_claimed": "<Khung giờ ngoại phạm tại vị trí cụ thể>",
+      "statement": "Từ {sug_culprit_start} đến {sug_culprit_end}, tôi ở <residence> đang <mô tả hành động công việc cụ thể, chi tiết đồ vật/âm thanh/tương tác>.",
+      "timeline_claimed": "{sug_culprit_start} - {sug_culprit_end}",
       "interview_notes": "<Ghi chú thẩm vấn: phong thái tâm lý điềm tĩnh, trả lời mạch lạc, né tránh ánh mắt khi nhắc đến mốc giờ gây án, Nhóm máu A/B/O/AB>",
-      "alibi_start": "20:15",
-      "alibi_end": "22:30",
+      "alibi_start": "{sug_culprit_start}",
+      "alibi_end": "{sug_culprit_end}",
       "alibi_statement": "<Hoạt động ngoại phạm chứa mâu thuẫn vật lý hoặc tài liệu sẽ bị bẻ gãy>",
       "secret_innocent_fact": null,
       "is_culprit": true,
@@ -381,11 +398,11 @@ Output JSON (all professions and residences MUST strictly fit {theme}):
       "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
       "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
       "motive": "<Động cơ đáng ngờ>",
-      "statement": "<Lời khai về việc ở đâu trong khung giờ án mạng>",
-      "timeline_claimed": "<Khung giờ ngoại phạm>",
+      "statement": "Từ {sug_innocent1_start} đến {sug_innocent1_end}, tôi ở <residence> đang <mô tả hành vi cụ thể gắn với bí mật tài chính/tình cảm riêng>.",
+      "timeline_claimed": "{sug_innocent1_start} - {sug_innocent1_end}",
       "interview_notes": "<Ghi chú thẩm vấn: thái độ căng thẳng, lo lắng về bí mật tài chính/tình cảm riêng, Nhóm máu A/B/O/AB>",
-      "alibi_start": "21:15",
-      "alibi_end": "22:45",
+      "alibi_start": "{sug_innocent1_start}",
+      "alibi_end": "{sug_innocent1_end}",
       "alibi_statement": "<Hoạt động ngoại phạm được người khác hoặc sổ sách xác nhận>",
       "secret_innocent_fact": "<Bí mật phi pháp hoặc riêng tư nhưng không giết người>",
       "is_culprit": false,
@@ -400,11 +417,11 @@ Output JSON (all professions and residences MUST strictly fit {theme}):
       "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
       "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
       "motive": "<Động cơ bị nghi ngờ>",
-      "statement": "<Lời khai ngoại phạm>",
-      "timeline_claimed": "<Khung giờ ngoại phạm>",
+      "statement": "Từ {sug_innocent2_start} đến {sug_innocent2_end}, tôi ở <residence> đang <mô tả hành động cụ thể độc lập>.",
+      "timeline_claimed": "{sug_innocent2_start} - {sug_innocent2_end}",
       "interview_notes": "<Ghi chú thẩm vấn: buồn bã hoặc sợ hãi, khẳng định vô tội, Nhóm máu A/B/O/AB>",
-      "alibi_start": "20:30",
-      "alibi_end": "22:00",
+      "alibi_start": "{sug_innocent2_start}",
+      "alibi_end": "{sug_innocent2_end}",
       "alibi_statement": "<Hoạt động ngoại phạm độc lập>",
       "secret_innocent_fact": "<Hành vi khả nghi nhưng độc lập với vụ án>",
       "is_culprit": false,
@@ -414,7 +431,44 @@ Output JSON (all professions and residences MUST strictly fit {theme}):
 }}
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
-        return [Suspect.model_validate(s) for s in data.get("suspects", [])]
+        suspects = [Suspect.model_validate(s) for s in data.get("suspects", [])]
+
+        # Post-Processing: Deterministic Synchronization of Timeline and Action Statement
+        for s in suspects:
+            s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+
+            # Enforce culprit alibi bracket
+            if s.is_culprit and ground_truth.actual_crime_time:
+                try:
+                    c_h, c_m = map(int, ground_truth.actual_crime_time.split(':'))
+                    c_tot = c_h * 60 + c_m
+                    s_h, s_m = map(int, s.alibi_start.split(':'))
+                    e_h, e_m = map(int, s.alibi_end.split(':'))
+                    s_tot = s_h * 60 + s_m
+                    e_tot = e_h * 60 + e_m
+                    if not (s_tot <= c_tot <= e_tot):
+                        s.alibi_start = sug_culprit_start
+                        s.alibi_end = sug_culprit_end
+                        s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+                except Exception:
+                    pass
+
+            # Synchronize statement prefix with exact alibi interval
+            if s.statement:
+                prefix = f"Từ {s.alibi_start} đến {s.alibi_end}"
+                if prefix not in s.statement and f"{s.alibi_start} - {s.alibi_end}" not in s.statement:
+                    # Clean out any conflicting arbitrary time from the front
+                    cleaned = re.sub(
+                        r'^(Tôi|Tôi đã|Vào lúc|Khoảng|Từ)?\s*(ở|tại)?\s*.*?(từ|lúc|khoảng)?\s*\d{1,2}:\d{2}.*?(đến|cho đến khi)?\s*(\d{1,2}:\d{2}|kết thúc)?[\.,;:]?\s*',
+                        '',
+                        s.statement,
+                        flags=re.IGNORECASE
+                    ).strip()
+                    if not cleaned:
+                        cleaned = f"ở {s.residence} làm việc và không rời khỏi đây"
+                    s.statement = f"{prefix}, tôi {cleaned}"
+
+        return suspects
 
     async def repair_suspects(self, suspects: List[Suspect], ground_truth: GroundTruth, diagnostic: str) -> List[Suspect]:
         """Localized patch repair for duplicate IDs or culprit flags (Paper 7)."""
