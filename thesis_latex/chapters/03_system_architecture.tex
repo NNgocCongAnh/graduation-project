@@ -1,10 +1,70 @@
 \chapter{Phân tích và Thiết kế Kiến trúc Hệ thống}
 \label{ch:architecture}
 
+Chương 3 trình bày chi tiết quá trình phân tích yêu cầu, thiết kế kiến trúc và đặc tả các thành phần kỹ thuật của hệ thống sinh kịch bản trinh thám Neuro-Symbolic. Trước hết, chương thiết lập ma trận truy nguyên yêu cầu kỹ thuật từ các hạn chế logic của LLM và công bố bộ tiêu chí đánh giá định lượng làm cơ sở định hướng thiết kế. Tiếp theo, 7 bản ghi quyết định kiến trúc cốt lõi (ADR) cùng sơ đồ phân tầng hệ thống được phân tích thấu đáo. Các phần còn lại đặc tả chi tiết Multi-Agent Pipeline, đặc tả Data Schema với Pydantic v2, động cơ kiểm định ký hiệu tích hợp giải tích Henssge, cơ chế vá lỗi cục bộ và giao diện tương tác Unity 6 URP 2D.
+
+\section{Phân tích Yêu cầu Kỹ thuật và Ma trận Truy nguyên}
+\label{sec:arch_requirements}
+
+\subsection{Cơ sở Phát biểu Yêu cầu từ Hạn chế Thực tế của LLM}
+Xuất phát từ các hạn chế bản chất của các mô hình ngôn ngữ lớn (LLM) trong suy luận hình thức nhiều bước và hiện tượng ảo giác nhân quả đã được khảo sát tại Chương 1 và Chương 2, đồ án xác lập 5 yêu cầu kỹ thuật then chốt mà kiến trúc hệ thống bắt buộc phải giải quyết:
+\begin{enumerate}[leftmargin=1.5cm]
+    \item \textbf{Yêu cầu 1 (Tính nhất quán thời gian tử vong):} Khóa cứng cửa sổ giờ chết (TOD) theo đúng định luật nhiệt học thi thể, bảo đảm thời điểm tử vong trùng khớp hoàn toàn với các dấu hiệu hoen và co cứng tử thi trong biên bản khám nghiệm.
+    \item \textbf{Yêu cầu 2 (Tính giải được và tính duy nhất của thủ phạm):} Kịch bản phải có nghiệm suy luận hợp lệ duy nhất, triệt tiêu khả năng tồn tại đồng thời nhiều thủ phạm khả dĩ hoặc thiếu manh mối bẻ gãy chứng cứ ngoại phạm.
+    \item \textbf{Yêu cầu 3 (Tối ưu chi phí phục hồi lỗi):} Cô lập và khắc phục vi phạm logic với độ phức tạp ngữ cảnh hằng số $\mathcal{O}(1)$, hạn chế tối đa chi phí token và độ trễ phục hồi lỗi so với việc tái sinh toàn bộ hồ sơ $\mathcal{O}(N)$.
+    \item \textbf{Yêu cầu 4 (Toàn vẹn hợp đồng dữ liệu):} Chuẩn hóa và kiểm soát chặt chẽ cấu trúc JSON đầu ra ở mọi biên giới tác tử, ngăn ngừa triệt để lỗi phân tích cú pháp làm sập ứng dụng Client.
+    \item \textbf{Yêu cầu 5 (Tương tác thực nghiệm và bền bỉ dữ liệu):} Cung cấp giao diện trực quan hỗ trợ người chơi thu thập chứng cứ và nộp cáo trạng kết án, đồng thời lưu vết toàn bộ dữ liệu đo kiểm thực nghiệm đạt chuẩn ACID.
+\end{enumerate}
+
+\subsection{Ma trận Truy nguyên Yêu cầu Kỹ thuật}
+Nhằm bảo đảm tính truy nguyên tường minh giữa các quyết định thiết kế phần mềm với các hiện tượng lỗi thực tế, Bảng \ref{tab:traceability_matrix} liên kết trực tiếp từng yêu cầu hệ thống với cơ sở lỗi ở Chương 2, thành phần giải pháp kiến trúc đề xuất và tệp mã nguồn hiện thực hóa trong đồ án.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Ma trận Truy nguyên Yêu cầu Kỹ thuật Hệ thống (Traceability Matrix)}
+\label{tab:traceability_matrix}
+\begin{tabularx}{\textwidth}{p{2.0cm} c p{4.2cm} p{4.2cm} p{2.4cm}}
+\toprule
+\textbf{Yêu cầu} & \textbf{Mã} & \textbf{Cơ sở Lỗi của LLM (Chương 2)} & \textbf{Giải pháp Kiến trúc Đề xuất} & \textbf{Minh chứng} \\
+\midrule
+\textbf{Nhất quán thời gian tử vong} & \texttt{REQ-01} & LLM sinh giờ chết tự quy hồi ngẫu nhiên, mâu thuẫn với nhiệt độ thi thể và hiện tượng biến đổi tử thi (Hoen/Co cứng). & Khóa cứng cửa sổ giờ chết bằng hàm giải tích phương trình nhiệt học Henssge qua phương pháp chia đôi (\textit{Bisection}). & \texttt{validator.py} \\
+\textbf{Tính giải được \& Duy nhất} & \texttt{REQ-02} & Kịch bản bị đa nghiệm (nhiều hơn một thủ phạm) hoặc thiếu manh mối bẻ gãy chứng cứ ngoại phạm (vi phạm Knox Rule 1 \& 8). & Biểu diễn quan hệ nghi phạm -- manh mối dạng đồ thị hai phía, kiểm định ánh xạ phủ định ngoại phạm duy nhất. & \texttt{case\_graph.py} \newline \texttt{validator.py} \\
+\textbf{Tối ưu chi phí phục hồi lỗi} & \texttt{REQ-03} & Tái sinh toàn phần khi có vi phạm tiêu tốn $\mathcal{O}(N)$ token ($\sim 3,000$ tokens) và tăng độ trễ toàn trình gấp 4 lần. & Cơ chế Vá lỗi Cục bộ (\textit{Local Patch Repair}) định tuyến vi phạm về đúng tác tử lỗi với ngữ cảnh $\mathcal{O}(1)$ ($\sim 350$ tokens). & \texttt{agents.py} \\
+\textbf{Toàn vẹn hợp đồng dữ liệu} & \texttt{REQ-04} & Đầu ra LLM dễ trôi định dạng JSON, sai kiểu dữ liệu hoặc thiếu trường thuộc tính cần thiết cho Game Client. & Ràng buộc Data Schema nghiêm ngặt qua Pydantic v2, tích hợp cơ chế tự động fallback đa mô hình. & \texttt{models.py} \newline \texttt{agents.py} \\
+\textbf{Tương tác thực \& Bền bỉ} & \texttt{REQ-05} & Cần môi trường thực nghiệm trực quan cho người chơi nộp cáo trạng và hệ thống lưu trữ không bị nghẽn khóa ghi. & Client Unity 6 URP 2D kết nối Backend FastAPI qua HTTP/JSON, lưu trữ SQLite chế độ WAL đạt chuẩn ACID. & \texttt{database.py} \newline Unity Client \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Bộ Tiêu chí Đánh giá Chất lượng và Độ sẵn sàng Hệ thống}
+Để tránh thiên lệch chọn tiêu chí theo kết quả đo đạc, đồ án đóng băng trước bộ tiêu chí đánh giá chất lượng và độ sẵn sàng của hệ thống tại Bảng \ref{tab:predefined_criteria}. Bộ tiêu chí này đóng vai trò là hệ quy chiếu định lượng bắt buộc cho toàn bộ các kịch bản thử nghiệm tại Chương 4.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Bộ Tiêu chí Đánh giá Chất lượng và Độ sẵn sàng Hệ thống}
+\label{tab:predefined_criteria}
+\begin{tabularx}{\textwidth}{c p{2.5cm} c p{3.2cm} c X}
+\toprule
+\textbf{Mã} & \textbf{Tên Tiêu chí} & \textbf{Đơn vị} & \textbf{Phương pháp Đo / Công thức} & \textbf{Ngưỡng} & \textbf{Ý nghĩa Kỹ thuật} \\
+\midrule
+$A_1$ & Tỷ lệ hợp lệ cú pháp (\textit{Schema Validity}) & \% & $(N_{\text{valid\_json}} / N_{\text{total}}) \times 100\%$ & $100\%$ & Bảo đảm không có ngoại lệ làm sập ứng dụng ở tầng bóc tách dữ liệu JSON. \\
+$A_2$ & Tỷ lệ vượt qua kiểm định (\textit{Pass Rate}) & \% & $(N_{\text{passed}} / N_{\text{total}}) \times 100\%$ & $\ge 90\%$ & Bảo đảm kịch bản tuân thủ toàn diện các ràng buộc y pháp và logic trinh thám. \\
+$A_3$ & Tính duy nhất của thủ phạm (\textit{Uniqueness}) & Nghiệm & Số thủ phạm thỏa mãn toàn bộ chuỗi chứng cứ & $= 1$ & Triệt tiêu hoàn toàn khả năng kết án oan hoặc kịch bản đa nghiệm mâu thuẫn. \\
+$L_1$ & Độ trễ tạo sinh toàn trình P50 & Giây (s) & Phân vị P50 thời gian chạy chuỗi 4 tác tử & $\le 20\text{s}$ & Bảo đảm trải nghiệm người dùng không bị gián đoạn quá lâu khi tạo màn chơi. \\
+$C_1$ & Chi phí ngữ cảnh vá lỗi (\textit{Token Footprint}) & Token & Số token đầu vào gửi trong mỗi lượt vá cục bộ & $\le 500$ & Đạt độ phức tạp không gian $\mathcal{O}(1)$, tiết kiệm đáng kể so với tái sinh toàn phần. \\
+$C_2$ & Thời gian xác thực suy luận & Mili-giây (ms) & Thời gian thực thi hàm \newline \texttt{evaluate\_player\_deduction} & $\le 10\text{ms}$ & Chấm điểm phá án trong bộ nhớ bằng logic tất định, tốn 0 token AI. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{Các Quyết định Kiến trúc Cốt lõi}
 \label{sec:arch_adrs}
 
-Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh giá qua độ phức tạp thuật toán, mà còn thông qua việc cân nhắc thấu đáo các đánh đổi kỹ thuật ở từng tầng thiết kế. Trong quá trình phát triển đồ án, tác giả đã thiết lập 7 bản ghi quyết định kiến trúc (ADR\textsuperscript{2}) làm cơ sở lựa chọn công nghệ và đối sánh trực diện với các lựa chọn thay thế như tổng hợp tại Bảng \ref{tab:framework_comparison}:
+Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh giá qua độ phức tạp thuật toán, mà còn thông qua việc cân nhắc thấu đáo các đánh đổi kỹ thuật ở từng tầng thiết kế. Trong quá trình phát triển, đồ án đã thiết lập 7 bản ghi quyết định kiến trúc (ADR\textsuperscript{2}) nhằm đáp ứng trực tiếp 5 yêu cầu kỹ thuật nêu trên và đối sánh trực diện với các lựa chọn thay thế như tổng hợp tại Bảng \ref{tab:framework_comparison}:
 
 \subsection{ADR-001: Lựa chọn Ngôn ngữ Python và Web Framework FastAPI}
 \begin{itemize}[leftmargin=1.5cm]
@@ -35,7 +95,7 @@ Một hệ thống phần mềm AI hoàn chỉnh không chỉ được đánh gi
 
 \subsection{ADR-003: Thiết kế Kiến trúc Dịch vụ Web Kết hợp Client Unity 6 URP 2D Đa nền tảng}
 \begin{itemize}[leftmargin=1.5cm]
-    \item \textbf{Đặt vấn đề:} Ở giai đoạn thử nghiệm ban đầu, tôi đã xây dựng nguyên mẫu giao diện Web bằng React (\texttt{V0/frontend/}). Tuy nhiên, khi chuyển sang hoàn thiện trải nghiệm bàn làm việc thám tử với ánh sáng động, nhiều lớp thẻ ảnh kéo thả, dây chỉ đỏ co giãn và tính năng tìm phòng chơi mạng cục bộ LAN không cần nhập địa chỉ IP thủ công, nguyên mẫu thuần trình duyệt bộc lộ nhiều giới hạn kỹ thuật.
+    \item \textbf{Đặt vấn đề:} Ở giai đoạn thử nghiệm ban đầu, đồ án đã xây dựng nguyên mẫu giao diện Web bằng React (\texttt{V0/frontend/}). Tuy nhiên, khi chuyển sang hoàn thiện trải nghiệm bàn làm việc thám tử với ánh sáng động, nhiều lớp thẻ ảnh kéo thả, dây chỉ đỏ co giãn và tính năng tìm phòng chơi mạng cục bộ LAN không cần nhập địa chỉ IP thủ công, nguyên mẫu thuần trình duyệt bộc lộ nhiều giới hạn kỹ thuật.
     \item \textbf{Các phương án cân nhắc:}
     \begin{enumerate}
         \item \textit{Thuần Web React:} Dễ truy cập qua trình duyệt nhưng tốn chi phí đồng bộ thao tác kéo thả kết hợp vẽ dây chỉ đỏ trên cây mô hình tài liệu trình duyệt, và bị cơ chế hộp cát bảo mật của trình duyệt chặn quyền phát gói tin quảng bá UDP ở tầng mạng cục bộ (cổng \texttt{47777} trong \texttt{lan\_discovery.py} và \texttt{LanDiscoveryClient.cs}).
@@ -145,7 +205,7 @@ Các bước sau mô tả luồng thực thi khi tiếp nhận yêu cầu tới 
 \end{enumerate}
 
 \subsection{Luồng Xác thực Kết án Tất định}
-Khác với các hệ thống đối thoại để LLM tự đánh giá câu trả lời của người dùng, tại endpoint \texttt{POST /api/case/verify} hệ thống của tôi \textbf{tách biệt hoàn toàn LLM khỏi khâu chấm điểm và tuyên án} nhằm loại bỏ rủi ro phán quyết cảm tính hoặc thay đổi kết quả sai quy tắc. Luồng xử lý gồm 4 bước tuần tự như minh họa ở Hình \ref{fig:sequence_diagram_e2e}:
+Khác với các hệ thống đối thoại để LLM tự đánh giá câu trả lời của người dùng, tại endpoint \texttt{POST /api/case/verify}, đồ án \textbf{tách biệt hoàn toàn LLM khỏi khâu chấm điểm và tuyên án} nhằm loại bỏ rủi ro phán quyết cảm tính hoặc thay đổi kết quả sai quy tắc. Luồng xử lý gồm 4 bước tuần tự như minh họa ở Hình \ref{fig:sequence_diagram_e2e}:
 
 \begin{figure}[H]
     \centering
@@ -275,7 +335,7 @@ Phía Unity Client (\texttt{Assets/Scripts/Models/CaseData.cs}) ánh xạ song s
 \section{Thiết kế Tầng Lưu trữ Dữ liệu Quan hệ}
 \label{sec:arch_database}
 
-Nhằm khắc phục rủi ro mất dữ liệu khi chỉ lưu trữ tạm thời trên RAM, tôi triển khai tầng lưu trữ quan hệ sử dụng \textbf{SQLite} kết hợp thư viện ánh xạ đối tượng -- quan hệ (ORM) \textbf{SQLAlchemy 2.0} (phiên bản cài đặt 2.0.51) tại tệp \texttt{detective-backend/database.py}. Khi khởi tạo kết nối, hệ thống tự động kích hoạt các chỉ thị đồng bộ và toàn vẹn trên SQLite:
+Nhằm khắc phục rủi ro mất dữ liệu khi chỉ lưu trữ tạm thời trên RAM, đồ án triển khai tầng lưu trữ quan hệ sử dụng \textbf{SQLite} kết hợp thư viện ánh xạ đối tượng -- quan hệ (ORM) \textbf{SQLAlchemy 2.0} (phiên bản cài đặt 2.0.51) tại tệp \texttt{detective-backend/database.py}. Khi khởi tạo kết nối, hệ thống tự động kích hoạt các chỉ thị đồng bộ và toàn vẹn trên SQLite:
 \begin{itemize}[leftmargin=1.5cm]
     \item \texttt{PRAGMA foreign\_keys=ON}: Bắt buộc kiểm tra khóa ngoại và xóa dây chuyền;
     \item \texttt{PRAGMA journal\_mode=WAL}: Bật chế độ ghi nhật ký trước (WAL) giúp nhiều luồng đọc đồng thời không bị chặn bởi thao tác ghi khi chơi nhóm;
@@ -377,3 +437,8 @@ Giao diện phía người chơi được phát triển bằng C\# trên \textbf
     \caption{Giao diện Cửa sổ Báo cáo Khám nghiệm Tử thi Tích hợp Thông số Henssge}
     \label{fig:forensic_modal_screenshot}
 \end{figure}
+
+\section{Kết luận Chương 3}
+\label{sec:arch_conclusion}
+
+Chương 3 đã hoàn thiện toàn bộ khung thiết kế kiến trúc cho hệ thống sinh kịch bản trinh thám Neuro-Symbolic. Bằng việc thiết lập ma trận truy nguyên yêu cầu kỹ thuật (Bảng \ref{tab:traceability_matrix}) và đóng băng bộ tiêu chí đánh giá định lượng (Bảng \ref{tab:predefined_criteria}) ngay từ đầu, đồ án bảo đảm mọi thành phần kiến trúc---từ Multi-Agent Pipeline 4 tác tử, đặc tả Data Schema với Pydantic v2, động cơ kiểm định ký hiệu tích hợp giải tích Henssge, đến cơ chế vá lỗi cục bộ $\mathcal{O}(1)$---đều được xây dựng nhằm giải quyết trực diện các điểm nghẽn logic của LLM. Đây là nền tảng kỹ thuật vững chắc để triển khai cài đặt thực tế và tiến hành các bài đo kiểm thực nghiệm định lượng tại Chương 4.
