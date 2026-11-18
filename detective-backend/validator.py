@@ -374,7 +374,17 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
         alibi_covers_crime = is_time_in_interval(crime_time, culprit.alibi_start, culprit.alibi_end)
         culprit_clues = [ev for ev in crucial_evidences if ev.linked_suspect_id == culprit.id or ev.is_crucial]
 
-        if alibi_covers_crime and not culprit_clues:
+        if not alibi_covers_crime:
+            violations.append(ConstraintViolation(
+                violation_type=ViolationType.ALIBI_UNBROKEN,
+                component="character",
+                message=(
+                    f"Culprit '{culprit.id}' alibi [{culprit.alibi_start}-{culprit.alibi_end}] "
+                    f"does not cover the actual crime time '{crime_time}'."
+                ),
+                target_id=culprit.id
+            ))
+        elif not culprit_clues:
             violations.append(ConstraintViolation(
                 violation_type=ViolationType.ALIBI_UNBROKEN,
                 component="clue",
@@ -384,6 +394,16 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
                 ),
                 target_id=culprit.id
             ))
+
+        # Check statement quality and action details
+        for s in case.suspects:
+            if not s.statement or len(s.statement.strip().split()) < 6:
+                violations.append(ConstraintViolation(
+                    violation_type=ViolationType.SCHEMA_ERROR,
+                    component="character",
+                    message=f"Suspect '{s.id}' statement is missing or too brief (< 6 words).",
+                    target_id=s.id
+                ))
 
     # 5. Multi-Hop Reasoning Chain Validation (Paper 3)
     if case.reasoning_chain:
