@@ -5,12 +5,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Bảng Điều Tra 3 Chặng Mục Tiêu & Lệnh Bắt Giữ (Three Objectives & Accusation System)
-/// Thiết kế chuẩn theo phong cách bóc tách phong bì niêm phong của Unsolved Case Files:
-/// - Chặng 1: Minh oan cho người vô tội (Exonerate an innocent suspect)
-/// - Chặng 2: Bẻ gãy hiện trường giả & Tìm hung khí (Shatter staged alibi & weapon)
-/// - Chặng 3: Lệnh bắt giữ chính thức (Official Arrest Warrant & Final Conviction)
-/// - Bonus Envelope: Tái hiện toàn cảnh vụ án (Full Narrative Epilogue Solution)
+/// Bảng Chỉ Định Thủ Phạm & Đối Soát Lập Luận (Accusation & Deductive Reasoning Modal)
+/// Thiết kế tối giản theo yêu cầu:
+/// 1. Dropdown chọn 1 trong số các nghi phạm làm hung thủ.
+/// 2. Ô nhập văn bản tự do để điền dẫn chứng / lập luận suy luận (tùy chọn).
+/// 3. Nút Gửi lệnh bắt giữ:
+///    - So khớp hung thủ với ground_truth.culprit_id.
+///    - So khớp lập luận với ground_truth.core_contradiction, giờ tử vong, hung khí (nếu người chơi có nhập).
+///    - Bật màn hình Phán quyết (Verdict Panel) công bố kết quả và sự thật vụ án.
 /// </summary>
 public class AccusationModal : MonoBehaviour
 {
@@ -32,13 +34,6 @@ public class AccusationModal : MonoBehaviour
         private set => _instance = value;
     }
 
-    public enum ObjectiveStage
-    {
-        Stage1_Exonerate = 0,
-        Stage2_ShatterAlibi = 1,
-        Stage3_ArrestWarrant = 2
-    }
-
     [Header("Main Dialog References")]
     [SerializeField] private GameObject modalRoot;
     [SerializeField] private Dropdown suspectDropdown;
@@ -54,34 +49,17 @@ public class AccusationModal : MonoBehaviour
     [SerializeField] private Text coreContradictionText;
     [SerializeField] private Button closeVerdictButton;
 
-    [Header("Dramatic Roulette Overlay")]
-    [SerializeField] private GameObject rouletteOverlay;
-    [SerializeField] private Text rouletteTitleText;
-    [SerializeField] private Text rouletteSpinnerNameText;
-    [SerializeField] private Text rouletteSubText;
-
-    // State 3 Phong Bì Mục Tiêu
-    private ObjectiveStage activeStage = ObjectiveStage.Stage1_Exonerate;
-    private bool stage1Done = false;
-    private bool stage2Done = false;
-    private string stage1ExoneratedName = "";
-
-    // Selection State cho Chặng 1
-    private string selectedExonerateSuspectId = "";
-    private string selectedExonerateSuspectName = "";
-    private string selectedExonerateEvidenceId = "";
-
-    // Selection State cho Chặng 3 (Lệnh bắt giữ)
-    private string selectedAccusedId = "";
-    private string selectedAccusedName = "";
-    private readonly HashSet<string> selectedEvidenceIds = new HashSet<string>();
-
+    // State
+    private string selectedSuspectId = "";
+    private string selectedSuspectName = "";
+    private string selectedSuspectOccupation = "";
     private InputField reasoningInputField;
     private Text warningText;
-    private readonly List<Button> suspectButtons = new List<Button>();
-    private readonly List<Button> evidenceButtons = new List<Button>();
+    private Text dropdownLabelText;
+    private GameObject dropdownListPopup;
+    private bool isDropdownOpen = false;
 
-    public bool IsOpen => (modalRoot != null && modalRoot.activeSelf) || (verdictPanel != null && verdictPanel.activeSelf) || (rouletteOverlay != null && rouletteOverlay.activeSelf);
+    public bool IsOpen => (modalRoot != null && modalRoot.activeSelf) || (verdictPanel != null && verdictPanel.activeSelf);
 
     private void Awake()
     {
@@ -105,38 +83,13 @@ public class AccusationModal : MonoBehaviour
             closeVerdictButton.onClick.AddListener(CloseVerdict);
         }
 
-        CleanAndPrepareContainer();
-
-        if (modalRoot != null) modalRoot.SetActive(false);
-        if (verdictPanel != null) verdictPanel.SetActive(false);
-    }
-
-    private void CleanAndPrepareContainer()
-    {
         if (suspectDropdown != null)
         {
             suspectDropdown.gameObject.SetActive(false);
         }
 
-        if (evidenceTogglesContainer != null)
-        {
-            VerticalLayoutGroup vlg = evidenceTogglesContainer.GetComponent<VerticalLayoutGroup>();
-            if (vlg != null)
-            {
-                vlg.enabled = false;
-                Destroy(vlg);
-            }
-
-            RectTransform cRt = evidenceTogglesContainer.GetComponent<RectTransform>();
-            if (cRt != null)
-            {
-                // Give full middle space from below header to action buttons
-                cRt.anchorMin = new Vector2(0.04f, 0.19f);
-                cRt.anchorMax = new Vector2(0.96f, 0.89f);
-                cRt.offsetMin = Vector2.zero;
-                cRt.offsetMax = Vector2.zero;
-            }
-        }
+        if (modalRoot != null) modalRoot.SetActive(false);
+        if (verdictPanel != null) verdictPanel.SetActive(false);
     }
 
     private void Update()
@@ -169,854 +122,470 @@ public class AccusationModal : MonoBehaviour
         modalRoot.SetActive(true);
         gameObject.SetActive(true);
 
-        CleanAndPrepareContainer();
-
         if (verdictPanel != null) verdictPanel.SetActive(false);
-        if (rouletteOverlay != null) rouletteOverlay.SetActive(false);
         transform.SetAsLastSibling();
 
-        BuildInteractiveAccusationUI();
+        BuildSimplifiedAccusationUI();
     }
 
     public void Close()
     {
+        if (dropdownListPopup != null) dropdownListPopup.SetActive(false);
+        isDropdownOpen = false;
         if (modalRoot != null) modalRoot.SetActive(false);
         if (verdictPanel != null) verdictPanel.SetActive(false);
-        if (rouletteOverlay != null) rouletteOverlay.SetActive(false);
         gameObject.SetActive(false);
     }
 
-    /// <summary>
-    /// Xây dựng giao diện 3 Chặng Mục Tiêu chuẩn Unsolved Case Files.
-    /// </summary>
-    private void BuildInteractiveAccusationUI()
+    public void CloseVerdict()
     {
-        CleanAndPrepareContainer();
+        if (verdictPanel != null) verdictPanel.SetActive(false);
+        Close();
+    }
 
+    /// <summary>
+    /// Xây dựng giao diện tối giản: 1 Dropdown chọn nghi phạm + 1 Ô nhập văn bản lập luận + Nút gửi
+    /// </summary>
+    private void BuildSimplifiedAccusationUI()
+    {
         CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-        if (currentCase == null) return;
+        if (currentCase == null || evidenceTogglesContainer == null) return;
 
-        if (evidenceTogglesContainer == null) return;
-
-        // Xóa sạch container con cũ
+        // Reset container
         foreach (Transform child in evidenceTogglesContainer)
         {
             Destroy(child.gameObject);
         }
 
-        suspectButtons.Clear();
-        evidenceButtons.Clear();
+        RectTransform cRt = evidenceTogglesContainer.GetComponent<RectTransform>();
+        if (cRt != null)
+        {
+            cRt.anchorMin = new Vector2(0.05f, 0.17f);
+            cRt.anchorMax = new Vector2(0.95f, 0.90f);
+            cRt.offsetMin = Vector2.zero;
+            cRt.offsetMax = Vector2.zero;
+        }
 
         Font font = DetectiveAssetBank.GetDefaultUIFont();
+        List<SuspectData> suspects = currentCase.suspects ?? new List<SuspectData>();
+
+        // Tự động chọn nghi phạm đầu tiên nếu chưa chọn
+        if (string.IsNullOrEmpty(selectedSuspectId) && suspects.Count > 0)
+        {
+            selectedSuspectId = suspects[0].id;
+            selectedSuspectName = suspects[0].name;
+            selectedSuspectOccupation = suspects[0].occupation;
+        }
 
         // =========================================================================
-        // 1. THANH TABS 3 PHONG BÌ MỤC TIÊU TRÊN CÙNG
+        // 1. NHÃN CẢNH BÁO (WARNING LABEL TRÊN CÙNG)
         // =========================================================================
-        GameObject tabsRow = new GameObject("ObjectiveTabsRow", typeof(RectTransform));
-        RectTransform tabsRt = tabsRow.GetComponent<RectTransform>();
-        tabsRt.SetParent(evidenceTogglesContainer, false);
-        tabsRt.anchorMin = new Vector2(0f, 0.91f);
-        tabsRt.anchorMax = new Vector2(1f, 1.0f);
-        tabsRt.sizeDelta = Vector2.zero;
-
-        CreateTabButton(tabsRow.transform, new Vector2(0f, 0f), new Vector2(0.29f, 1f),
-            stage1Done ? "✉️ MỤC TIÊU 1 [✓]" : "✉️ MỤC TIÊU 1\n<size=9>Minh oan</size>",
-            activeStage == ObjectiveStage.Stage1_Exonerate,
-            stage1Done ? new Color(0.2f, 0.55f, 0.25f, 1f) : new Color(0.7f, 0.2f, 0.2f, 1f),
-            () => { activeStage = ObjectiveStage.Stage1_Exonerate; BuildInteractiveAccusationUI(); });
-
-        CreateTabButton(tabsRow.transform, new Vector2(0.31f, 0f), new Vector2(0.60f, 1f),
-            stage2Done ? "✉️ MỤC TIÊU 2 [✓]" : (stage1Done ? "✉️ MỤC TIÊU 2\n<size=9>Bẻ Alibi</size>" : "🔒 MỤC TIÊU 2\n<size=9>Niêm phong</size>"),
-            activeStage == ObjectiveStage.Stage2_ShatterAlibi,
-            stage2Done ? new Color(0.65f, 0.55f, 0.15f, 1f) : new Color(0.7f, 0.2f, 0.2f, 1f),
-            () =>
-            {
-                activeStage = ObjectiveStage.Stage2_ShatterAlibi;
-                BuildInteractiveAccusationUI();
-            });
-
-        CreateTabButton(tabsRow.transform, new Vector2(0.62f, 0f), new Vector2(0.91f, 1f),
-            "⚖️ MỤC TIÊU 3\n<size=9>Lệnh bắt giữ</size>",
-            activeStage == ObjectiveStage.Stage3_ArrestWarrant,
-            new Color(0.75f, 0.18f, 0.18f, 1f),
-            () => { activeStage = ObjectiveStage.Stage3_ArrestWarrant; BuildInteractiveAccusationUI(); });
-
-        // Nút tắt mở khóa nhanh (Bắt khẩn cấp)
-        CreateTabButton(tabsRow.transform, new Vector2(0.92f, 0f), new Vector2(1.0f, 1f),
-            "⚡\n<size=8>Tắt</size>",
-            false,
-            new Color(0.25f, 0.26f, 0.30f, 1f),
-            () => { activeStage = ObjectiveStage.Stage3_ArrestWarrant; BuildInteractiveAccusationUI(); });
-
-        // =========================================================================
-        // 2. VÙNG THÔNG BÁO / FEEDBACK TRẠNG THÁI
-        // =========================================================================
-        GameObject warnGo = new GameObject("WarningLabel", typeof(RectTransform), typeof(Text));
-        RectTransform warnRt = warnGo.GetComponent<RectTransform>();
-        warnRt.SetParent(evidenceTogglesContainer, false);
-        warnRt.anchorMin = new Vector2(0f, 0.85f);
-        warnRt.anchorMax = new Vector2(1f, 0.90f);
-        warnRt.sizeDelta = Vector2.zero;
+        GameObject warnGo = new GameObject("WarningText", typeof(RectTransform), typeof(Text));
+        RectTransform wRt = warnGo.GetComponent<RectTransform>();
+        wRt.SetParent(evidenceTogglesContainer, false);
+        wRt.anchorMin = new Vector2(0f, 0.94f);
+        wRt.anchorMax = new Vector2(1f, 1.0f);
+        wRt.sizeDelta = Vector2.zero;
         warningText = warnGo.GetComponent<Text>();
         warningText.font = font;
         warningText.fontSize = 11;
         warningText.fontStyle = FontStyle.Bold;
         warningText.alignment = TextAnchor.MiddleCenter;
-        warningText.color = new Color(1f, 0.4f, 0.4f);
+        warningText.color = new Color(1f, 0.35f, 0.35f);
         warningText.text = "";
 
         // =========================================================================
-        // 3. NỘI DUNG THEO TỪNG CHẶNG MỤC TIÊU
+        // 2. PHẦN 1: TIÊU ĐỀ & DROPDOWN CHỌN NGHI PHẠM
         // =========================================================================
-        if (activeStage == ObjectiveStage.Stage1_Exonerate)
+        GameObject sTitleGo = new GameObject("SuspectSectionTitle", typeof(RectTransform), typeof(Text));
+        RectTransform stRt = sTitleGo.GetComponent<RectTransform>();
+        stRt.SetParent(evidenceTogglesContainer, false);
+        stRt.anchorMin = new Vector2(0f, 0.85f);
+        stRt.anchorMax = new Vector2(1f, 0.93f);
+        stRt.sizeDelta = Vector2.zero;
+        Text stText = sTitleGo.GetComponent<Text>();
+        stText.font = font;
+        stText.fontSize = 12;
+        stText.fontStyle = FontStyle.Bold;
+        stText.alignment = TextAnchor.MiddleLeft;
+        stText.color = new Color(0.96f, 0.82f, 0.38f);
+        stText.text = "🎯 BƯỚC 1: CHỌN HUNG THỦ CẦN BẮT GIỮ (BẮT BUỘC):";
+
+        // Dropdown Selector Button
+        GameObject dropBtnGo = new GameObject("DropdownSelectorBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+        RectTransform dRt = dropBtnGo.GetComponent<RectTransform>();
+        dRt.SetParent(evidenceTogglesContainer, false);
+        dRt.anchorMin = new Vector2(0f, 0.70f);
+        dRt.anchorMax = new Vector2(1f, 0.83f);
+        dRt.sizeDelta = Vector2.zero;
+
+        Image dImg = dropBtnGo.GetComponent<Image>();
+        dImg.color = new Color(0.18f, 0.20f, 0.25f, 1f);
+
+        Outline dOutline = dropBtnGo.AddComponent<Outline>();
+        dOutline.effectColor = new Color(0.8f, 0.65f, 0.25f, 0.8f);
+        dOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        Button dropBtn = dropBtnGo.GetComponent<Button>();
+        dropBtn.onClick.AddListener(() =>
         {
-            BuildStage1Content(currentCase, font);
-        }
-        else if (activeStage == ObjectiveStage.Stage2_ShatterAlibi)
-        {
-            BuildStage2Content(currentCase, font);
-        }
-        else
-        {
-            BuildStage3Content(currentCase, font);
-        }
-
-        UpdateSubmitButtonVisual();
-    }
-
-    private void CreateTabButton(Transform parent, Vector2 min, Vector2 max, string title, bool isActive, Color activeColor, UnityEngine.Events.UnityAction action)
-    {
-        GameObject tabGo = new GameObject("TabBtn", typeof(RectTransform), typeof(Image), typeof(Button));
-        RectTransform rt = tabGo.GetComponent<RectTransform>();
-        rt.SetParent(parent, false);
-        rt.anchorMin = min;
-        rt.anchorMax = max;
-        rt.sizeDelta = Vector2.zero;
-
-        Image img = tabGo.GetComponent<Image>();
-        img.color = isActive ? activeColor : new Color(0.14f, 0.15f, 0.18f, 0.95f);
-
-        Outline outline = tabGo.AddComponent<Outline>();
-        outline.effectColor = isActive ? new Color(1f, 0.85f, 0.35f, 0.9f) : new Color(0.3f, 0.3f, 0.35f, 0.6f);
-        outline.effectDistance = new Vector2(1f, -1f);
-
-        Button btn = tabGo.GetComponent<Button>();
-        btn.onClick.AddListener(action);
-
-        GameObject txtGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
-        RectTransform trt = txtGo.GetComponent<RectTransform>();
-        trt.SetParent(tabGo.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.sizeDelta = Vector2.zero;
-
-        Text txt = txtGo.GetComponent<Text>();
-        txt.font = DetectiveAssetBank.GetDefaultUIFont();
-        txt.fontSize = 10;
-        txt.fontStyle = FontStyle.Bold;
-        txt.alignment = TextAnchor.MiddleCenter;
-        txt.color = isActive ? Color.white : new Color(0.75f, 0.75f, 0.80f);
-        txt.text = title;
-        txt.raycastTarget = false;
-    }
-
-    // =========================================================================
-    // NỘI DUNG CHẶNG 1: MINH OAN CHO NGƯỜI VÔ TỘI
-    // =========================================================================
-    private void BuildStage1Content(CaseDossier currentCase, Font font)
-    {
-        // Banner hướng dẫn
-        GameObject bannerGo = new GameObject("Stage1Banner", typeof(RectTransform), typeof(Text));
-        RectTransform brt = bannerGo.GetComponent<RectTransform>();
-        brt.SetParent(evidenceTogglesContainer, false);
-        brt.anchorMin = new Vector2(0f, 0.74f);
-        brt.anchorMax = new Vector2(1f, 0.84f);
-        brt.sizeDelta = Vector2.zero;
-        Text bText = bannerGo.GetComponent<Text>();
-        bText.font = font;
-        bText.fontSize = 11;
-        bText.fontStyle = FontStyle.Bold;
-        bText.alignment = TextAnchor.MiddleLeft;
-        bText.color = new Color(0.96f, 0.82f, 0.38f);
-        bText.text = "✉️ PHONG BÌ MỤC TIÊU 1: MINH OAN CHO ĐỐI TƯỢNG VÔ TỘI (EXONERATION)\n" +
-                     "<size=10><color=#cccccc>Để thu hẹp diện điều tra, hãy chỉ định 1 nghi phạm bạn tin là vô can và 1 bằng chứng ngoại phạm xác đáng:</color></size>";
-
-        // Hàng nút chọn Nghi phạm cần minh oan
-        List<SuspectData> suspects = currentCase.suspects ?? new List<SuspectData>();
-        float suspWidth = 1f / Mathf.Max(1, suspects.Count);
-        for (int i = 0; i < suspects.Count; i++)
-        {
-            SuspectData susp = suspects[i];
-            GameObject sBtnGo = new GameObject($"ExonerateSuspect_{susp.id}", typeof(RectTransform), typeof(Image), typeof(Button));
-            RectTransform srt = sBtnGo.GetComponent<RectTransform>();
-            srt.SetParent(evidenceTogglesContainer, false);
-            srt.anchorMin = new Vector2(i * suspWidth + 0.01f, 0.53f);
-            srt.anchorMax = new Vector2((i + 1) * suspWidth - 0.01f, 0.72f);
-            srt.sizeDelta = Vector2.zero;
-
-            Image sImg = sBtnGo.GetComponent<Image>();
-            bool isSelected = (selectedExonerateSuspectId == susp.id);
-            sImg.color = isSelected ? new Color(0.2f, 0.55f, 0.3f, 1f) : new Color(0.16f, 0.18f, 0.22f, 1f);
-
-            Button sBtn = sBtnGo.GetComponent<Button>();
-            string sId = susp.id;
-            string sName = susp.name;
-            sBtn.onClick.AddListener(() =>
+            isDropdownOpen = !isDropdownOpen;
+            if (dropdownListPopup != null)
             {
-                selectedExonerateSuspectId = sId;
-                selectedExonerateSuspectName = sName;
-                AudioManager.Instance?.PlayPinClick();
-                BuildInteractiveAccusationUI();
-            });
+                dropdownListPopup.SetActive(isDropdownOpen);
+                if (isDropdownOpen) dropdownListPopup.transform.SetAsLastSibling();
+            }
+            AudioManager.Instance?.PlayPinClick();
+        });
 
-            GameObject txtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            RectTransform trt = txtGo.GetComponent<RectTransform>();
-            trt.SetParent(sBtnGo.transform, false);
-            trt.anchorMin = Vector2.zero;
-            trt.anchorMax = Vector2.one;
-            trt.sizeDelta = Vector2.zero;
+        // Label bên trong Dropdown Selector
+        GameObject dLabelGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
+        RectTransform dlRt = dLabelGo.GetComponent<RectTransform>();
+        dlRt.SetParent(dropBtnGo.transform, false);
+        dlRt.anchorMin = new Vector2(0.03f, 0f);
+        dlRt.anchorMax = new Vector2(0.97f, 1f);
+        dlRt.sizeDelta = Vector2.zero;
 
-            Text stxt = txtGo.GetComponent<Text>();
-            stxt.font = font;
-            stxt.fontSize = 11;
-            stxt.fontStyle = FontStyle.Bold;
-            stxt.alignment = TextAnchor.MiddleCenter;
-            stxt.color = isSelected ? new Color(1f, 0.95f, 0.45f) : new Color(0.9f, 0.9f, 0.9f);
-            stxt.text = $"{(isSelected ? "[✓] " : "")}{susp.name}\n<size=9><color=#aaaaaa>({susp.occupation})</color></size>\n<size=8><color=#88bb88>Alibi: {susp.alibi_start}-{susp.alibi_end}</color></size>";
-        }
+        dropdownLabelText = dLabelGo.GetComponent<Text>();
+        dropdownLabelText.font = font;
+        dropdownLabelText.fontSize = 12;
+        dropdownLabelText.fontStyle = FontStyle.Bold;
+        dropdownLabelText.alignment = TextAnchor.MiddleLeft;
+        dropdownLabelText.color = Color.white;
+        dropdownLabelText.text = $"👤 Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
 
-        // Tiêu đề chọn vật chứng alibi
-        GameObject eTitleGo = new GameObject("EvTitle", typeof(RectTransform), typeof(Text));
-        RectTransform etRt = eTitleGo.GetComponent<RectTransform>();
-        etRt.SetParent(evidenceTogglesContainer, false);
-        etRt.anchorMin = new Vector2(0f, 0.42f);
-        etRt.anchorMax = new Vector2(1f, 0.50f);
-        etRt.sizeDelta = Vector2.zero;
-        Text etText = eTitleGo.GetComponent<Text>();
-        etText.font = font;
-        etText.fontSize = 11;
-        etText.fontStyle = FontStyle.Bold;
-        etText.alignment = TextAnchor.MiddleLeft;
-        etText.color = new Color(0.65f, 0.88f, 1f);
-        etText.text = "🔍 CHỌN VẬT CHỨNG / TÀI LIỆU CHỨNG MINH NGOẠI PHẠM:";
+        // =========================================================================
+        // 3. PHẦN 2: TIÊU ĐỀ & KHUNG NHẬP DẪN CHỨNG LẬP LUẬN
+        // =========================================================================
+        GameObject rTitleGo = new GameObject("ReasoningSectionTitle", typeof(RectTransform), typeof(Text));
+        RectTransform rtRt = rTitleGo.GetComponent<RectTransform>();
+        rtRt.SetParent(evidenceTogglesContainer, false);
+        rtRt.anchorMin = new Vector2(0f, 0.58f);
+        rtRt.anchorMax = new Vector2(1f, 0.67f);
+        rtRt.sizeDelta = Vector2.zero;
+        Text rtText = rTitleGo.GetComponent<Text>();
+        rtText.font = font;
+        rtText.fontSize = 12;
+        rtText.fontStyle = FontStyle.Bold;
+        rtText.alignment = TextAnchor.MiddleLeft;
+        rtText.color = new Color(0.65f, 0.88f, 1f);
+        rtText.text = "✍️ BƯỚC 2: DẪN CHỨNG & LẬP LUẬN SUY LUẬN (TÙY CHỌN):";
 
-        // Danh sách vật chứng
-        List<EvidenceData> evidences = currentCase.evidences ?? new List<EvidenceData>();
-        float evWidth = 1f / Mathf.Max(1, evidences.Count);
-        for (int j = 0; j < evidences.Count; j++)
-        {
-            EvidenceData ev = evidences[j];
-            GameObject evBtnGo = new GameObject($"EvExBtn_{ev.id}", typeof(RectTransform), typeof(Image), typeof(Button));
-            RectTransform evRt = evBtnGo.GetComponent<RectTransform>();
-            evRt.SetParent(evidenceTogglesContainer, false);
-            evRt.anchorMin = new Vector2(j * evWidth + 0.01f, 0.22f);
-            evRt.anchorMax = new Vector2((j + 1) * evWidth - 0.01f, 0.40f);
-            evRt.sizeDelta = Vector2.zero;
+        // InputField Container
+        GameObject inputFieldGo = new GameObject("ReasoningInputField", typeof(RectTransform), typeof(Image), typeof(InputField));
+        RectTransform ifRt = inputFieldGo.GetComponent<RectTransform>();
+        ifRt.SetParent(evidenceTogglesContainer, false);
+        ifRt.anchorMin = new Vector2(0f, 0.08f);
+        ifRt.anchorMax = new Vector2(1f, 0.56f);
+        ifRt.sizeDelta = Vector2.zero;
 
-            Image evImg = evBtnGo.GetComponent<Image>();
-            bool isEvSel = (selectedExonerateEvidenceId == ev.id);
-            evImg.color = isEvSel ? new Color(0.18f, 0.45f, 0.65f, 1f) : new Color(0.14f, 0.16f, 0.20f, 1f);
+        Image ifImg = inputFieldGo.GetComponent<Image>();
+        ifImg.color = new Color(0.10f, 0.11f, 0.14f, 0.98f);
 
-            Button evBtn = evBtnGo.GetComponent<Button>();
-            string evId = ev.id;
-            evBtn.onClick.AddListener(() =>
-            {
-                selectedExonerateEvidenceId = evId;
-                AudioManager.Instance?.PlayPinClick();
-                BuildInteractiveAccusationUI();
-            });
+        Outline ifOutline = inputFieldGo.AddComponent<Outline>();
+        ifOutline.effectColor = new Color(0.35f, 0.40f, 0.50f, 0.6f);
+        ifOutline.effectDistance = new Vector2(1f, -1f);
 
-            GameObject evTxtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            RectTransform evTrt = evTxtGo.GetComponent<RectTransform>();
-            evTrt.SetParent(evBtnGo.transform, false);
-            evTrt.anchorMin = Vector2.zero;
-            evTrt.anchorMax = Vector2.one;
-            evTrt.sizeDelta = Vector2.zero;
+        reasoningInputField = inputFieldGo.GetComponent<InputField>();
+        reasoningInputField.lineType = InputField.LineType.MultiLineNewline;
 
-            Text evTxt = evTxtGo.GetComponent<Text>();
-            evTxt.font = font;
-            evTxt.fontSize = 10;
-            evTxt.fontStyle = FontStyle.Bold;
-            evTxt.alignment = TextAnchor.MiddleCenter;
-            evTxt.color = isEvSel ? new Color(1f, 0.95f, 0.45f) : new Color(0.85f, 0.85f, 0.85f);
-            evTxt.text = $"{(isEvSel ? "[✓] " : "[ ] ")}{ev.title}";
-        }
+        // Text Component bên trong InputField
+        GameObject textCompGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
+        RectTransform tcRt = textCompGo.GetComponent<RectTransform>();
+        tcRt.SetParent(inputFieldGo.transform, false);
+        tcRt.anchorMin = new Vector2(0.02f, 0.05f);
+        tcRt.anchorMax = new Vector2(0.98f, 0.95f);
+        tcRt.sizeDelta = Vector2.zero;
 
-        // Hướng dẫn chân trang
-        GameObject tipGo = new GameObject("Stage1Tip", typeof(RectTransform), typeof(Text));
+        Text textComp = textCompGo.GetComponent<Text>();
+        textComp.font = font;
+        textComp.fontSize = 11;
+        textComp.color = new Color(0.95f, 0.95f, 0.95f);
+        textComp.lineSpacing = 1.25f;
+        textComp.supportRichText = false;
+        reasoningInputField.textComponent = textComp;
+
+        // Placeholder Component
+        GameObject phGo = new GameObject("Placeholder", typeof(RectTransform), typeof(Text));
+        RectTransform phRt = phGo.GetComponent<RectTransform>();
+        phRt.SetParent(inputFieldGo.transform, false);
+        phRt.anchorMin = new Vector2(0.02f, 0.05f);
+        phRt.anchorMax = new Vector2(0.98f, 0.95f);
+        phRt.sizeDelta = Vector2.zero;
+
+        Text phText = phGo.GetComponent<Text>();
+        phText.font = font;
+        phText.fontSize = 11;
+        phText.fontStyle = FontStyle.Italic;
+        phText.color = new Color(0.55f, 0.60f, 0.70f, 0.8f);
+        phText.lineSpacing = 1.25f;
+        phText.text = "Nhập suy luận tóm tắt của bạn: mâu thuẫn ngoại phạm, hung khí thật sự, giờ tử vong (Henssge)...\n\n(💡 Gợi ý: Bạn có thể để trống ô này nếu chỉ muốn đối chiếu nhanh phán quyết của Tòa án!)";
+        reasoningInputField.placeholder = phText;
+
+        // =========================================================================
+        // 4. HƯỚNG DẪN DƯỚI CÙNG
+        // =========================================================================
+        GameObject tipGo = new GameObject("TipText", typeof(RectTransform), typeof(Text));
         RectTransform tipRt = tipGo.GetComponent<RectTransform>();
         tipRt.SetParent(evidenceTogglesContainer, false);
-        tipRt.anchorMin = new Vector2(0f, 0.02f);
-        tipRt.anchorMax = new Vector2(1f, 0.18f);
-        tipRt.sizeDelta = Vector2.zero;
-        Text tipText = tipGo.GetComponent<Text>();
-        tipText.font = font;
-        tipText.fontSize = 10;
-        tipText.fontStyle = FontStyle.Italic;
-        tipText.alignment = TextAnchor.MiddleCenter;
-        tipText.color = new Color(0.7f, 0.7f, 0.75f);
-        tipText.text = "💡 Gợi ý điều tra: Đọc kỹ khung giờ tử vong thực tế từ Báo cáo giám định tử thi nhiệt học Henssge\n" +
-                       "và đối chiếu với biên bản lấy lời khai của các nghi phạm để loại trừ người có bằng chứng ngoại phạm chắc chắn.";
-    }
-
-    // =========================================================================
-    // NỘI DUNG CHẶNG 2: BẺ GÃY HIỆN TRƯỜNG GIẢ & HUNG KHÍ
-    // =========================================================================
-    private void BuildStage2Content(CaseDossier currentCase, Font font)
-    {
-        // Banner hướng dẫn
-        GameObject bannerGo = new GameObject("Stage2Banner", typeof(RectTransform), typeof(Text));
-        RectTransform brt = bannerGo.GetComponent<RectTransform>();
-        brt.SetParent(evidenceTogglesContainer, false);
-        brt.anchorMin = new Vector2(0f, 0.74f);
-        brt.anchorMax = new Vector2(1f, 0.84f);
-        brt.sizeDelta = Vector2.zero;
-        Text bText = bannerGo.GetComponent<Text>();
-        bText.font = font;
-        bText.fontSize = 11;
-        bText.fontStyle = FontStyle.Bold;
-        bText.alignment = TextAnchor.MiddleLeft;
-        bText.color = new Color(0.96f, 0.82f, 0.38f);
-        bText.text = "✉️ PHONG BÌ MỤC TIÊU 2: BẺ GÃY HIỆN TRƯỜNG GIẢ & TÌM HUNG KHÍ\n" +
-                     "<size=10><color=#cccccc>Đối chiếu Báo cáo nhiệt học Henssge, hãy chọn ít nhất 1 manh mối then chốt vạch trần mốc tử vong giả hoặc hung khí thật sự:</color></size>";
-
-        if (stage1Done && !string.IsNullOrEmpty(stage1ExoneratedName))
-        {
-            GameObject exBadgeGo = new GameObject("ExonerateBadge", typeof(RectTransform), typeof(Text));
-            RectTransform exRt = exBadgeGo.GetComponent<RectTransform>();
-            exRt.SetParent(evidenceTogglesContainer, false);
-            exRt.anchorMin = new Vector2(0f, 0.67f);
-            exRt.anchorMax = new Vector2(1f, 0.73f);
-            exRt.sizeDelta = Vector2.zero;
-            Text exText = exBadgeGo.GetComponent<Text>();
-            exText.font = font;
-            exText.fontSize = 11;
-            exText.fontStyle = FontStyle.Bold;
-            exText.alignment = TextAnchor.MiddleLeft;
-            exText.color = new Color(0.4f, 0.9f, 0.4f);
-            exText.text = $"[✓ ĐÃ MINH OAN CHẶNG 1]: Đối tượng {stage1ExoneratedName} đã được loại trừ khỏi diện tình nghi.";
-        }
-
-        // Danh sách vật chứng để chọn bẻ alibi
-        List<EvidenceData> evidences = currentCase.evidences ?? new List<EvidenceData>();
-        float evWidth = 1f / Mathf.Max(1, evidences.Count);
-        for (int j = 0; j < evidences.Count; j++)
-        {
-            EvidenceData ev = evidences[j];
-            GameObject evBtnGo = new GameObject($"EvShatterBtn_{ev.id}", typeof(RectTransform), typeof(Image), typeof(Button));
-            RectTransform evRt = evBtnGo.GetComponent<RectTransform>();
-            evRt.SetParent(evidenceTogglesContainer, false);
-            evRt.anchorMin = new Vector2(j * evWidth + 0.01f, 0.40f);
-            evRt.anchorMax = new Vector2((j + 1) * evWidth - 0.01f, 0.62f);
-            evRt.sizeDelta = Vector2.zero;
-
-            Image evImg = evBtnGo.GetComponent<Image>();
-            bool isSelected = selectedEvidenceIds.Contains(ev.id);
-            evImg.color = isSelected ? new Color(0.65f, 0.45f, 0.15f, 1f) : new Color(0.14f, 0.16f, 0.20f, 1f);
-
-            Button evBtn = evBtnGo.GetComponent<Button>();
-            string evId = ev.id;
-            string evTitle = ev.title;
-            evBtn.onClick.AddListener(() =>
-            {
-                if (selectedEvidenceIds.Contains(evId))
-                {
-                    selectedEvidenceIds.Remove(evId);
-                }
-                else
-                {
-                    selectedEvidenceIds.Add(evId);
-                    AudioManager.Instance?.PlayPinClick();
-                }
-                BuildInteractiveAccusationUI();
-            });
-
-            GameObject evTxtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            RectTransform evTrt = evTxtGo.GetComponent<RectTransform>();
-            evTrt.SetParent(evBtnGo.transform, false);
-            evTrt.anchorMin = Vector2.zero;
-            evTrt.anchorMax = Vector2.one;
-            evTrt.sizeDelta = Vector2.zero;
-
-            Text evTxt = evTxtGo.GetComponent<Text>();
-            evTxt.font = font;
-            evTxt.fontSize = 10;
-            evTxt.fontStyle = FontStyle.Bold;
-            evTxt.alignment = TextAnchor.MiddleCenter;
-            evTxt.color = isSelected ? new Color(1f, 0.95f, 0.45f) : new Color(0.85f, 0.85f, 0.85f);
-            evTxt.text = $"{(isSelected ? "[✓] " : "[ ] ")}{ev.title}\n<size=8><color=#aaaaaa>({ev.location})</color></size>";
-        }
-
-        // Gợi ý
-        GameObject tipGo = new GameObject("Stage2Tip", typeof(RectTransform), typeof(Text));
-        RectTransform tipRt = tipGo.GetComponent<RectTransform>();
-        tipRt.SetParent(evidenceTogglesContainer, false);
-        tipRt.anchorMin = new Vector2(0f, 0.05f);
-        tipRt.anchorMax = new Vector2(1f, 0.35f);
+        tipRt.anchorMin = new Vector2(0f, 0f);
+        tipRt.anchorMax = new Vector2(1f, 0.07f);
         tipRt.sizeDelta = Vector2.zero;
         Text tipText = tipGo.GetComponent<Text>();
         tipText.font = font;
         tipText.fontSize = 10;
         tipText.fontStyle = FontStyle.Normal;
         tipText.alignment = TextAnchor.MiddleLeft;
-        tipText.color = new Color(0.85f, 0.85f, 0.90f);
-        tipText.text = "<b>HƯỚNG DẪN ĐỐI SOÁT VẬT CHỨNG:</b>\n" +
-                       "• Kiểm tra tình trạng dây cót / mặt kính của đồng hồ hiện trường so với kết quả nhiệt học Henssge.\n" +
-                       "• Kiểm tra tình trạng bếp lò than và các vật dụng đun nước của nghi phạm khai ở bếp.\n" +
-                       "• Kiểm tra đặc tính hung khí giấu kín tương thích với vết thương thấu tim nạn nhân.";
-    }
+        tipText.color = new Color(0.65f, 0.70f, 0.78f);
+        tipText.text = "⚖️ Tòa án sẽ đối chiếu hung thủ bạn chọn và so khớp lập luận với Chân lý vụ án (Ground Truth).";
 
-    // =========================================================================
-    // NỘI DUNG CHẶNG 3: LỆNH BẮT GIỮ HUNG THỦ CHÍNH THỨC
-    // =========================================================================
-    private void BuildStage3Content(CaseDossier currentCase, Font font)
-    {
-        // 1. Tiêu đề Mục 1: Chọn Hung Thủ
-        GameObject sTitleGo = new GameObject("SuspectHeader", typeof(RectTransform), typeof(Text));
-        RectTransform stRt = sTitleGo.GetComponent<RectTransform>();
-        stRt.SetParent(evidenceTogglesContainer, false);
-        stRt.anchorMin = new Vector2(0f, 0.77f);
-        stRt.anchorMax = new Vector2(1f, 0.84f);
-        stRt.sizeDelta = Vector2.zero;
-        Text stText = sTitleGo.GetComponent<Text>();
-        stText.font = font;
-        stText.fontSize = 11;
-        stText.fontStyle = FontStyle.Bold;
-        stText.alignment = TextAnchor.MiddleLeft;
-        stText.color = new Color(0.96f, 0.82f, 0.38f);
-        stText.text = "🎯 BƯỚC 1: CHỈ ĐỊNH HUNG THỦ CHÍNH (BẮT BUỘC):";
+        // =========================================================================
+        // 5. DROPDOWN LIST POPUP (DANH SÁCH THẢ XUỐNG KHI CLICK DROPDOWN)
+        // =========================================================================
+        dropdownListPopup = new GameObject("DropdownListPopup", typeof(RectTransform), typeof(Image));
+        RectTransform popRt = dropdownListPopup.GetComponent<RectTransform>();
+        popRt.SetParent(evidenceTogglesContainer, false);
+        popRt.anchorMin = new Vector2(0f, 0.28f);
+        popRt.anchorMax = new Vector2(1f, 0.70f);
+        popRt.sizeDelta = Vector2.zero;
 
-        // 2. Hàng nút bấm chọn Nghi Phạm
-        List<SuspectData> suspects = currentCase.suspects ?? new List<SuspectData>();
-        float btnWidth = 1f / Mathf.Max(1, suspects.Count);
+        Image popImg = dropdownListPopup.GetComponent<Image>();
+        popImg.color = new Color(0.12f, 0.13f, 0.16f, 0.98f);
+
+        Outline popOutline = dropdownListPopup.AddComponent<Outline>();
+        popOutline.effectColor = new Color(0.9f, 0.75f, 0.3f, 0.9f);
+        popOutline.effectDistance = new Vector2(2f, -2f);
+
+        float itemHeight = 1f / Mathf.Max(1, suspects.Count);
         for (int i = 0; i < suspects.Count; i++)
         {
             SuspectData susp = suspects[i];
-            GameObject btnGo = new GameObject($"SuspectBtn_{susp.id}", typeof(RectTransform), typeof(Image), typeof(Button));
-            RectTransform brt = btnGo.GetComponent<RectTransform>();
-            brt.SetParent(evidenceTogglesContainer, false);
-            brt.anchorMin = new Vector2(i * btnWidth + 0.01f, 0.59f);
-            brt.anchorMax = new Vector2((i + 1) * btnWidth - 0.01f, 0.75f);
-            brt.sizeDelta = Vector2.zero;
+            GameObject itemBtnGo = new GameObject($"Item_{susp.id}", typeof(RectTransform), typeof(Image), typeof(Button));
+            RectTransform itemRt = itemBtnGo.GetComponent<RectTransform>();
+            itemRt.SetParent(dropdownListPopup.transform, false);
+            itemRt.anchorMin = new Vector2(0.01f, 1f - (i + 1) * itemHeight + 0.02f);
+            itemRt.anchorMax = new Vector2(0.99f, 1f - i * itemHeight - 0.02f);
+            itemRt.sizeDelta = Vector2.zero;
 
-            Image img = btnGo.GetComponent<Image>();
-            bool isSel = (selectedAccusedId == susp.id);
-            img.color = isSel ? new Color(0.75f, 0.15f, 0.15f, 1f) : new Color(0.18f, 0.19f, 0.22f, 1f);
+            Image itemImg = itemBtnGo.GetComponent<Image>();
+            bool isCurrent = (susp.id == selectedSuspectId);
+            itemImg.color = isCurrent ? new Color(0.65f, 0.20f, 0.20f, 1f) : new Color(0.18f, 0.20f, 0.24f, 1f);
 
-            Button btn = btnGo.GetComponent<Button>();
-            string suspId = susp.id;
-            string suspName = susp.name;
-            btn.onClick.AddListener(() =>
+            Button itemBtn = itemBtnGo.GetComponent<Button>();
+            string sId = susp.id;
+            string sName = susp.name;
+            string sOcc = susp.occupation;
+            itemBtn.onClick.AddListener(() =>
             {
-                selectedAccusedId = suspId;
-                selectedAccusedName = suspName;
+                selectedSuspectId = sId;
+                selectedSuspectName = sName;
+                selectedSuspectOccupation = sOcc;
+
+                if (dropdownLabelText != null)
+                {
+                    dropdownLabelText.text = $"👤 Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
+                }
+
+                if (warningText != null) warningText.text = "";
+                if (dropdownListPopup != null) dropdownListPopup.SetActive(false);
+                isDropdownOpen = false;
+
                 AudioManager.Instance?.PlayPinClick();
-                BuildInteractiveAccusationUI();
+                BuildSimplifiedAccusationUI();
             });
 
-            GameObject txtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            RectTransform trt = txtGo.GetComponent<RectTransform>();
-            trt.SetParent(btnGo.transform, false);
-            trt.anchorMin = Vector2.zero;
-            trt.anchorMax = Vector2.one;
-            trt.sizeDelta = Vector2.zero;
-            Text btnTxt = txtGo.GetComponent<Text>();
-            btnTxt.font = font;
-            btnTxt.fontSize = 11;
-            btnTxt.fontStyle = FontStyle.Bold;
-            btnTxt.alignment = TextAnchor.MiddleCenter;
-            btnTxt.color = isSel ? new Color(1f, 0.95f, 0.45f) : new Color(0.9f, 0.9f, 0.9f);
-            btnTxt.text = $"{(isSel ? "🎯 " : "")}{susp.name}\n<size=9><color=#aaaaaa>({susp.occupation})</color></size>";
+            GameObject itemTxtGo = new GameObject("ItemText", typeof(RectTransform), typeof(Text));
+            RectTransform itRt = itemTxtGo.GetComponent<RectTransform>();
+            itRt.SetParent(itemBtnGo.transform, false);
+            itRt.anchorMin = new Vector2(0.03f, 0f);
+            itRt.anchorMax = new Vector2(0.97f, 1f);
+            itRt.sizeDelta = Vector2.zero;
 
-            suspectButtons.Add(btn);
+            Text itemTxt = itemTxtGo.GetComponent<Text>();
+            itemTxt.font = font;
+            itemTxt.fontSize = 11;
+            itemTxt.fontStyle = FontStyle.Bold;
+            itemTxt.alignment = TextAnchor.MiddleLeft;
+            itemTxt.color = isCurrent ? new Color(1f, 0.95f, 0.4f) : Color.white;
+            itemTxt.text = $"{(isCurrent ? "🎯 [ĐÃ CHỌN] " : "   ")}{susp.name}  —  <color=#cccccc>{susp.occupation}</color>  <size=9><color=#88bb88>(Ngoại phạm tự nhận: {susp.alibi_start}-{susp.alibi_end})</color></size>";
         }
 
-        // 3. Tiêu đề Mục 2: Chọn Vật chứng Then chốt
-        GameObject eTitleGo = new GameObject("EvidenceHeader", typeof(RectTransform), typeof(Text));
-        RectTransform etRt = eTitleGo.GetComponent<RectTransform>();
-        etRt.SetParent(evidenceTogglesContainer, false);
-        etRt.anchorMin = new Vector2(0f, 0.49f);
-        etRt.anchorMax = new Vector2(1f, 0.57f);
-        etRt.sizeDelta = Vector2.zero;
-        Text etText = eTitleGo.GetComponent<Text>();
-        etText.font = font;
-        etText.fontSize = 11;
-        etText.fontStyle = FontStyle.Bold;
-        etText.alignment = TextAnchor.MiddleLeft;
-        etText.color = new Color(0.65f, 0.88f, 1f);
-        etText.text = "🔍 BƯỚC 2: CHỌN HUNG KHÍ & VẬT CHỨNG KẾT TỘI:";
-
-        // 4. Hàng nút bấm chọn Vật chứng
-        List<EvidenceData> evidences = currentCase.evidences ?? new List<EvidenceData>();
-        float evWidth = 1f / Mathf.Max(1, evidences.Count);
-        for (int j = 0; j < evidences.Count; j++)
-        {
-            EvidenceData ev = evidences[j];
-            GameObject evBtnGo = new GameObject($"EvBtn_{ev.id}", typeof(RectTransform), typeof(Image), typeof(Button));
-            RectTransform ebrt = evBtnGo.GetComponent<RectTransform>();
-            ebrt.SetParent(evidenceTogglesContainer, false);
-            ebrt.anchorMin = new Vector2(j * evWidth + 0.01f, 0.32f);
-            ebrt.anchorMax = new Vector2((j + 1) * evWidth - 0.01f, 0.48f);
-            ebrt.sizeDelta = Vector2.zero;
-
-            Image evImg = evBtnGo.GetComponent<Image>();
-            bool isEvSel = selectedEvidenceIds.Contains(ev.id);
-            evImg.color = isEvSel ? new Color(0.15f, 0.35f, 0.55f, 1f) : new Color(0.14f, 0.16f, 0.20f, 1f);
-
-            Button evBtn = evBtnGo.GetComponent<Button>();
-            string evId = ev.id;
-            evBtn.onClick.AddListener(() =>
-            {
-                if (selectedEvidenceIds.Contains(evId))
-                {
-                    selectedEvidenceIds.Remove(evId);
-                }
-                else
-                {
-                    selectedEvidenceIds.Add(evId);
-                    AudioManager.Instance?.PlayPinClick();
-                }
-                BuildInteractiveAccusationUI();
-            });
-
-            GameObject evTxtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            RectTransform evTrt = evTxtGo.GetComponent<RectTransform>();
-            evTrt.SetParent(evBtnGo.transform, false);
-            evTrt.anchorMin = Vector2.zero;
-            evTrt.anchorMax = Vector2.one;
-            evTrt.sizeDelta = Vector2.zero;
-            Text evTxt = evTxtGo.GetComponent<Text>();
-            evTxt.font = font;
-            evTxt.fontSize = 10;
-            evTxt.fontStyle = FontStyle.Bold;
-            evTxt.alignment = TextAnchor.MiddleCenter;
-            evTxt.color = isEvSel ? new Color(1f, 0.95f, 0.45f) : new Color(0.85f, 0.85f, 0.85f);
-            evTxt.text = $"{(isEvSel ? "[✓] " : "[ ] ")}{ev.title}";
-        }
-
-        // 5. Tiêu đề Mục 3: Nhập Lập Luận Suy Luận
-        GameObject rTitleGo = new GameObject("ReasoningHeader", typeof(RectTransform), typeof(Text));
-        RectTransform rtRt = rTitleGo.GetComponent<RectTransform>();
-        rtRt.SetParent(evidenceTogglesContainer, false);
-        rtRt.anchorMin = new Vector2(0f, 0.22f);
-        rtRt.anchorMax = new Vector2(1f, 0.30f);
-        rtRt.sizeDelta = Vector2.zero;
-        Text rtText = rTitleGo.GetComponent<Text>();
-        rtText.font = font;
-        rtText.fontSize = 11;
-        rtText.fontStyle = FontStyle.Bold;
-        rtText.alignment = TextAnchor.MiddleLeft;
-        rtText.color = new Color(0.96f, 0.82f, 0.38f);
-        rtText.text = "📝 BƯỚC 3: DẪN CHỨNG & LẬP LUẬN (TÙY CHỌN):";
-
-        // 6. Khung nhập liệu lập luận
-        GameObject inputBg = new GameObject("ReasoningInputBox", typeof(RectTransform), typeof(Image), typeof(InputField));
-        RectTransform inputRt = inputBg.GetComponent<RectTransform>();
-        inputRt.SetParent(evidenceTogglesContainer, false);
-        inputRt.anchorMin = new Vector2(0f, 0.02f);
-        inputRt.anchorMax = new Vector2(1f, 0.21f);
-        inputRt.sizeDelta = Vector2.zero;
-        inputBg.GetComponent<Image>().color = new Color(0.08f, 0.09f, 0.12f, 1f);
-
-        GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
-        RectTransform textRt = textGo.GetComponent<RectTransform>();
-        textRt.SetParent(inputBg.transform, false);
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = new Vector2(8f, 6f);
-        textRt.offsetMax = new Vector2(-8f, -6f);
-        Text text = textGo.GetComponent<Text>();
-        text.font = font;
-        text.fontSize = 11;
-        text.color = new Color(0.92f, 0.92f, 0.95f);
-        text.supportRichText = false;
-        text.alignment = TextAnchor.UpperLeft;
-
-        GameObject phGo = new GameObject("Placeholder", typeof(RectTransform), typeof(Text));
-        RectTransform phRt = phGo.GetComponent<RectTransform>();
-        phRt.SetParent(inputBg.transform, false);
-        phRt.anchorMin = Vector2.zero;
-        phRt.anchorMax = Vector2.one;
-        phRt.offsetMin = new Vector2(8f, 6f);
-        phRt.offsetMax = new Vector2(-8f, -6f);
-        Text ph = phGo.GetComponent<Text>();
-        ph.font = font;
-        ph.fontSize = 10;
-        ph.fontStyle = FontStyle.Italic;
-        ph.color = new Color(0.55f, 0.55f, 0.60f);
-        ph.alignment = TextAnchor.UpperLeft;
-        ph.text = "Nhập suy luận tóm tắt của bạn: hung khí, giờ tử vong (Henssge), mâu thuẫn lời khai...\n(Để trống nếu chỉ muốn xem phán quyết của Tòa án)";
-
-        reasoningInputField = inputBg.GetComponent<InputField>();
-        reasoningInputField.textComponent = text;
-        reasoningInputField.placeholder = ph;
-        reasoningInputField.lineType = InputField.LineType.MultiLineNewline;
-        reasoningInputField.text = "";
+        dropdownListPopup.SetActive(false);
+        isDropdownOpen = false;
     }
 
-    private void UpdateSubmitButtonVisual()
-    {
-        if (submitButton == null) return;
-        Text btnText = submitButton.GetComponentInChildren<Text>();
-        if (btnText == null) return;
-
-        if (activeStage == ObjectiveStage.Stage1_Exonerate)
-        {
-            btnText.text = "✉️ XÁC NHẬN MINH OAN // MỞ KHÓA MỤC TIÊU 2";
-        }
-        else if (activeStage == ObjectiveStage.Stage2_ShatterAlibi)
-        {
-            btnText.text = "✉️ XÁC NHẬN BẺ ALIBI // MỞ KHÓA MỤC TIÊU 3";
-        }
-        else
-        {
-            btnText.text = "⚖️ GỬI LỆNH BẮT GIỮ // TRÌNH TÒA PHÊ CHUẨN";
-        }
-    }
-
+    /// <summary>
+    /// Xử lý gửi lệnh bắt giữ: So khớp Hung thủ & Đối soát lập luận với Ground Truth
+    /// </summary>
     private void OnSubmitButtonClicked()
     {
-        if (activeStage == ObjectiveStage.Stage1_Exonerate)
-        {
-            SubmitStage1();
-        }
-        else if (activeStage == ObjectiveStage.Stage2_ShatterAlibi)
-        {
-            SubmitStage2();
-        }
-        else
-        {
-            SubmitStage3Final();
-        }
-    }
-
-    // =========================================================================
-    // XỬ LÝ NỘP MỤC TIÊU 1 (MINH OAN)
-    // =========================================================================
-    private void SubmitStage1()
-    {
-        if (string.IsNullOrEmpty(selectedExonerateSuspectId))
-        {
-            if (warningText != null)
-            {
-                warningText.text = "⚠️ Vui lòng nhấp chọn 1 nghi phạm để minh oan!";
-                warningText.color = new Color(1f, 0.4f, 0.4f);
-            }
-            return;
-        }
-
         CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-        GroundTruthData gt = currentCase != null ? currentCase.ground_truth : null;
-        string correctCulpritId = gt != null ? gt.culprit_id : "SUSP-01";
+        if (currentCase == null) return;
 
-        bool isCulprit = string.Equals(selectedExonerateSuspectId, correctCulpritId, StringComparison.OrdinalIgnoreCase);
-
-        if (isCulprit)
+        if (string.IsNullOrEmpty(selectedSuspectId))
         {
             if (warningText != null)
             {
-                warningText.text = $"❌ BÁC BỎ YÊU CẦU MINH OAN! Đối tượng {selectedExonerateSuspectName} có nhiều biểu hiện nghi vấn trực tiếp tại hiện trường. Không thể loại trừ khỏi diện tình nghi!";
-                warningText.color = new Color(1f, 0.35f, 0.35f);
+                warningText.text = "⚠️ Vui lòng chọn 1 nghi phạm trong danh sách trước khi gửi lệnh bắt!";
             }
-        }
-        else
-        {
-            stage1Done = true;
-            stage1ExoneratedName = selectedExonerateSuspectName;
-            activeStage = ObjectiveStage.Stage2_ShatterAlibi;
             AudioManager.Instance?.PlayPinClick();
-            BuildInteractiveAccusationUI();
-            if (warningText != null)
-            {
-                warningText.text = $"🎉 CHÍNH XÁC! {selectedExonerateSuspectName} đã được chứng minh vô tội. 🔓 ĐÃ MỞ KHÓA MỤC TIÊU 2!";
-                warningText.color = new Color(0.4f, 0.95f, 0.4f);
-            }
-        }
-    }
-
-    // =========================================================================
-    // XỬ LÝ NỘP MỤC TIÊU 2 (BẺ GÃY ALIBI)
-    // =========================================================================
-    private void SubmitStage2()
-    {
-        if (selectedEvidenceIds.Count == 0)
-        {
-            if (warningText != null)
-            {
-                warningText.text = "⚠️ Vui lòng chọn ít nhất 1 manh mối then chốt để bẻ gãy mốc thời gian giả!";
-                warningText.color = new Color(1f, 0.4f, 0.4f);
-            }
             return;
         }
 
-        CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-        bool hasCrucial = false;
-        if (currentCase != null && currentCase.evidences != null)
+        SuspectData selectedSuspect = currentCase.suspects.Find(s => s.id == selectedSuspectId);
+        bool isCulprit = (selectedSuspect != null && selectedSuspect.is_culprit) ||
+                         (selectedSuspectId == currentCase.ground_truth?.culprit_id);
+
+        string reasoning = reasoningInputField != null ? reasoningInputField.text.Trim() : "";
+        bool hasReasoning = !string.IsNullOrEmpty(reasoning);
+
+        AudioManager.Instance?.PlayConanClimaxTheme();
+
+        // ---------------------------------------------------------------------
+        // 1. TRƯỜNG HỢP BẮT SAI HUNG THỦ
+        // ---------------------------------------------------------------------
+        if (!isCulprit)
         {
-            foreach (string evId in selectedEvidenceIds)
+            string innocentReason = selectedSuspect != null && !string.IsNullOrEmpty(selectedSuspect.secret_innocent_fact)
+                ? selectedSuspect.secret_innocent_fact
+                : "Đối tượng có ngoại phạm độc lập và không có động cơ/phương tiện thực hiện vụ án.";
+
+            ShowVerdict(
+                title: "❌ LỆNH BẮT GIỮ BỊ BÁC BỎ // BẮT OAN NGƯỜI VÔ TỘI",
+                titleColor: new Color(0.92f, 0.25f, 0.25f),
+                feedback: $"Tòa án và Viện Kiểm sát bác bỏ lệnh bắt giữ đối với <b>{selectedSuspectName}</b> ({selectedSuspectOccupation})!\n\n" +
+                          $"<b>SỰ THẬT VỀ ĐỐI TƯỢNG VÔ CAN:</b>\n{innocentReason}\n\n" +
+                          $"⚠️ <i>Cảnh báo: Bắt sai đối tượng vi phạm quy tắc tố tụng và tạo cơ hội cho kẻ thủ ác tẩu thoát. Hãy đối soát lại Báo cáo pháp y Henssge và các vật chứng hiện trường!</i>",
+                contradiction: currentCase.ground_truth != null ? $"Hung thủ thật sự là {currentCase.ground_truth.culprit_id}" : "",
+                score: 0
+            );
+            return;
+        }
+
+        // ---------------------------------------------------------------------
+        // 2. TRƯỜNG HỢP BẮT ĐÚNG HUNG THỦ
+        // ---------------------------------------------------------------------
+        string coreContradiction = currentCase.ground_truth?.core_contradiction ?? "";
+        string actualCrimeTime = currentCase.ground_truth?.actual_crime_time ?? "";
+
+        if (!hasReasoning)
+        {
+            // Người chơi BỎ TRỐNG ô lập luận: Công nhận đúng hung thủ, hiển thị kết quả
+            ShowVerdict(
+                title: "⚖️ PHÁN QUYẾT: CHÍNH XÁC // BẮT GIỮ ĐÚNG HUNG THỦ",
+                titleColor: new Color(0.2f, 0.82f, 0.45f),
+                feedback: $"Chúc mừng Thám tử! Đối tượng <b>{selectedSuspectName}</b> ({selectedSuspectOccupation}) chính là thủ phạm thực sự của vụ án.\n\n" +
+                          $"<b>TÓM TẮT DIỄN BIẾN VỤ ÁN:</b>\n{currentCase.summary}\n\n" +
+                          $"<b>MÂU THUẪN THEN CHỐT VẠCH TRẦN HUNG THỦ (GROUND TRUTH):</b>\n{coreContradiction}\n\n" +
+                          $"<b>THỜI ĐIỂM GÂY ÁN THẬT:</b> {actualCrimeTime}",
+                contradiction: coreContradiction,
+                score: 75
+            );
+        }
+        else
+        {
+            // Người chơi CÓ NHẬP lập luận: Đối chiếu với Ground Truth
+            int score = 70;
+            List<string> matchedPoints = new List<string>();
+            string lowerReasoning = reasoning.ToLowerInvariant();
+
+            // So khớp giờ án mạng & Henssge
+            if (!string.IsNullOrEmpty(actualCrimeTime) && (lowerReasoning.Contains(actualCrimeTime) || lowerReasoning.Contains("henssge") || lowerReasoning.Contains("nhiệt") || lowerReasoning.Contains("tử vong") || lowerReasoning.Contains("pháp y")))
             {
-                var ev = currentCase.evidences.Find(e => e.id == evId);
-                if (ev != null && ev.is_crucial)
+                score += 10;
+                matchedPoints.Add("✓ Xác định chuẩn xác thời gian tử vong theo nhiệt học Henssge (+10đ)");
+            }
+
+            // So khớp mâu thuẫn ngoại phạm (từ core_contradiction)
+            string[] flawKeywords = new string[] { "ngoại phạm", "sổ", "đồng hồ", "cháy", "vé", "tàu", "hầm", "bếp", "ấm", "thuốc", "vết thương", "mâu thuẫn", "giả", "vỡ", "dừng", "alibi", "lời khai" };
+            int flawHits = 0;
+            foreach (var kw in flawKeywords)
+            {
+                if (lowerReasoning.Contains(kw) && coreContradiction.ToLowerInvariant().Contains(kw))
                 {
-                    hasCrucial = true;
-                    break;
+                    flawHits++;
                 }
             }
+            if (flawHits >= 1)
+            {
+                score += 15;
+                matchedPoints.Add("✓ Bóc trần thành công mâu thuẫn ngoại phạm của đối tượng (+15đ)");
+            }
+
+            // So khớp hung khí & thương tích
+            if (lowerReasoning.Contains("dao") || lowerReasoning.Contains("đâm") || lowerReasoning.Contains("vũ khí") || lowerReasoning.Contains("hung khí") || lowerReasoning.Contains("thuốc") || lowerReasoning.Contains("độc"))
+            {
+                score += 5;
+                matchedPoints.Add("✓ Chỉ điểm đúng hung khí và cơ chế sát hại (+5đ)");
+            }
+
+            score = Mathf.Clamp(score, 70, 100);
+            string pointsFeedback = matchedPoints.Count > 0 ? string.Join("\n", matchedPoints) : "• Lập luận phù hợp với hồ sơ vụ án.";
+
+            ShowVerdict(
+                title: score >= 90 ? "🏆 PHÁN QUYẾT TOÀN THẮNG // LẬP LUẬN XUẤT SẮC" : "⚖️ PHÁN QUYẾT: CHÍNH XÁC // LẬP LUẬN HỢP LỆ",
+                titleColor: score >= 90 ? new Color(1f, 0.85f, 0.25f) : new Color(0.2f, 0.82f, 0.45f),
+                feedback: $"Xuất sắc! Lập luận suy luận của bạn đã thuyết phục hoàn toàn Hội đồng xét xử.\n\n" +
+                          $"<b>LẬP LUẬN CỦA BẠN:</b>\n\"{reasoning}\"\n\n" +
+                          $"<b>ĐỐI CHIẾU DẪN CHỨNG:</b>\n{pointsFeedback}\n\n" +
+                          $"<b>MÂU THUẪN THEN CHỐT VẠCH TRẦN HUNG THỦ (GROUND TRUTH):</b>\n{coreContradiction}\n\n" +
+                          $"<b>THỜI ĐIỂM GÂY ÁN THẬT:</b> {actualCrimeTime}",
+                contradiction: coreContradiction,
+                score: score
+            );
         }
 
-        if (hasCrucial)
+        // Đồng bộ lên API Backend nếu có kết nối
+        if (DetectiveAPIManager.Instance != null && currentCase != null)
         {
-            stage2Done = true;
-            activeStage = ObjectiveStage.Stage3_ArrestWarrant;
-            AudioManager.Instance?.PlayPinClick();
-            BuildInteractiveAccusationUI();
-            if (warningText != null)
+            var req = new VerifyRequest
             {
-                warningText.text = "🎉 XUẤT SẮC! Bạn đã vạch trần mốc tử vong ngụy tạo! 🔓 ĐÃ MỞ KHÓA MỤC TIÊU 3: LỆNH BẮT GIỮ!";
-                warningText.color = new Color(0.4f, 0.95f, 0.4f);
-            }
-        }
-        else
-        {
-            if (warningText != null)
-            {
-                warningText.text = "❌ CHƯA ĐỦ CĂN CỨ VẬT LÝ! Manh mối bạn chọn là hiện trường phụ hoặc bẫy nghi binh. Hãy đối chiếu kỹ lại Báo cáo nhiệt học Henssge!";
-                warningText.color = new Color(1f, 0.35f, 0.35f);
-            }
+                case_id = currentCase.case_id,
+                selected_suspect_id = selectedSuspectId,
+                selected_evidence_ids = new List<string>()
+            };
+            DetectiveAPIManager.Instance.VerifyDeduction(req, (ok, res) => { });
         }
     }
 
-    // =========================================================================
-    // XỬ LÝ NỘP MỤC TIÊU 3: LỆNH BẮT GIỮ CHÍNH THỨC
-    // =========================================================================
-    private void SubmitStage3Final()
-    {
-        if (string.IsNullOrEmpty(selectedAccusedId))
-        {
-            if (warningText != null)
-            {
-                warningText.text = "⚠️ Vui lòng nhấp chọn một nghi phạm bạn cho là hung thủ ở Bước 1!";
-                warningText.color = new Color(1f, 0.4f, 0.4f);
-            }
-            return;
-        }
-
-        string reasoningText = reasoningInputField != null ? reasoningInputField.text.Trim() : "";
-        if (submitButton != null) submitButton.interactable = false;
-
-        // Perform instant Local Deductive Reasoning Evaluation (0s latency, offline!)
-        VerifyResponse response = EvaluateDeductionLocally(selectedAccusedId, selectedAccusedName, reasoningText);
-
-        ShowVerdict(response);
-    }
-
-    private VerifyResponse EvaluateDeductionLocally(string accusedId, string accusedName, string reasoningText)
-    {
-        CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-        GroundTruthData gt = currentCase != null ? currentCase.ground_truth : null;
-        string correctCulpritId = gt != null ? gt.culprit_id : "SUSP-01";
-
-        bool isCulpritCorrect = string.Equals(accusedId, correctCulpritId, System.StringComparison.OrdinalIgnoreCase);
-
-        VerifyResponse response = new VerifyResponse();
-        response.case_id = currentCase != null ? currentCase.case_id : "CASE-2026-001";
-        response.culprit_identified = isCulpritCorrect;
-        response.is_correct = isCulpritCorrect;
-        response.core_contradiction = gt != null ? gt.core_contradiction : "";
-
-        DeductionScoreBreakdown breakdown = new DeductionScoreBreakdown();
-        response.score_breakdown = breakdown;
-
-        if (string.IsNullOrEmpty(reasoningText))
-        {
-            if (isCulpritCorrect)
-            {
-                response.verdict = "solved_flawed";
-                breakdown.base_culprit_score = 75f;
-                breakdown.total_score = 80f;
-                response.score = 80f;
-                response.feedback =
-                    $"🎉 PHÁ ÁN THÀNH CÔNG! Bạn đã chỉ định chính xác kẻ thủ ác là <b>{accusedName}</b>!\n" +
-                    $"(Hoàn tất 3 chặng phá án theo đúng chuẩn Unsolved Case Files. Điểm số: <b>80/100</b>).";
-            }
-            else
-            {
-                response.verdict = "unsolved";
-                breakdown.total_score = 0f;
-                response.score = 0f;
-                response.feedback =
-                    $"❌ LỆNH BẮT GIỮ BỊ TÒA ÁN BÁC BỎ!\n\n" +
-                    $"Căn cứ buộc tội đối với <b>{accusedName}</b> chưa đủ sức thuyết phục hoặc đã bắt nhầm người vô tội. " +
-                    $"Hồ sơ đã được hoàn trả về bàn trinh thám để tiếp tục đối chiếu lời khai và vật chứng hiện trường!";
-            }
-        }
-        else
-        {
-            // Evaluate with reasoning
-            float score = isCulpritCorrect ? 70f : 0f;
-            string lower = reasoningText.ToLower();
-            if (lower.Contains("dao") || lower.Contains("máu") || lower.Contains("knife")) score += 10f;
-            if (lower.Contains("henssge") || lower.Contains("20:") || lower.Contains("giờ tử vong")) score += 10f;
-            if (lower.Contains("đồng hồ") || lower.Contains("ngụy tạo") || lower.Contains("watch")) score += 10f;
-
-            breakdown.total_score = Mathf.Min(100f, score);
-            response.score = breakdown.total_score;
-            response.feedback = isCulpritCorrect
-                ? $"🎉 PHÁ ÁN XUẤT SẮC! Bạn đã chỉ đúng hung thủ {accusedName} và lập luận sắc bén (Điểm: {response.score}/100)!"
-                : $"❌ PHÁN QUYẾT SAI! Lệnh bắt giữ đối với {accusedName} bị bác bỏ do thiếu căn cứ xác đáng. Hãy quay lại bàn trinh thám và kiểm tra kỹ lại mâu thuẫn giữa lời khai ngoại phạm và các báo cáo pháp y!";
-        }
-
-        return response;
-    }
-
+    /// <summary>
+    /// Hiển thị bảng phán quyết từ VerifyResponse (gọi từ GameController hoặc mạng)
+    /// </summary>
     public void ShowVerdict(VerifyResponse response)
     {
-        if (submitButton != null) submitButton.interactable = true;
+        if (response == null) return;
+        Color color = response.is_correct ? new Color(0.2f, 0.82f, 0.45f) : new Color(0.92f, 0.25f, 0.25f);
+        string title = response.is_correct ? "⚖️ PHÁN QUYẾT: CHÍNH XÁC // BẮT GIỮ ĐÚNG HUNG THỦ" : "❌ LỆNH BẮT GIỮ BỊ BÁC BỎ // BẮT OAN";
+        ShowVerdict(title, color, response.feedback, response.core_contradiction, Mathf.RoundToInt(response.score));
+    }
+
+    /// <summary>
+    /// Hiển thị bảng phán quyết kết quả
+    /// </summary>
+    public void ShowVerdict(string title, Color titleColor, string feedback, string contradiction, int score)
+    {
+        if (modalRoot != null) modalRoot.SetActive(false);
 
         if (verdictPanel != null)
         {
             verdictPanel.SetActive(true);
-            verdictPanel.transform.SetAsLastSibling();
+            transform.SetAsLastSibling();
 
             if (verdictTitleText != null)
             {
-                verdictTitleText.text = response.is_correct ? "🎉 PHÁN QUYẾT: PHÁ ÁN THÀNH CÔNG" : "❌ PHÁN QUYẾT: KẾT TỘI THẤT BẠI";
-                verdictTitleText.color = response.is_correct ? new Color(0.4f, 0.9f, 0.4f) : new Color(0.95f, 0.3f, 0.3f);
+                verdictTitleText.text = title;
+                verdictTitleText.color = titleColor;
             }
 
             if (verdictFeedbackText != null)
             {
-                verdictFeedbackText.text = response.feedback;
+                verdictFeedbackText.text = $"<b>ĐIỂM ĐÁNH GIÁ: {score}/100</b>\n\n{feedback}";
             }
 
-            // Bonus Envelope Solution (Toàn văn giải mã vụ án)
             if (coreContradictionText != null)
             {
-                if (response.is_correct && !string.IsNullOrEmpty(response.core_contradiction))
-                {
-                    CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-                    string fullNarrative = currentCase?.reasoning_chain?.final_conclusion ?? "";
-
-                    string bonusStory = $"<b>Sự thật vụ án & Lỗ hổng cốt lõi:</b>\n{response.core_contradiction}";
-                    if (!string.IsNullOrEmpty(fullNarrative))
-                    {
-                        bonusStory += $"\n\n<b>📖 TÁI HIỆN TOÀN CẢNH VỤ ÁN (BONUS SOLUTION DOSSIER):</b>\n{fullNarrative}";
-                    }
-
-                    coreContradictionText.gameObject.SetActive(true);
-                    coreContradictionText.text = bonusStory;
-                }
-                else
-                {
-                    coreContradictionText.gameObject.SetActive(false);
-                }
+                coreContradictionText.text = contradiction;
             }
         }
-    }
-
-    private void CloseVerdict()
-    {
-        if (verdictPanel != null) verdictPanel.SetActive(false);
-        Close();
     }
 }
