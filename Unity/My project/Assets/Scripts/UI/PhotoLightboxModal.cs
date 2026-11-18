@@ -72,6 +72,7 @@ public class PhotoLightboxModal : MonoBehaviour
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     private void Update()

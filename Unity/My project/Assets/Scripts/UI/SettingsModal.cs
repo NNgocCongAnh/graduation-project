@@ -76,6 +76,7 @@ public class SettingsModal : MonoBehaviour
 
         LoadCurrentValues();
         transform.SetAsLastSibling();
+        gameObject.SetActive(true);
         root.gameObject.SetActive(true);
         SwitchTab(TabIndex.Graphics);
     }
@@ -83,6 +84,7 @@ public class SettingsModal : MonoBehaviour
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
 
         // Return to previous screen
         if (openedFromMainMenu)

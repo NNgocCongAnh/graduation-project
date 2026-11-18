@@ -27,6 +27,7 @@ public class HotkeyTaskbar : MonoBehaviour
     private PhotoLightboxModal lightboxModal;
     private GameObject pauseBtnGo;
     private GameObject settingsBtnGo;
+    private GameObject briefingBtnGo;
 
     public static HotkeyTaskbar Instance { get; private set; }
 
@@ -91,11 +92,40 @@ public class HotkeyTaskbar : MonoBehaviour
                     btn.onClick.RemoveAllListeners();
                     btn.onClick.AddListener(ToggleSettings);
                 }
+
+                // Briefing button (Case Intro & Initial Report)
+                briefingBtnGo = Instantiate(lobbyChipButton.gameObject, lobbyChipButton.transform.parent);
+                briefingBtnGo.name = "BriefingChipButton";
+                Text bText = briefingBtnGo.GetComponentInChildren<Text>();
+                if (bText != null) bText.text = "📁 Bàn giao án (B)";
+                Button bBtn = briefingBtnGo.GetComponent<Button>();
+                if (bBtn != null)
+                {
+                    bBtn.onClick.RemoveAllListeners();
+                    bBtn.onClick.AddListener(ToggleBriefing);
+                }
             }
             catch (System.Exception e)
             {
                 Debug.LogWarning($"[HotkeyTaskbar] Could not clone taskbar buttons: {e.Message}");
             }
+        }
+
+        // Tự động liên kết click vào tập hồ sơ giấy Manila trên bàn
+        try
+        {
+            GameObject manila = GameObject.Find("Manila_Dossier_Folder");
+            if (manila != null)
+            {
+                Button mBtn = manila.GetComponent<Button>();
+                if (mBtn == null) mBtn = manila.AddComponent<Button>();
+                mBtn.onClick.RemoveAllListeners();
+                mBtn.onClick.AddListener(() => CaseBriefingModal.Instance.Open());
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[HotkeyTaskbar] Manila folder click bind warning: {ex.Message}");
         }
         RefreshStatus();
 
@@ -117,6 +147,7 @@ public class HotkeyTaskbar : MonoBehaviour
         if (lobbyChipButton != null) lobbyChipButton.gameObject.SetActive(visible);
         if (pauseBtnGo != null) pauseBtnGo.SetActive(visible);
         if (settingsBtnGo != null) settingsBtnGo.SetActive(visible);
+        if (briefingBtnGo != null) briefingBtnGo.SetActive(visible);
         if (statusText != null) statusText.gameObject.SetActive(visible);
 
         Image bg = GetComponent<Image>();
@@ -131,6 +162,7 @@ public class HotkeyTaskbar : MonoBehaviour
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
         if (kb.tKey.wasPressedThisFrame) ToggleChat();
+        if (kb.bKey.wasPressedThisFrame) ToggleBriefing();
         if (kb.lKey.wasPressedThisFrame) ToggleLobby();
         if (kb.oKey.wasPressedThisFrame) ToggleSettings();
         if (kb.hKey.wasPressedThisFrame || kb.f1Key.wasPressedThisFrame) ToggleHelp();
@@ -139,6 +171,7 @@ public class HotkeyTaskbar : MonoBehaviour
         if (kb.escapeKey.wasPressedThisFrame) OnEscapePressed();
 #else
         if (Input.GetKeyDown(KeyCode.T)) ToggleChat();
+        if (Input.GetKeyDown(KeyCode.B)) ToggleBriefing();
         if (Input.GetKeyDown(KeyCode.L)) ToggleLobby();
         if (Input.GetKeyDown(KeyCode.O)) ToggleSettings();
         if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.F1)) ToggleHelp();
@@ -269,6 +302,15 @@ public class HotkeyTaskbar : MonoBehaviour
         settingsModal.Toggle();
     }
 
+    public void ToggleBriefing()
+    {
+        if (CaseBriefingModal.Instance == null) return;
+        if (CaseBriefingModal.Instance.IsOpen)
+            CaseBriefingModal.Instance.Close();
+        else
+            CaseBriefingModal.Instance.Open();
+    }
+
     public void ToggleHelp()
     {
         if (helpModal == null) return;
@@ -321,6 +363,7 @@ public class HotkeyTaskbar : MonoBehaviour
 
         // 3. If any in-game modal or lightbox is open:
         bool anyOpen = (PhotoLightboxModal.Instance != null && PhotoLightboxModal.Instance.IsOpen) ||
+                       (CaseBriefingModal.Instance != null && CaseBriefingModal.Instance.IsOpen) ||
                        (AccusationModal.Instance != null && AccusationModal.Instance.IsOpen) ||
                        (AutopsyReportModal.Instance != null && AutopsyReportModal.Instance.IsOpen) ||
                        (EvidenceDetailModal.Instance != null && EvidenceDetailModal.Instance.IsOpen) ||
@@ -343,6 +386,7 @@ public class HotkeyTaskbar : MonoBehaviour
     private void CloseAll()
     {
         if (PhotoLightboxModal.Instance != null && PhotoLightboxModal.Instance.IsOpen) PhotoLightboxModal.Instance.Close();
+        if (CaseBriefingModal.Instance != null && CaseBriefingModal.Instance.IsOpen) CaseBriefingModal.Instance.Close();
         if (AccusationModal.Instance != null && AccusationModal.Instance.IsOpen) AccusationModal.Instance.Close();
         if (AutopsyReportModal.Instance != null && AutopsyReportModal.Instance.IsOpen) AutopsyReportModal.Instance.Close();
         if (EvidenceDetailModal.Instance != null && EvidenceDetailModal.Instance.IsOpen) EvidenceDetailModal.Instance.Close();

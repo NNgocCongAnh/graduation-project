@@ -69,12 +69,40 @@ public class GenerateCaseModal : MonoBehaviour
     private void Awake()
     {
         if (_instance == null) _instance = this;
+
+        // Ensure legacy image from scene doesn't block raycasts or darken the screen
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
+        {
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
+        }
+    }
+
+    public void DismissModal()
+    {
+        if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
+
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
+        {
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
+        }
     }
 
     public void Open()
     {
         _instance = this;
         gameObject.SetActive(true);
+
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
+        {
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
+        }
 
         if (root == null) BuildUI();
 
@@ -99,9 +127,15 @@ public class GenerateCaseModal : MonoBehaviour
 
     public void Close()
     {
-        if (root != null) root.gameObject.SetActive(false);
-        TitleMenuModal titleMenu = TitleMenuModal.Instance ?? FindObjectOfType<TitleMenuModal>(true);
-        titleMenu?.Open();
+        DismissModal();
+
+        // Only return to title menu if no case is currently loaded
+        GameController gc = GameController.Instance ?? FindObjectOfType<GameController>();
+        if (gc == null || !gc.isCaseLoaded)
+        {
+            TitleMenuModal titleMenu = TitleMenuModal.Instance ?? FindObjectOfType<TitleMenuModal>(true);
+            titleMenu?.Open();
+        }
     }
 
     private void Update()
@@ -193,6 +227,7 @@ public class GenerateCaseModal : MonoBehaviour
             GameLoadingScreen.Instance?.Hide();
             if (success && dossier != null)
             {
+                DismissModal();
                 HotkeyTaskbar.Instance?.SetTaskbarVisuals(true);
                 GameController controller = GameController.Instance ?? FindObjectOfType<GameController>();
                 controller?.LoadCaseFromData(dossier);
@@ -226,6 +261,7 @@ public class GenerateCaseModal : MonoBehaviour
             GameLoadingScreen.Instance?.Hide();
             if (success && dossier != null)
             {
+                DismissModal();
                 HotkeyTaskbar.Instance?.SetTaskbarVisuals(true);
                 GameController controller = GameController.Instance ?? FindObjectOfType<GameController>();
                 controller?.LoadCaseFromData(dossier);
@@ -368,16 +404,16 @@ public class GenerateCaseModal : MonoBehaviour
         CreateDivider(panel, new Vector2(0f, -42f), 640f);
 
         // =========================================================================
-        // SECTION 3: BỘ LỌC CÁCH THỨC GÂY ÁN & THỂ LOẠI BÍ ẨN
+        // SECTION 3: PHONG CÁCH BỐI CẢNH & KHÔNG KHÍ TRINH THÁM (KHÔNG TIẾT LỘ THỦ ĐOẠN)
         // =========================================================================
-        CreateText(panel, "BỘ LỌC CÁCH THỨC GÂY ÁN & THỂ LOẠI BÍ ẨN:", 12, TitleGold, FontStyle.Bold, new Vector2(0f, -60f), new Vector2(640f, 20f), TextAnchor.MiddleLeft);
+        CreateText(panel, "PHONG CÁCH BỐI CẢNH & KHÔNG KHÍ TRINH THÁM:", 12, TitleGold, FontStyle.Bold, new Vector2(0f, -60f), new Vector2(640f, 20f), TextAnchor.MiddleLeft);
         mysteryDropdown = CreateDropdown(panel, new Vector2(0f, -90f), new Vector2(640f, 32f), new List<string> {
-            "Án mạng phòng kín (Locked-Room Mystery)",
-            "Đầu độc bí ẩn không màu không mùi (Poisoning)",
-            "Hung khí biến mất không dấu vết (Vanishing Weapon)",
-            "Biệt thự cô lập giữa đêm mưa bão (Isolated Manor)",
-            "Hiện trường giả & Alibi ngoại phạm giả (Staged Crime & False Alibi)",
-            "Tranh chấp thừa kế gia tộc thượng lưu (Family Inheritance Feud)"
+            "Bí ẩn biệt thự trang viên cổ (Classic Manor Mystery)",
+            "Kỳ án án mạng phòng kín cổ điển (Locked-Room Mystery)",
+            "Hồ sơ án mạng đêm mưa bão (Stormy Night Murder)",
+            "Bi kịch gia tộc thượng lưu bí ẩn (High-Society Intrigue)",
+            "Kỳ án kỳ bí trên chuyến tàu đêm (Express Train Case)",
+            "Vụ án chưa có lời giải - Độ khó cao (Unsolved Cold Case)"
         });
 
         CreateDivider(panel, new Vector2(0f, -125f), 640f);

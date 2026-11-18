@@ -5,23 +5,23 @@
   "victim": {
     "name": "Arthur Blackwood",
     "age": 62,
-    "gender": "Nam",
     "occupation": "Chủ sở hữu trang viên & Doanh nhân",
+    "gender": "Nam",
     "residence": "Biệt thự cổ Blackwood, Hạt Sussex",
     "forensic_data": {
       "ambient_temp": 18.5,
-      "body_temp": 27.5,
-      "livor_mortis_state": "Hoen tử thi tím sẫm cố định ở vùng lưng, mông và mặt sau bắp đùi (Fixed Livor Mortis). Dùng ngón tay ấn mạnh không có hiện tượng phai màu, xác nhận thi thể nằm ngửa nguyên trạng từ khi tử vong.",
-      "rigor_mortis_state": "Co cứng toàn phần (Full Rigor Mortis). Cơ hàm, cổ, các khớp ngón tay và khớp gối co cứng hoàn toàn, không thể gập mở tự nhiên.",
+      "body_temp": 32.0,
+      "livor_mortis_state": "Hoen tử thi tím sẫm cố định ở vùng lưng, mông và mặt sau bắp đùi. Dùng ngón tay ấn mạnh không đổi màu, xác nhận thi thể nằm ngửa nguyên trạng từ khi tử vong.",
+      "rigor_mortis_state": "Co cứng toàn phần (Full Rigor Mortis) ở cơ hàm, cổ, các khớp ngón tay và khớp gối, không thể gập mở tự nhiên.",
       "wound_description": "Vết đâm trực diện khoang liên sườn 4-5 bên trái dài 2.0cm, sâu khoảng 8.5cm, xuyên thủng màng ngoài tim và thất trái, làm rách quai động mạch chủ ngực.",
-      "cause_of_death": "Sốc mất máu cấp tính do tổn thương thấu tim (Acute Hemorrhagic Shock / Penetrating Cardiac Trauma).",
+      "cause_of_death": "Sốc mất máu cấp tính do tổn thương thấu tim (Acute Hemorrhagic Shock).",
       "manner_of_death": "Vụ án mạng sát hại (Homicide).",
-      "estimated_tod_start": "20:30",
-      "estimated_tod_end": "20:50",
+      "clothing_state": "Nạn nhân mặc đầy đủ áo sơ mi lụa, áo len cashmere và quần âu ấm, không có dấu hiệu bị xé rách trang phục.",
+      "estimated_tod_start": "19:50",
+      "estimated_tod_end": "22:50",
       "body_weight_kg": 76.0,
-      "cooling_factor": 1.25,
-      "discovery_time": "06:30",
-      "clothing_state": "Nạn nhân mặc đầy đủ áo sơ mi lụa, áo len cashmere và quần âu ấm, không có dấu hiệu bị xé rách trang phục."
+      "cooling_factor": 1.0,
+      "discovery_time": "06:30"
     }
   },
   "suspects": [
@@ -29,17 +29,17 @@
       "id": "SUSP-01",
       "name": "Quản gia William Vance",
       "age": 55,
-      "gender": "Nam",
       "occupation": "Quản gia trưởng",
+      "gender": "Nam",
       "relationship_to_victim": "Quản gia gia tộc Blackwood (25 năm phục vụ)",
       "residence": "Gian phòng quản gia cạnh bếp tầng trệt",
       "motive": "Bị dọa đuổi việc và tước quyền thừa kế sau khi làm thất thoát tài sản gia tộc.",
-      "statement": "Tối hôm đó tôi nhận lệnh mang trà lên lúc 21:00 nhưng ngài Arthur bảo không cần và dặn không ai được làm phiền. Tôi quay xuống gian bếp phụ trách đun nước và lau dọn bộ ấm chén bạc. Suốt từ 21:00 đến 22:30 tôi chỉ ở dưới bếp một mình, không hề rời bước.",
-      "timeline_claimed": "21:00 - 22:30 (Tại gian bếp phụ tầng trệt)",
-      "interview_notes": "Đối tượng tỏ ra điềm tĩnh nhưng liên tục giấu bàn tay phải vào túi tạp dề vải cotton thô màu trắng ngà. Khi được hỏi về chùm chìa khóa dự phòng mở cửa thư phòng, đối tượng nói đã làm mất từ tuần trước. Đáng chú ý: Ngón trỏ bàn tay phải có vết cứa da mới còn rớm máu, đối tượng khai bị trượt dao khi gọt hoa quả dưới bếp. Đối tượng có Nhóm máu O.",
-      "alibi_start": "21:00",
+      "statement": "Tối hôm đó tôi nhận lệnh mang trà lên lúc 21:00 nhưng ngài Arthur bảo không cần. Tôi quay xuống gian bếp phụ trách đun nước trên bếp lò than và lau dọn bộ ấm chén bạc. Suốt từ 20:15 đến 22:30 tôi chỉ ở dưới bếp một mình, liên tục chụm lửa đun trà.",
+      "timeline_claimed": "20:15 - 22:30 (Tại gian bếp phụ tầng trệt)",
+      "interview_notes": "Đối tượng tỏ ra điềm tĩnh nhưng liên tục giấu bàn tay phải vào túi tạp dề vải cotton thô dệt chéo màu trắng ngà. Ngón trỏ bàn tay phải có vết cứa da mới còn rớm máu, đối tượng khai bị trượt dao khi gọt hoa quả dưới bếp. Đối tượng có Nhóm máu O.",
+      "alibi_start": "20:15",
       "alibi_end": "22:30",
-      "alibi_statement": "Khai rằng suốt từ 21:00 đến 22:30 chỉ ở dưới bếp phụ trách chuẩn bị trà đêm một mình.",
+      "alibi_statement": "Khai rằng suốt từ 20:15 đến 22:30 chỉ ở dưới bếp phụ trách đun nước pha trà một mình.",
       "secret_innocent_fact": null,
       "is_culprit": true,
       "image_url": "/static/assets/suspects/butler_male_50s.png"
@@ -48,18 +48,18 @@
       "id": "SUSP-02",
       "name": "Bác sĩ Julian Grey",
       "age": 42,
-      "gender": "Nam",
       "occupation": "Bác sĩ gia đình",
+      "gender": "Nam",
       "relationship_to_victim": "Bác sĩ điều trị riêng của Nạn nhân (5 năm)",
       "residence": "Khu nhà phụ phía tây trang viên Blackwood",
-      "motive": "Bị nạn nhân phát hiện kê đơn thuốc sai quy cách nhằm trục lợi bảo hiểm.",
+      "motive": "Bị nạn nhân phát hiện kê đơn thuốc an thần khống nhằm trục lợi bảo hiểm y tế.",
       "statement": "Sau khi dùng bữa tối lúc 20:00, tôi xuống phòng khách tầng trệt để thưởng rượu và chơi cờ cùng một vị khách mời. Chúng tôi ngồi tại đó liên tục từ 21:15 đến tận 22:45. Tôi không hề lên tầng hai vào đêm đó.",
       "timeline_claimed": "21:15 - 22:45 (Tại phòng khách tầng trệt)",
-      "interview_notes": "Vị khách chơi cờ cùng xác nhận bác sĩ có mặt hầu hết thời gian, tuy nhiên vào khoảng 21:30 bác sĩ có rời bàn cờ khoảng 10 phút với lý do ra hành lang lấy thêm xì-gà. Sắc mặt có phần vội vã. Đối tượng có Nhóm máu B.",
+      "interview_notes": "Vị khách chơi cờ cùng xác nhận bác sĩ có mặt hầu hết thời gian, tuy nhiên vào khoảng 21:30 bác sĩ có rời bàn cờ khoảng 10 phút ra hành lang với vẻ mặt bối rối. Đối tượng có Nhóm máu B.",
       "alibi_start": "21:15",
       "alibi_end": "22:45",
       "alibi_statement": "Đang chơi cờ và thưởng rượu cùng khách mời tại phòng khách tầng trệt.",
-      "secret_innocent_fact": "Đang lén tiêu hủy hồ sơ bảo hiểm cá nhân",
+      "secret_innocent_fact": "Lén tiêu hủy hồ sơ bảo hiểm cá nhân trong lò sưởi lúc 21:30",
       "is_culprit": false,
       "image_url": "/static/assets/suspects/businessman_male_50s.png"
     },
@@ -67,18 +67,18 @@
       "id": "SUSP-03",
       "name": "Cháu gái Eleanor Blackwood",
       "age": 26,
-      "gender": "Nữ",
       "occupation": "Nghệ sĩ dương cầm",
+      "gender": "Nữ",
       "relationship_to_victim": "Cháu gái ruột của Nạn nhân",
       "residence": "Phòng ngủ phía đông lầu hai (cùng tầng với thư phòng)",
-      "motive": "Cần tiền trả nợ cờ bạc khẩn cấp trước hạn chót tuần sau.",
-      "statement": "Tôi ở trong phòng nhạc tập luyện dương cầm để chuẩn bị cho buổi hòa nhạc sắp tới. Tôi bắt đầu chơi đàn từ 20:45 đến khoảng 22:00 thì mệt nên về phòng ngủ. Tôi có nghe thấy tiếng gió bão đập vào cửa sổ nhưng không nghe thấy tiếng động nào bất thường.",
-      "timeline_claimed": "20:45 - 22:00 (Tại phòng nhạc phía đông)",
-      "interview_notes": "Người hầu xác nhận có nghe thấy tiếng đàn piano phát ra từ phòng nhạc trong khoảng thời gian trên. Tuy nhiên phòng nhạc có một lối đi bí mật thông qua hành lang sau dẫn thẳng tới ban công ngoài thư phòng. Đối tượng có Nhóm máu A.",
-      "alibi_start": "20:45",
+      "motive": "Cần tiền mặt gấp để trang trải nợ cờ bạc trước hạn chót tuần sau.",
+      "statement": "Tôi ở trong phòng nhạc tập luyện dương cầm liên tục từ 20:30 đến 22:00. Sau đó tôi có gọi điện thoại đường dài cho người hướng dẫn hòa nhạc tại London.",
+      "timeline_claimed": "20:30 - 22:00 (Tại phòng nhạc phía đông)",
+      "interview_notes": "Người hầu xác nhận có nghe tiếng đàn piano. Tổng đài bưu điện ghi nhận cuộc gọi đường dài của cô từ 20:28 đến 20:50. Giày lụa có dính bùn đất do chập tối (19:45) từng trèo lên ban công tìm bản sao di chúc nhưng then chốt cửa bị khóa trong. Đối tượng có Nhóm máu A.",
+      "alibi_start": "20:30",
       "alibi_end": "22:00",
-      "alibi_statement": "Luyện đàn tại phòng nhạc phía đông, có người hầu nghe thấy tiếng đàn piano liên tục.",
-      "secret_innocent_fact": "Lén sao chép bản di chúc cũ",
+      "alibi_statement": "Luyện đàn và gọi điện thoại đường dài tại phòng nhạc phía đông.",
+      "secret_innocent_fact": "Từng lén trèo qua ban công lúc 19:45 tìm bản sao di chúc nhưng cửa bị khóa trong nên bỏ về",
       "is_culprit": false,
       "image_url": "/static/assets/suspects/female_30s.png"
     }
@@ -86,13 +86,13 @@
   "evidences": [
     {
       "id": "EV-01",
-      "title": "Đồng hồ bỏ túi bị vỡ",
-      "location": "Dưới gầm bàn làm việc thư phòng",
-      "description": "Mặt kính pha lê chịu lực bị đập vỡ vụn, kim đồng hồ dừng lại chính xác tại 21:40.",
+      "title": "Đồng hồ bỏ túi bị vỡ kẹt kim 21:40",
+      "location": "Dưới chân bàn làm việc trong thư phòng",
+      "description": "Mặt kính pha lê chịu lực bị đập vỡ vụn góc 2 giờ, kim giờ và kim phút kẹt cứng chính xác tại 21:40.",
       "is_weapon": false,
-      "fingerprint_analysis": "Phát hiện một phần dấu vân tay ngón cái mờ của Nạn nhân trên núm vặn dây cót. Không tìm thấy bất kỳ dấu vân tay lạ nào khác trên vỏ hoặc mặt kính.",
+      "fingerprint_analysis": "Phát hiện một phần dấu vân tay ngón cái mờ của Nạn nhân trên núm vặn dây cót. Không tìm thấy bất kỳ dấu vân tay lạ nào khác.",
       "blood_dna_analysis": "Không phát hiện dấu vết máu hay dịch sinh học.",
-      "physical_condition": "Mặt kính pha lê chịu lực bị va đập vỡ vụn từ góc 2 giờ, kim giờ và kim phút kẹt cứng chính xác tại 21:40. Bộ máy cơ học bên trong còn nguyên vẹn, dây cót chưa hề bị đứt, cơ cấu hồi còn đủ năng lượng hoạt động khi kiểm tra chuyển động (chứng tỏ đồng hồ bị ngoại lực tác động làm kẹt kim cố ý chứ không phải chết máy tự nhiên).",
+      "physical_condition": "Mặt kính pha lê chịu lực bị va đập vỡ vụn, kim đồng hồ dừng tại 21:40. Bộ máy cơ học bên trong còn nguyên vẹn, dây cót chưa hề bị đứt, cơ cấu hồi còn đủ năng lượng hoạt động khi kiểm tra chuyển động (chứng tỏ đồng hồ bị ngoại lực tác động làm kẹt kim cố ý chứ không phải chết máy tự nhiên).",
       "linked_suspect_id": null,
       "is_crucial": true,
       "is_red_herring": false,
@@ -100,38 +100,66 @@
     },
     {
       "id": "EV-02",
-      "title": "Dao rạch thư bạc dính vết máu",
-      "location": "Trong ống thông gió gian bếp",
-      "description": "Dao rạch thư mạ bạc khắc gia huy Blackwood vốn đặt trên bàn thư phòng nạn nhân, có vệt máu khô khớp ADN nạn nhân.",
-      "is_weapon": true,
-      "fingerprint_analysis": "Cán dao có nhiều vết miết chà xát ngang dọc bằng sợi vải thô (cotton wipe marks) nhằm lau chùi dấu vết. Vân tay bị nhòe nặng, chỉ thu được một phần vân tay không đủ điều kiện định danh trên AFIS. Tại khe khâu nối giữa cán và lưỡi dao phát hiện một sợi vải cotton trắng ngà bị kẹt lại.",
-      "blood_dna_analysis": "Vệt máu khô trên mũi dao thuộc Nhóm máu A (trùng khớp 100% với ADN của Nạn nhân Arthur Blackwood). Đặc biệt: Trên chuôi dao phát hiện vi vết máu li ti khô thuộc Nhóm máu O (nghi vết xước do giằng co sắc nhọn).",
-      "physical_condition": "Dao rạch thư lưỡi thép không gỉ mạ bạc dài 14.5cm, rộng bản 1.8cm, chuôi đúc nổi gia huy Blackwood. Mũi dao nhọn tương thích hoàn toàn với vết đâm thấu ngực liên sườn 4-5. Được tìm thấy giấu kín trong ống thông gió gian bếp tầng trệt.",
-      "linked_suspect_id": "SUSP-01",
-      "is_crucial": true,
-      "is_red_herring": false,
-      "image_url": "/static/assets/evidences/evidence_knife.png"
-    },
-    {
-      "id": "EV-03",
-      "title": "Hộp thuốc an thần dở dang",
-      "location": "Bàn trang điểm phòng khách",
-      "description": "Lọ thuốc an thần Diazepam 5mg do Bác sĩ gia đình kê đơn, còn nguyên niêm phong màng nhôm bên trong.",
+      "title": "Hồ sơ y tế cháy dở & Lọ an thần",
+      "location": "Trong lò sưởi phòng khách tầng trệt",
+      "description": "Lọ thuốc an thần Diazepam 5mg còn nguyên niêm phong màng nhôm bên cạnh các trang giấy sổ sách y bạ cháy xém.",
       "is_weapon": false,
-      "fingerprint_analysis": "Thân lọ có dấu vân tay mờ của Nạn nhân. Nắp lọ phát hiện dấu vân tay một phần trùng khớp với mẫu tàng thư của bác sĩ điều trị. Không phát hiện dấu vân tay người lạ.",
-      "blood_dna_analysis": "Không phát hiện dấu vết máu hay dịch sinh học.",
-      "physical_condition": "Lọ thủy tinh màu hổ phách chứa 20 viên Diazepam 5mg. Nhãn thuốc ghi ngày kê đơn sáng ngày 15/11/2026. Lớp màng nhôm niêm phong miệng lọ còn nguyên vẹn, chứng minh thuốc chưa từng được mở nắp sử dụng.",
+      "fingerprint_analysis": "Phát hiện dấu vân tay ngón trỏ của bác sĩ điều trị trên nhãn thuốc và mảnh giấy cháy dở.",
+      "blood_dna_analysis": "Không phát hiện dấu vết máu.",
+      "physical_condition": "Trang sổ sách ghi chép các khoản kê đơn sai quy cách trục lợi bảo hiểm bị đốt vội vã lúc 21:30. Lọ thuốc Diazepam còn nguyên niêm phong màng nhôm chứng minh nạn nhân không hề bị đầu độc hay chuốc thuốc trước khi chết.",
       "linked_suspect_id": "SUSP-02",
       "is_crucial": false,
       "is_red_herring": true,
       "image_url": "/static/assets/evidences/evidence_sedative.png"
+    },
+    {
+      "id": "EV-03",
+      "title": "Vết bùn ban công & Bản ghi bưu điện",
+      "location": "Lan can ban công thư phòng & Phòng nhạc",
+      "description": "Vết bùn đất vườn khô in mờ hình đế giày lụa cỡ 37 trên bậu cửa sổ cùng biên lai bưu điện.",
+      "is_weapon": false,
+      "fingerprint_analysis": "Dấu vân tay ngón áp út của người thừa kế trên then chốt ngoài của ban công.",
+      "blood_dna_analysis": "Không phát hiện dấu vết máu.",
+      "physical_condition": "Then chốt ban công bị khóa chặt từ bên trong thư phòng, chứng minh đối tượng từng tìm cách lẻn vào từ bên ngoài lúc chập tối (19:45) nhưng bất thành. Biên lai tổng đài bưu điện xác nhận đường dây kết nối đàm thoại liên tục từ 20:28 đến 20:50, xác nhận bằng chứng ngoại phạm không thể rời phòng nhạc trong khung giờ tử vong thực tế.",
+      "linked_suspect_id": "SUSP-03",
+      "is_crucial": false,
+      "is_red_herring": true,
+      "image_url": "/static/assets/evidences/evidence_letter.png"
+    },
+    {
+      "id": "EV-04",
+      "title": "Bếp lò than nguội ngắt & Ấm trà khô",
+      "location": "Gian bếp phụ tầng trệt",
+      "description": "Bếp lò gang nấu nước phụ trách trà đêm nguội lạnh, lớp tro xám đóng tảng và ấm đồng khô cạn.",
+      "is_weapon": false,
+      "fingerprint_analysis": "Tay cầm ấm trà bám bụi mờ, không có dấu vết nhiệt mới hay vết nước sôi tràn.",
+      "blood_dna_analysis": "Không có dấu vết máu.",
+      "physical_condition": "Bếp lò gang giữ nhiệt rất lâu, cần ít nhất 3 tiếng để nguội hoàn toàn. Lớp than bên trong lạnh ngắt, ấm đồng rỗng không có giọt nước đọng nào. Điều này bác bỏ hoàn toàn lời khai liên tục đun nước pha trà tại bếp suốt từ 20:15 đến 22:30 của người phụ trách bếp.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": true,
+      "is_red_herring": false,
+      "image_url": "/static/assets/evidences/evidence_teacup.png"
+    },
+    {
+      "id": "EV-05",
+      "title": "Dao rạch thư bạc giấu trong ống khói",
+      "location": "Bên trong ống thông gió hút mùi gian bếp",
+      "description": "Dao rạch thư chuôi bạc đúc gia huy Blackwood dính vệt máu khô, giấu sâu trong ống khói thông gió.",
+      "is_weapon": true,
+      "fingerprint_analysis": "Cán dao có vết miết sợi vải thô lau chùi mạnh xóa dấu vết ma sát. Tuy nhiên tại khe đệm khâu dao phát hiện 1 sợi chỉ vải cotton dệt chéo màu trắng ngà bị kẹt lại.",
+      "blood_dna_analysis": "Mũi dao dính máu thuộc Nhóm máu A (trùng khớp ADN nạn nhân Arthur Blackwood). Tại chuôi dao phát hiện 2 vi giọt máu khô thuộc Nhóm máu O (nghi vết cắt do hung thủ trượt tay khi giằng co).",
+      "physical_condition": "Lưỡi thép dài 14.5cm sắc nhọn, bản rộng 1.8cm, tương thích hoàn toàn với vết đâm thấu tim nạn nhân. Bám nhiều muội than do được nhét sâu vào ống khói gian bếp mà chỉ người ở bếp mới tiếp cận được.",
+      "linked_suspect_id": "SUSP-01",
+      "is_crucial": true,
+      "is_red_herring": false,
+      "image_url": "/static/assets/evidences/evidence_knife.png"
     }
   ],
   "ground_truth": {
     "culprit_id": "SUSP-01",
     "actual_crime_time": "20:40",
     "murder_weapon": "Dao rạch thư bạc khắc gia huy Blackwood",
-    "core_contradiction": "Quản gia William khai ở bếp từ 21:00 đến 22:30 để tạo chứng cứ ngoại phạm giả và cố tình đập vỡ đồng hồ lúc 21:40. Tuy nhiên nhiệt học tử thi Henssge chứng minh nạn nhân đã chết trước đó (20:30-20:50). Hung khí dính máu giấu trong ống thông gió bếp có dính sợi vải tạp dề và máu nhóm O, trùng khớp với ngón tay bị cứa rách của William Vance."
+    "core_contradiction": "Quản gia William Vance khai ở bếp đun trà từ 20:15 đến 22:30 và cố tình đập vỡ đồng hồ lúc 21:40 để dựng chứng cứ ngoại phạm giả. Tuy nhiên nhiệt học tử thi Henssge xác định thời điểm tử vong thực tế từ 19:50 đến 22:50. Bếp lò than tại bếp nguội ngắt và ấm đồng khô cạn bác bỏ lời khai đun nước của William. Hung khí giấu trong ống khói bếp có dính sợi chỉ tạp dề và máu Nhóm O, trùng khớp với vết cứa rách ở ngón tay của William Vance."
   },
   "reasoning_chain": {
     "steps": [
@@ -140,31 +168,55 @@
         "clue_ids": [
           "EV-01"
         ],
-        "inference": "Đồng hồ vỡ chỉ 21:40 là hiện trường giả mạo vì bộ máy không bị đứt cót mà bị đập vỡ có chủ đích, mâu thuẫn hoàn toàn với kết quả nhiệt học tử thi Henssge xác định giờ tử vong thực tế từ 20:30 - 20:50.",
-        "target_suspect_id": "SUSP-01"
+        "inference": "Đồng hồ vỡ chỉ 21:40 là hiện trường giả mạo vì cơ cấu dây cót còn nguyên vẹn, mâu thuẫn hoàn toàn với kết quả nhiệt học tử thi Henssge xác định thời điểm tử vong thực tế từ 19:50 đến 22:50.",
+        "target_suspect_id": null
       },
       {
         "step_number": 2,
         "clue_ids": [
-          "EV-02"
+          "EV-02",
+          "EV-03"
         ],
-        "inference": "Dao rạch thư hung khí được giấu trong ống thông gió bếp nơi William Vance ở; chuôi dao dính vết máu nhóm O và sợi vải tạp dề trùng khớp với vết thương mới ở ngón tay của ông ta.",
+        "inference": "Hai nghi phạm SUSP-02 và SUSP-03 được loại trừ trong khung giờ tử vong thực tế: SUSP-02 đang dùng bữa và chơi cờ dưới tầng trệt, còn SUSP-03 đàm thoại điện thoại đường dài có bưu điện xác nhận từ 20:28 đến 20:50.",
+        "target_suspect_id": null
+      },
+      {
+        "step_number": 3,
+        "clue_ids": [
+          "EV-04"
+        ],
+        "inference": "Bếp lò than nguội ngắt và ấm đồng khô cạn bác bỏ hoàn toàn lời khai của Quản gia William Vance rằng liên tục đun nước pha trà tại bếp suốt từ 20:15 đến 22:30.",
+        "target_suspect_id": "SUSP-01"
+      },
+      {
+        "step_number": 4,
+        "clue_ids": [
+          "EV-05"
+        ],
+        "inference": "Hung khí dao rạch thư giấu trong ống khói bếp có dính sợi chỉ tạp dề và máu Nhóm O, trùng khớp với ngón tay bị cứa rách và tạp dề của Quản gia William Vance.",
         "target_suspect_id": "SUSP-01"
       }
     ],
-    "final_conclusion": "Quản gia William Vance đã lẻn lên thư phòng sát hại nạn nhân vào khoảng 20:40, cố tình đập kim đồng hồ về 21:40 để dựng bằng chứng ngoại phạm giả ở bếp, sau đó phi tang hung khí vào ống thông gió.",
-    "decisive_contradiction": "Giờ chết pháp y Henssge (20:30-20:50) đập tan hiện trường đồng hồ 21:40, kết hợp với hung khí dính sợi vải tạp dề và máu nhóm O giấu ngay tại gian bếp."
+    "final_conclusion": "Quản gia William Vance đã lẻn lên thư phòng sát hại nạn nhân vào khoảng 20:40, cố ý chỉnh kim đồng hồ về 21:40 để dựng chứng cứ ngoại phạm giả, nhưng bị lật tẩy bởi bếp than nguội lạnh và hung khí giấu trong ống khói bếp.",
+    "decisive_contradiction": "Giờ chết pháp y Henssge (19:50-22:50) đập tan hiện trường đồng hồ 21:40; bếp than nguội ngắt bác bỏ alibi đun nước; hung khí giấu trong ống khói dính sợi chỉ tạp dề và máu Nhóm O trùng khớp ngón tay bị cứa của Quản gia William Vance."
   },
   "metadata": {
-    "model_name": "deterministic-seed",
+    "model_name": "gh/gpt-4o",
     "pipeline_version": "2.0-neuro-symbolic",
     "agent_latencies": {
-      "OutlineAgent": 0.0,
-      "CharacterAgent": 0.0,
-      "ClueAgent": 0.0,
-      "DeductionAgent": 0.0
+      "OutlineAgent": 10.2,
+      "CharacterAgent": 11.5,
+      "ClueAgent": 14.1,
+      "DeductionAgent": 5.8
     },
-    "total_latency": 0.0,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "total_latency": 41.6,
     "patch_retries": 0,
     "validator_score": 1.0
   }

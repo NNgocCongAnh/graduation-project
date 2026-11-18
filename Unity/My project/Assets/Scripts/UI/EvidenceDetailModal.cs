@@ -58,8 +58,14 @@ public class EvidenceDetailModal : MonoBehaviour
         _instance = this;
         uiFont = DetectiveAssetBank.GetDefaultUIFont();
 
-        // Tắt triệt để giao diện đen cũ của scene nếu có
-        if (modalRoot != null && modalRoot != gameObject)
+        Image selfBg = GetComponent<Image>();
+        if (selfBg != null)
+        {
+            selfBg.enabled = false;
+            selfBg.raycastTarget = false;
+        }
+
+        if (modalRoot != null)
         {
             modalRoot.SetActive(false);
         }
@@ -123,10 +129,11 @@ public class EvidenceDetailModal : MonoBehaviour
         {
             paperRootGo.SetActive(false);
         }
-        if (modalRoot != null && modalRoot != gameObject)
+        if (modalRoot != null)
         {
             modalRoot.SetActive(false);
         }
+        gameObject.SetActive(false);
     }
 
     private void EnsurePaperRoot()
@@ -451,9 +458,8 @@ public class EvidenceDetailModal : MonoBehaviour
 
         // Bảng thuộc tính vật chứng bên phải
         GameObject infoBox = CreateBox(crt, new Vector2(0.37f, topSecYMin), new Vector2(1.0f, topSecYMax), TableBg, PaperBorder);
-        string categoryTag = evidence.is_weapon
-            ? "<color=#9c2b2b><b>🔴 HUNG KHÍ GÂY ÁN TIỀM TÀNG (SUSPECTED WEAPON)</b></color>"
-            : "<color=#1b4d8c><b>🔵 VẬT CHỨNG HIỆN TRƯỜNG (CRIME SCENE EVIDENCE)</b></color>";
+        // Phân loại vật chứng trung tính chuẩn hồ sơ giám định hiện trường (không để lộ trước hung khí)
+        string categoryTag = "<color=#1b4d8c><b>🔵 VẬT CHỨNG THU GIỮ HIỆN TRƯỜNG (CRIME SCENE EXHIBIT)</b></color>";
 
         string demoText =
             $"<size=11>TÊN VẬT MẪU:</size>   <b><size=16>{(string.IsNullOrEmpty(evidence.title) ? "VẬT CHỨNG" : evidence.title.ToUpper())}</size></b>\n" +

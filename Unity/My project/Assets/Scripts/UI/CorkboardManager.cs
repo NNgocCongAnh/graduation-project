@@ -180,7 +180,7 @@ public class CorkboardManager : MonoBehaviour
     /// <summary>
     /// Spawns a suspect or evidence card on the corkboard and asynchronously loads its photograph.
     /// </summary>
-    public void AddCard(string id, string title, bool isSuspect, string imageUrl = null)
+    public void AddCard(string id, string title, bool isSuspect, string imageUrl = null, string gender = null)
     {
         if (cardPrefab == null || itemContainer == null)
         {
@@ -238,7 +238,7 @@ public class CorkboardManager : MonoBehaviour
         if (rawImg != null)
         {
             // 1. Instant local resolution or smart semantic matching from asset bank (0s latency!)
-            Texture2D localTex = DetectiveAssetBank.ResolveTexture(imageUrl, id, title, isSuspect);
+            Texture2D localTex = DetectiveAssetBank.ResolveTexture(imageUrl, id, title, isSuspect, gender);
             if (localTex != null)
             {
                 cardTextures[id] = localTex;
@@ -263,18 +263,7 @@ public class CorkboardManager : MonoBehaviour
             }
         }
 
-        // Tự động khởi tạo dây chỉ đỏ từ dữ liệu vụ án ban đầu
-        CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
-        if (currentCase != null && currentCase.evidences != null)
-        {
-            var ev = currentCase.evidences.Find(e => e.id == id);
-            if (ev != null && !string.IsNullOrEmpty(ev.linked_suspect_id))
-            {
-                string key = GetConnectionKey(ev.id, ev.linked_suspect_id);
-                manualConnections.Add(key);
-            }
-        }
-
+        // Người chơi bắt đầu điều tra với bảng ghim hoàn toàn trống dây chỉ đỏ (đảm bảo tính bảo mật và suy luận)
         draggable.SetupInteractiveElements();
 
         if (showRedStrings)

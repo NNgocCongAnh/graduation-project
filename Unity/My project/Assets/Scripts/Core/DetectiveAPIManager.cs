@@ -24,6 +24,100 @@ public class DetectiveAPIManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        if (ServerConfig.IsLocalHost)
+        {
+            StartCoroutine(CheckAndEnsureBackendRunning());
+        }
+    }
+
+    private static bool hasAttemptedAutoLaunch = false;
+
+    public static void TryAutoLaunchBackend()
+    {
+        if (hasAttemptedAutoLaunch) return;
+        hasAttemptedAutoLaunch = true;
+
+        try
+        {
+            string[] candidateDirs = new string[]
+            {
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "..", "..", "detective-backend")),
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "..", "detective-backend")),
+                @"D:\Work\Đồ Án Tốt Nghiệp\detective-backend"
+            };
+
+            string backendDir = null;
+            foreach (string dir in candidateDirs)
+            {
+                if (System.IO.Directory.Exists(dir) && System.IO.File.Exists(System.IO.Path.Combine(dir, "main.py")))
+                {
+                    backendDir = dir;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(backendDir)) return;
+
+            string[] pythonPaths = new string[]
+            {
+                @"C:\ProgramData\miniconda3\python.exe",
+                @"C:\Python310\python.exe",
+                @"C:\Python311\python.exe",
+                @"C:\Python312\python.exe",
+                "python"
+            };
+
+            string pythonExe = null;
+            foreach (string py in pythonPaths)
+            {
+                if (System.IO.File.Exists(py) || py == "python")
+                {
+                    pythonExe = py;
+                    break;
+                }
+            }
+
+            if (pythonExe != null)
+            {
+                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = pythonExe,
+                    Arguments = "-m uvicorn main:app --host 0.0.0.0 --port 8000",
+                    WorkingDirectory = backendDir,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                System.Diagnostics.Process.Start(psi);
+                Debug.Log($"[APIManager] Auto-launched backend process from: {backendDir}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[APIManager] Could not auto-launch backend: {ex.Message}");
+        }
+    }
+
+    private IEnumerator CheckAndEnsureBackendRunning()
+    {
+        using (UnityWebRequest ping = UnityWebRequest.Get(baseUrl + "/api/health"))
+        {
+            ping.timeout = 2;
+            yield return ping.SendWebRequest();
+            if (ping.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log("[APIManager] Local backend not responding to ping, starting in background...");
+                TryAutoLaunchBackend();
+            }
+            else
+            {
+                Debug.Log("[APIManager] Local backend is active and healthy.");
+            }
+        }
+    }
+
     /// <summary>
     /// Fetch verified sample case dossier for offline testing and quick start.
     /// Prioritizes local bundled sample case in StreamingAssets for instant offline playability.
@@ -254,6 +348,29 @@ public class DetectiveAPIManager : MonoBehaviour
 
             if (req.result != UnityWebRequest.Result.Success)
             {
+                if (ServerConfig.IsLocalHost && !hasAttemptedAutoLaunch)
+                {
+                    Debug.Log($"[APIManager] POST to {endpoint} failed on localhost. Trying auto-launch backend...");
+                    TryAutoLaunchBackend();
+                    yield return new WaitForSeconds(3f);
+
+                    using (UnityWebRequest retryReq = new UnityWebRequest(baseUrl + endpoint, "POST"))
+                    {
+                        retryReq.timeout = 60;
+                        retryReq.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                        retryReq.downloadHandler = new DownloadHandlerBuffer();
+                        retryReq.SetRequestHeader("Content-Type", "application/json");
+                        ClientSecurity.SignRequest(retryReq, endpoint, json);
+                        yield return retryReq.SendWebRequest();
+
+                        if (retryReq.result == UnityWebRequest.Result.Success)
+                        {
+                            callback(true, retryReq.downloadHandler.text);
+                            yield break;
+                        }
+                    }
+                }
+
                 Debug.LogError($"[APIManager] POST Error ({endpoint}): {req.error}");
                 callback(false, null);
             }

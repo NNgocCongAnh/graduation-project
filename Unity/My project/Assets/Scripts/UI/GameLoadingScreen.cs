@@ -26,6 +26,12 @@ public class GameLoadingScreen : MonoBehaviour
     private void Awake()
     {
         if (_instance == null) _instance = this;
+        Image selfImg = GetComponent<Image>();
+        if (selfImg != null)
+        {
+            selfImg.enabled = false;
+            selfImg.raycastTarget = false;
+        }
     }
 
     private RectTransform root;
@@ -78,6 +84,7 @@ public class GameLoadingScreen : MonoBehaviour
         }
 
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
 
         // Switch back to gentle investigation BGM
         AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.ConanRan);

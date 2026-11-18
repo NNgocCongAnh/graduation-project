@@ -32,33 +32,71 @@ CF_API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN")
 
 # Semantic Keyword Dictionaries for Suspect Archetypes
 SUSPECT_ARCHETYPE_RULES: List[Dict] = [
+    # Female Archetypes
+    {
+        "filename": "female_20s.png",
+        "keywords": ["tiểu thư", "cháu gái", "con gái", "nghệ sĩ", "dương cầm", "piano", "nhiếp ảnh", "sinh viên", "cô", "chị", "young woman", "pianist"],
+        "gender": "female",
+        "min_age": 18,
+        "max_age": 32
+    },
+    {
+        "filename": "young_female_1.png",
+        "keywords": ["cháu gái", "tiểu thư", "cô gái", "y tá", "nữ sinh", "nghệ sĩ", "mai", "lan", "hương", "linh", "hoa"],
+        "gender": "female",
+        "min_age": 18,
+        "max_age": 30
+    },
+    {
+        "filename": "female_30s.png",
+        "keywords": ["nữ", "tiểu thư", "cháu gái", "nghệ sĩ", "bác sĩ nữ", "luật sư nữ", "doanh nhân nữ", "phu nhân"],
+        "gender": "female",
+        "min_age": 25,
+        "max_age": 45
+    },
+    {
+        "filename": "middle_female_1.png",
+        "keywords": ["quý bà", "phu nhân", "mẹ", "bác gái", "dì", "nữ giám đốc", "nữ quản lý"],
+        "gender": "female",
+        "min_age": 40,
+        "max_age": 58
+    },
+    {
+        "filename": "elderly_female.png",
+        "keywords": ["bà", "bà lão", "cụ bà", "phu nhân già", "mẹ già"],
+        "gender": "female",
+        "min_age": 58,
+        "max_age": 95
+    },
+
+    # Male Archetypes
+    {
+        "filename": "young_male_20s.png",
+        "keywords": ["cháu trai", "con trai", "sinh viên", "thanh niên", "cậu", "anh", "young", "nam"],
+        "gender": "male",
+        "min_age": 18,
+        "max_age": 35
+    },
     {
         "filename": "butler_male_50s.png",
-        "keywords": ["quản gia", "butler", "gia nhân", "người hầu", "valet", "steward", "phục vụ"],
+        "keywords": ["quản gia", "butler", "gia nhân", "người hầu", "valet", "steward", "phục vụ", "bếp trưởng"],
         "gender": "male",
         "min_age": 40,
         "max_age": 75
     },
     {
         "filename": "businessman_male_50s.png",
-        "keywords": ["doanh nhân", "businessman", "bác sĩ", "doctor", "luật sư", "lawyer", "chủ", "giám đốc", "triệu phú", "nhà sưu tầm", "collector", "ông trùm", "chủ tịch"],
+        "keywords": ["doanh nhân", "businessman", "bác sĩ", "doctor", "luật sư", "lawyer", "chủ", "giám đốc", "triệu phú", "nhà sưu tầm", "collector", "ông trùm", "chủ tịch", "hưng", "khánh", "minh"],
         "gender": "male",
         "min_age": 35,
-        "max_age": 75
-    },
-    {
-        "filename": "female_30s.png",
-        "keywords": ["tiểu thư", "cháu gái", "con gái", "nghệ sĩ", "nhiếp ảnh", "bà", "cô", "phu nhân", "heiress", "lady", "nữ bác sĩ", "nữ"],
-        "gender": "female",
-        "min_age": 18,
         "max_age": 60
     },
     {
-        "filename": "young_male_20s.png",
-        "keywords": ["cháu trai", "con trai", "nghệ sĩ", "nhiếp ảnh", "nhạc sĩ", "sinh viên", "thanh niên", "cậu", "anh", "young", "artist", "son"],
+        "filename": "elderly_male.png",
+        "keywords": ["ông lão", "cụ ông", "bác", "già", "trưởng lão", "tiền bối"],
         "gender": "male",
-        "min_age": 18,
-        "max_age": 35
+        "min_age": 60,
+        "max_age": 95
     }
 ]
 
@@ -109,36 +147,44 @@ class AssetService:
     def __init__(self, base_url: str = ""):
         self.base_url = base_url.rstrip("/")
 
-    def _infer_gender(self, name: str, occupation: str, statement: str) -> str:
-        """Infer gender from Vietnamese/English naming and pronouns."""
+    def _normalize_gender(self, raw_gender: Optional[str] = None, name: str = "", occupation: str = "", statement: str = "") -> str:
+        """Strict gender determination prioritizing explicit gender field, then Vietnamese middle names and pronouns."""
+        if raw_gender:
+            g = raw_gender.strip().lower()
+            if any(w in g for w in ["nữ", "female", "woman", "girl", "lady", "bà", "cô", "chị"]):
+                return "female"
+            if any(w in g for w in ["nam", "male", "man", "boy", "ông", "anh"]):
+                return "male"
+
         text = f"{name} {occupation} {statement}".lower()
-        female_clues = ["nữ", "bà", "cô", "chị", "tiểu thư", "eleanor", "emma", "sarah", "mary", "mrs", "ms", "lady"]
-        male_clues = ["nam", "ông", "anh", "cậu", "william", "arthur", "julian", "john", "mr", "lord", "sir"]
+        female_clues = ["thị", "nữ", "bà", "cô", "chị", "tiểu thư", "eleanor", "emma", "sarah", "mary", "mrs", "ms", "lady", "mai", "lan", "hương", "linh", "hoa", "trang", "ngọc"]
+        male_clues = ["văn", "nam", "ông", "anh", "cậu", "william", "arthur", "julian", "john", "mr", "lord", "sir", "khánh", "hưng", "minh", "đạt", "tuấn", "hải"]
 
         score_f = sum(1 for w in female_clues if re.search(r"\b" + re.escape(w) + r"\b", text))
         score_m = sum(1 for w in male_clues if re.search(r"\b" + re.escape(w) + r"\b", text))
 
         return "female" if score_f > score_m else "male"
 
-    def match_suspect_asset(self, name: str, age: int, occupation: str, alibi_statement: str = "") -> str:
-        """Match suspect details to the best available curated portrait."""
-        inferred_gender = self._infer_gender(name, occupation, alibi_statement)
+    def match_suspect_asset(self, name: str, age: int, occupation: str, alibi_statement: str = "", gender: Optional[str] = None) -> str:
+        """Match suspect details to the best available curated portrait with strict gender matching."""
+        inferred_gender = self._normalize_gender(gender, name, occupation, alibi_statement)
         text_corpus = f"{name} {occupation} {alibi_statement}".lower()
 
         best_match = None
         highest_score = -999
 
         for rule in SUSPECT_ARCHETYPE_RULES:
-            score = 0
-            # Strict Gender match: Penalize heavily if gender differs
-            if rule["gender"] == inferred_gender:
-                score += 10
-            else:
-                score -= 20
+            # Strict Gender match: NEVER assign male portrait to female or vice-versa
+            if rule["gender"] != inferred_gender:
+                continue
+
+            score = 10
 
             # Age range match
             if rule["min_age"] <= age <= rule["max_age"]:
                 score += 5
+            else:
+                score -= abs(age - ((rule["min_age"] + rule["max_age"]) // 2)) // 5
 
             # Keyword match
             for kw in rule["keywords"]:
@@ -149,15 +195,8 @@ class AssetService:
                 highest_score = score
                 best_match = rule["filename"]
 
-            for kw in rule["keywords"]:
-                if kw in text_corpus:
-                    score += 4
-
-            if score > highest_score:
-                highest_score = score
-                best_match = rule["filename"]
-
-        matched_file = best_match or "butler_male_50s.png"
+        fallback = "female_30s.png" if inferred_gender == "female" else "butler_male_50s.png"
+        matched_file = best_match or fallback
         return f"{self.base_url}/static/assets/suspects/{matched_file}"
 
     def match_evidence_asset(self, title: str, description: str, location: str = "") -> str:
@@ -226,7 +265,8 @@ class AssetService:
                 name=s.name,
                 age=s.age,
                 occupation=s.occupation,
-                alibi_statement=s.alibi_statement
+                alibi_statement=s.alibi_statement,
+                gender=getattr(s, "gender", None)
             )
 
         for ev in case_dossier.evidences:

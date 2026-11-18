@@ -67,20 +67,45 @@ public static class DetectiveAssetBank
     };
 
     /// <summary>
-    /// Nạp hoặc ghép ảnh tương thích ngay lập tức cho thẻ bài.
+    /// Nạp hoặc ghép ảnh tương thích ngay lập tức cho thẻ bài với kiểm tra giới tính nghiêm ngặt.
     /// </summary>
-    public static Texture2D ResolveTexture(string imageUrlOrPath, string cardId, string title, bool isSuspect)
+    public static Texture2D ResolveTexture(string imageUrlOrPath, string cardId, string title, bool isSuspect, string gender = null)
     {
-        string cacheKey = $"{cardId}_{title}";
+        string cacheKey = $"{cardId}_{title}_{gender}";
         if (textureCache.TryGetValue(cacheKey, out Texture2D cached) && cached != null)
         {
             return cached;
         }
 
-        // 1. Nếu có đường dẫn file cụ thể, thử tìm nạp trực tiếp từ ổ cứng
+        bool isFemale = false;
+        if (!string.IsNullOrEmpty(gender))
+        {
+            string g = gender.ToLowerInvariant();
+            isFemale = g.Contains("nữ") || g.Contains("female") || g.Contains("woman") || g.Contains("girl");
+        }
+        else if (isSuspect)
+        {
+            string lowerTitle = (title ?? "").ToLowerInvariant();
+            isFemale = lowerTitle.Contains("thị") || lowerTitle.Contains("nữ") || lowerTitle.Contains("bà") || 
+                       lowerTitle.Contains("cô") || lowerTitle.Contains("chị") || lowerTitle.Contains("tiểu thư") || 
+                       lowerTitle.Contains("mai") || lowerTitle.Contains("lan") || lowerTitle.Contains("hương") || 
+                       lowerTitle.Contains("linh") || lowerTitle.Contains("hoa") || lowerTitle.Contains("trang");
+        }
+
+        // 1. Nếu có đường dẫn file cụ thể, kiểm tra xem có xung đột giới tính không
         if (!string.IsNullOrEmpty(imageUrlOrPath))
         {
             string cleanName = Path.GetFileName(imageUrlOrPath.Trim());
+            // Nếu nghi phạm là Nữ nhưng đường dẫn chứa 'male' (do bug cũ/mô hình gán nhầm), chuyển hướng sang ảnh Nữ
+            if (isSuspect && isFemale && cleanName.ToLowerInvariant().Contains("male"))
+            {
+                cleanName = "female_20s.png";
+            }
+            else if (isSuspect && !isFemale && cleanName.ToLowerInvariant().Contains("female"))
+            {
+                cleanName = "young_male_20s.png";
+            }
+
             Texture2D directTex = LoadFromStreamingAssets(cleanName, isSuspect);
             if (directTex != null)
             {
@@ -90,7 +115,7 @@ public static class DetectiveAssetBank
         }
 
         // 2. Thuật toán Semantic Matching dựa trên tên & mô tả + biến thể 3X
-        string matchedFileName = MatchAssetFileName(cardId, title, isSuspect);
+        string matchedFileName = MatchAssetFileName(cardId, title, isSuspect, isFemale);
         Texture2D matchedTex = LoadFromStreamingAssets(matchedFileName, isSuspect);
         if (matchedTex != null)
         {
@@ -107,13 +132,19 @@ public static class DetectiveAssetBank
     /// <summary>
     /// Thuật toán so khớp từ khóa và lựa chọn biến thể 3X thích hợp cho nghi phạm.
     /// </summary>
-    public static string MatchAssetFileName(string cardId, string text, bool isSuspect)
+    public static string MatchAssetFileName(string cardId, string text, bool isSuspect, bool isFemale = false)
     {
         string lower = (text ?? "").ToLowerInvariant();
         int hash = Math.Abs(((cardId ?? "") + "_" + (text ?? "")).GetHashCode());
 
         if (isSuspect)
         {
+            if (isFemale)
+            {
+                string[] femaleVariants = new[] { "female_20s.png", "young_female_1.png", "young_female_2.png", "female_30s.png" };
+                return femaleVariants[hash % femaleVariants.Length];
+            }
+
             foreach (var rule in SuspectRules)
             {
                 foreach (string kw in rule.keywords)
@@ -126,7 +157,7 @@ public static class DetectiveAssetBank
                 }
             }
             // Fallback suspect
-            string[] defaultFallbacks = new[] { "young_male_1.png", "middle_male_1.png", "young_female_1.png" };
+            string[] defaultFallbacks = new[] { "young_male_1.png", "middle_male_1.png", "businessman_male_50s.png" };
             return defaultFallbacks[hash % defaultFallbacks.Length];
         }
         else

@@ -171,7 +171,7 @@ public class GameController : MonoBehaviour
         {
             foreach (var suspect in currentCase.suspects)
             {
-                corkboardManager.AddCard(suspect.id, suspect.name, true, suspect.image_url);
+                corkboardManager.AddCard(suspect.id, suspect.name, true, suspect.image_url, suspect.gender);
             }
         }
 

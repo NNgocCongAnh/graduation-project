@@ -62,6 +62,7 @@ public class LanLobbyModal : MonoBehaviour
         hostField.text = ServerConfig.Host;
         roomField.text = ServerConfig.RoomId;
         transform.SetAsLastSibling(); // draw above corkboard, desk props and modals
+        gameObject.SetActive(true);
         root.gameObject.SetActive(true);
         RefreshStatus();
     }
@@ -69,6 +70,7 @@ public class LanLobbyModal : MonoBehaviour
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     // ------------------------------------------------------------------

@@ -44,12 +44,14 @@ public class InGamePauseModal : MonoBehaviour
         transform.SetAsLastSibling();
         if (confirmDialog != null) confirmDialog.SetActive(false);
         if (toastText != null) toastText.text = "";
+        gameObject.SetActive(true);
         root.gameObject.SetActive(true);
     }
 
     public void Close()
     {
         if (root != null) root.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     private void BuildUI()
