@@ -1,109 +1,98 @@
-# ĐỒ ÁN TỐT NGHIỆP ĐẠI HỌC — UNSOLVED CASE FILES AI
+# ĐỒ ÁN TỐT NGHIỆP — UNSOLVED CASE FILES AI
 
-**Đề tài:** *Nghiên cứu và xây dựng trò chơi trinh thám giải đố trên nền tảng Web, ứng dụng mô hình ngôn ngữ lớn (LLM) để sinh tự động các bộ hồ sơ vụ án có tính logic và nhất quán*  
-*(Hướng tiếp cận Neuro-Symbolic kết hợp Hệ đa tác tử và Bộ kiểm định hình thức)*
+**Đề tài:** *Nghiên cứu và xây dựng trò chơi trinh thám giải đố trên nền tảng Web, ứng dụng mô hình ngôn ngữ lớn (LLM) để sinh tự động các bộ hồ sơ vụ án có tính logic và nhất quán*
 
-- **Sinh viên thực hiện:** Nguyễn Ngọc Công Anh — MSSV: `22010201` — Lớp: `K16-KHMT`
-- **Cán bộ hướng dẫn:** TS. Nguyễn Văn Tánh — Khoa Khoa học máy tính, Trường Đại học Phenikaa
-
----
-
-## 📊 Danh mục Kết quả & Tài liệu Bàn giao
-
-Dự án đã hoàn tất **100% các hạng mục nghiên cứu, phát triển phần mềm và đánh giá thực nghiệm**, phục vụ buổi bảo vệ khóa luận tốt nghiệp:
-
-| Hạng mục | Tệp / Thư mục trên Kho chứa | Mô tả |
-| :--- | :--- | :--- |
-| **Bản mềm Luận văn (PDF)** | [`BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf`](./BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf) | Bản báo cáo hoàn chỉnh 5 chương theo quy chuẩn Đại học Phenikaa |
-| **Slide Thuyết trình** | [`BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx`](./BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx) | Bộ slide báo cáo tiến độ và bảo vệ khóa luận tốt nghiệp |
-| **Kết quả Thực nghiệm** | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Sổ tay Jupyter tổng hợp 30 phiên thực nghiệm đối sánh 3 mô hình LLM |
-| **Mã nguồn Backend AI** | [`detective-backend/`](./detective-backend) | FastAPI ASGI, 4 Specialized Agents, Validator Henssge & Bipartite Matching |
-| **Mã nguồn Game Client** | [`Unity/My project/`](./Unity/My%20project) | Unity 6 URP (Bàn trinh thám, Corkboard, Hồ sơ pháp y, Quy trình 3 phong bì) |
-| **Khởi chạy Docker** | [`docker-compose.yml`](./docker-compose.yml) | Cấu hình Docker Compose khởi chạy trọn gói máy chủ chỉ với 1 lệnh |
-| **Mẫu Biến môi trường** | [`.env.example`](./.env.example) | Mẫu cấu hình an toàn cho OpenRouter, 9Router, Google AI Studio hoặc Ollama |
+- **Sinh viên thực hiện:** Nguyễn Ngọc Công Anh — MSSV `22010201` — Lớp `K16-KHMT`
+- **Giảng viên hướng dẫn:** TS. Nguyễn Văn Tánh — Trường Công nghệ thông tin, Đại học Phenikaa
 
 ---
 
-## 🏗️ Kiến trúc Hệ thống (Neuro-Symbolic Multi-Agent)
+## Cấu trúc kho mã nguồn
 
-Hệ thống kết hợp sức mạnh biểu đạt ngữ nghĩa của **Mô hình Ngôn ngữ Lớn (LLM)** với tính chính xác toán học của **Bộ kiểm định Biểu tượng (Symbolic Validator)**:
+| Thư mục / tệp | Nội dung |
+| :--- | :--- |
+| [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
+| [`detective-backend/test_*.py`](./detective-backend) | 85 kiểm thử đơn vị và tích hợp (pytest) |
+| [`detective-backend/*_runner.py`, `solver_agent.py`](./detective-backend) | Script thực nghiệm: benchmark, nghiên cứu loại trừ, tiêm lỗi, tác tử phá án độc lập |
+| [`detective-backend/*_results*.json`](./detective-backend) | Kết quả thô của từng lượt thực nghiệm (dùng cho Chương 4 báo cáo) |
+| [`Unity/My project/`](./Unity/My%20project) | Client trò chơi Unity 6 URP 2D (Desktop và WebGL) |
+| [`V0/`](./V0) | Nguyên mẫu Web ban đầu (React + FastAPI), được thay thế bởi kiến trúc hiện tại |
+| [`docs/architecture/`](./docs/architecture) | Các bản ghi quyết định kiến trúc (ADR) |
+| [`docker-compose.yml`](./docker-compose.yml) | Khởi chạy backend bằng Docker |
+
+## Kiến trúc
 
 ```text
-[ Unity 6 URP 2D/3D Client (Desktop EXE / WebGL) ]
-             │  REST API (HTTP/JSON + HMAC-SHA-256) & WebSocket (/ws/rooms/{room_id})
-             ▼
-[ FastAPI Backend (ASGI / Uvicorn) + Pydantic v2 + SQLite WAL ]
-             │
-             ├── 1. OutlineAgent   ──► Cốt truyện, Nạn nhân & Khóa giờ tử vong Henssge (Bisection)
-             ├── 2. CharacterAgent ──► Nghi phạm & Lời khai ngoại phạm (Zero-spoiler, không sơ hở rẻ tiền)
-             ├── 3. ClueAgent      ──► 5 vật chứng khách quan & Mâu thuẫn môi trường (EV-01..EV-05)
-             ├── 4. Bộ kiểm định   ──► validate_case_diagnostics (Henssge + Đồ thị hai phía Bipartite)
-             │                         └── Localized Patch Repair (Sửa cục bộ thành phần lỗi O(1))
-             └── 5. DeductionAgent ──► Chuỗi suy luận đa chặng (4-Hop Reasoning Chain)
-             │
-             ▼
-[ Cloud LLM Gateway (OpenAI GPT-4o-mini / Google AI Studio Gemini / 9Router / Ollama) ]
+[ Unity 6 URP 2D Client (Desktop / WebGL) ]
+        │  REST (HTTP/JSON, chữ ký HMAC-SHA-256) + WebSocket phòng chơi LAN
+        ▼
+[ FastAPI + Pydantic v2 + SQLite ]
+        ├── OutlineAgent    → cốt truyện, nạn nhân, chân lý gốc; cửa sổ TOD tính bằng Henssge (chia đôi)
+        ├── CharacterAgent  → nghi phạm, lời khai ngoại phạm
+        ├── ClueAgent       → vật chứng then chốt và nghi binh
+        ├── DeductionAgent  → chuỗi suy luận
+        └── validate_case_diagnostics → kiểm định cấu trúc; vi phạm được định tuyến về đúng tác tử để vá cục bộ
+        ▼
+[ LLM qua gateway tương thích OpenAI (GitHub Models / Ollama cục bộ) ]
 ```
 
----
+Client chỉ nhận `ClientCaseDossier` (không có chân lý gốc và cờ đáp án); việc chấm điểm kết án thực hiện trên máy chủ (`POST /api/case/verify`).
 
-## 🚀 Hướng dẫn Cài đặt & Khởi chạy
+## Cài đặt và chạy
 
-### Cách 1: Khởi chạy bằng Docker Compose (Khuyến nghị cho Server / Tester)
-Yêu cầu: Đã cài đặt Docker và Docker Compose.
+Biến môi trường bắt buộc (đặt trong `detective-backend/.env`, xem `.env.example`):
+
+| Biến | Ý nghĩa |
+| :--- | :--- |
+| `GAME_CLIENT_SECRET` | Khóa ký HMAC của client; máy chủ từ chối khởi động nếu thiếu |
+| `LLM_API_BASE`, `LLM_API_KEY`, `LLM_MODEL` | Cấu hình gateway LLM; không có giá trị mặc định cho khóa |
+| `INTERNAL_API_TOKEN` | (Tùy chọn) mở các endpoint nội bộ chứa đáp án `/api/case/{id}/internal`, `/graph`; nếu không đặt, các endpoint này bị tắt |
+| `CORS_ORIGINS` | (Tùy chọn) danh sách origin được phép, phân tách bằng dấu phẩy |
+
 ```bash
-# 1. Sao chép file cấu hình môi trường
-cp .env.example .env
+# Docker
+docker compose up --build -d          # API: http://localhost:8000/docs
 
-# 2. Khởi chạy toàn bộ dịch vụ backend bằng Docker
-docker compose up --build -d
-```
-* Backend API hoạt động tại: `http://localhost:8000/docs`
-* Kiểm tra trạng thái máy chủ: `http://localhost:8000/api/health`
-
----
-
-### Cách 2: Khởi chạy 1-Click trên Windows (Cho người chơi Game)
-1. Nhấp đúp chuột vào file:
-   ```text
-   CHAY_GAME_TRON_GOI.bat
-   ```
-2. Hệ thống sẽ tự động bật máy chủ Backend FastAPI chạy ngầm và mở game Unity `UnsolvedCaseFiles.exe`.
-
----
-
-### Cách 3: Khởi chạy Thủ công bằng Python (Dành cho Lập trình viên)
-```bash
-# 1. Cài đặt môi trường Backend
+# Thủ công
 cd detective-backend
-python -m venv venv
-venv\Scripts\activate
+python -m venv venv && venv\Scripts\activate
 pip install -r requirements.txt
-
-# 2. Khởi chạy FastAPI Backend
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
----
+Trên Windows có thể dùng `CHAY_GAME_TRON_GOI.bat` để chạy backend kèm bản build game.
 
-## 🎮 Cơ chế Chơi & Quy trình Điều tra Phá án
+## Kiểm thử
 
-Game mô phỏng chân thực quy trình phá án của một tập hồ sơ vụ án lạnh (*Cold Case File*):
-1. **📁 Tờ Giới thiệu Vụ án (Briefing Sheet - Phím B):** Đọc tóm tắt nhân thân nạn nhân, mốc thời gian và biên bản ghi chép của sĩ quan đầu tiên tiếp cận hiện trường.
-2. **🩺 Báo cáo Pháp y Khám nghiệm Tử thi (Autopsy - Phím M):** Đọc nhiệt độ trực tràng, nhiệt độ môi trường và tính toán khung giờ tử vong thực tế theo định luật nguội lạnh Henssge ($t^*$) để phá hiện trường giả.
-3. **📌 Bảng ghim Manh mối (Corkboard):** Soi ảnh chân dung nghi phạm, lời khai ngoại phạm (alibi) và đối chiếu 5 vật chứng hiện trường (EV-01 đến EV-05).
-4. **✉️ Hệ thống 3 Phong bì Mục tiêu (Objective Envelopes - Phím A):**
-   - **Phong bì 1:** Chứng minh nghi phạm vô tội (Exonerate) dựa trên alibi độc lập để mở khóa Phong bì 2.
-   - **Phong bì 2:** Vạch trần hiện trường giả & Tìm hung khí thật sự (bẻ gãy alibi hung thủ).
-   - **Phong bì 3:** Phát lệnh bắt giữ chính thức (Arrest Warrant) $\rightarrow$ Khởi tố hung thủ và xem phần **Tái hiện toàn cảnh vụ án (Bonus Solution)**.
+```bash
+cd detective-backend
+python -m pytest -q
+```
 
----
+Kết quả tại commit hiện tại: 85/85 kiểm thử đạt.
 
-## 🔬 Kết quả Đánh giá Thực nghiệm (Chương 4 Luận văn)
+## Tái lập thực nghiệm (Chương 4)
 
-Thực nghiệm đo đạc 30 phiên độc lập trên phần cứng nghiên cứu:
-* **Mô hình triển khai (`gh/gpt-4o-mini`):** Tỷ lệ hợp lệ logic đạt **100%**, độ trễ trung bình $10.98\text{ s}$.
-* **Mô hình đối chuẩn (`ollama/gemma4:31b-cloud`):** Tỷ lệ hợp lệ logic **100%**, độ trễ trung bình $11.66\text{ s}$.
-* **Sai số thời gian tử vong (Henssge):** Đạt **0%** nhờ tầng giải số vi phân bisection độc lập.
-* **Cơ chế sửa lỗi cục bộ (Localized Patch Repair):** Tiết kiệm **65%** thời gian suy luận so với việc tạo sinh lại toàn bộ kịch bản khi phát hiện vi phạm ràng buộc.
-Chi tiết số liệu đối sánh và biểu đồ có trong file [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb).
+```bash
+# chạy từ thư mục gốc của kho mã nguồn
+python detective-backend/benchmark_runner.py --mode benchmark --models gh/gpt-4o-mini --trials-per-theme 10 --output-benchmark detective-backend/benchmark_results_gpt4o_mini.json
+python detective-backend/benchmark_runner.py --mode ablation --ablation-trials 1 --output-ablation detective-backend/ablation_results.json
+python detective-backend/fault_injection_runner.py
+python detective-backend/solver_agent.py
+```
+
+| Thực nghiệm | Tệp kết quả | Cỡ mẫu | Kết quả chính |
+| :--- | :--- | :---: | :--- |
+| Benchmark `gh/gpt-4o-mini` | `benchmark_results_gpt4o_mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 23,23 s, P95 30,90 s |
+| Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o.json` | 30 | 30/30; P50 41,95 s, P95 49,51 s |
+| Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB |
+| Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
+| Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá (giảm 77,0% so với sinh lại toàn bộ) |
+| Tác tử phá án độc lập | `solver_benchmark_results.json` | 20 | Xác định đúng thủ phạm 19/20 |
+
+## Hạn chế đã biết
+
+- Bộ kiểm định chỉ kiểm tra bất biến cấu trúc (một thủ phạm, toàn vẹn tham chiếu, vật chứng then chốt, cửa sổ TOD), chưa kiểm định ngữ nghĩa lời khai.
+- Độ trễ P50 (23,23 s) và chi phí vá (4.227,6 token) chưa đạt ngưỡng thiết kế (≤ 20 s, ≤ 500 token).
+- Mô hình còn thiên lệch khi chọn thủ phạm (`SUSP-02` ở 54/60 lượt).
+- Chưa có thử nghiệm người chơi có quy trình; WebSocket phòng chơi chưa có xác thực phiên (chỉ dùng trong LAN tin cậy).

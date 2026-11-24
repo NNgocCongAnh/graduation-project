@@ -12,11 +12,19 @@ AGENTS.md
 .codegraph/
 .mcp.json
 presentation_web/
-V0/
+# V0 = first React web prototype (referenced in the report): source only
+V0/**/node_modules/
+V0/frontend/dist/
+V0/.env.example
+V0/**/*.db
 Prepare(Trước khi đăng ký)/
 design/
 production/
-docs/
+# docs: only architecture decision records are published
+docs/*
+!docs/architecture/
+!docs/registry/
+detective-backend/ablation_results_n9.json
 project.yaml
 render.yaml
 convert_to_word.py
@@ -174,3 +182,6 @@ detective-backend/cases/*TEST*.json
 !CHAY_GAME_TRON_GOI.bat
 !detective-backend/cases/CASE-2026-001.json
 !/README.md
+
+# V0 env template not published (kept local)
+V0/.env.example
