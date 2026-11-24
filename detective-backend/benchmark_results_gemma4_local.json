@@ -1,0 +1,1497 @@
+[
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:20-21:20",
+    "crime_time": "20:45",
+    "patch_retries": 0,
+    "latency_sec": 5297.93,
+    "title": "Bí ẩn Văn Thư Bị Giả Mạo Tại Biệt Thự Phong Gia",
+    "summary": "Tại căn biệt thự cổ trang trọng, ông Nguyễn Văn Phong được tìm thấy đã tử vong trong phòng làm việc. Một tài liệu quan trọng về việc phân chia tài sản đã được ký vào chiều hôm trước, nhưng những bằng chứng y pháp lại hé lộ một sự thật kinh hoàng đằng sau chữ ký cuối cùng đó.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-4o-mini",
+      "ClueAgent": "gh/gpt-4o-mini",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11322,
+      "gen_completion_tokens": 5149,
+      "gen_total_tokens": 16471,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16471,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1810,
+          "total_tokens": 3356
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4174,
+          "completion_tokens": 983,
+          "total_tokens": 5157
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4259,
+          "completion_tokens": 1020,
+          "total_tokens": 5279
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1343,
+          "completion_tokens": 1336,
+          "total_tokens": 2679
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 1
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:20-21:20",
+    "crime_time": "20:45",
+    "patch_retries": 0,
+    "latency_sec": 1132.99,
+    "title": "Bí ẩn Cái Chết Trong Phòng Làm Việc Của Ngôi Biệt Thự Blackwood",
+    "summary": "Thân xác của ông Phan Văn Khải, chủ sở hữu tài sản khổng lồ, được phát hiện trong phòng làm việc biệt thự cổ vào sáng hôm sau. Các nhân chứng đều có lý do nghi ngờ, và một bản di chúc mới có chữ ký của nạn nhân đã được tìm thấy, nhưng lại gây ra những mâu thuẫn pháp y nghiêm trọng.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11247,
+      "gen_completion_tokens": 5121,
+      "gen_total_tokens": 16368,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16368,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1386,
+          "total_tokens": 2932
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4169,
+          "completion_tokens": 878,
+          "total_tokens": 5047
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4227,
+          "completion_tokens": 1099,
+          "total_tokens": 5326
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1305,
+          "completion_tokens": 1758,
+          "total_tokens": 3063
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 2
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:20-22:20",
+    "crime_time": "21:45",
+    "patch_retries": 0,
+    "latency_sec": 1072.55,
+    "title": "Bí Ẩn Thư Phòng Bí Mật Tại Biệt Thự An",
+    "summary": "Ông Trần Quốc An, chủ đất giàu có của gia tộc, được tìm thấy đã tử vong trong phòng làm việc riêng tại biệt thự cổ vào sáng hôm sau. Vụ án được cho là trộm cắp tài liệu quan trọng, nhưng các dấu vết hiện trường lại gợi lên một vụ sát hại có chủ đích.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11291,
+      "gen_completion_tokens": 6031,
+      "gen_total_tokens": 17322,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17322,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 2023,
+          "total_tokens": 3569
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4174,
+          "completion_tokens": 1045,
+          "total_tokens": 5219
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4231,
+          "completion_tokens": 1110,
+          "total_tokens": 5341
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1340,
+          "completion_tokens": 1853,
+          "total_tokens": 3193
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 3
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:05-22:05",
+    "crime_time": "21:30",
+    "patch_retries": 0,
+    "latency_sec": 1494.38,
+    "title": "Bí Ẩn Huyết Tán Trong Ngôi Nhà Giả Dối",
+    "summary": "Tại căn biệt thự cổ uy nghiêm trên khu phố trung tâm, chủ doanh nghiệp uy tín, ông Nguyễn Văn Hải, được phát hiện tử vong trong phòng làm việc. Vụ việc diễn ra trong không khí căng thẳng của cuộc tranh chấp quyền thừa kế, để lại một hồ sơ pháp y mâu thuẫn nghiêm trọng về thời điểm nạn nhân còn tỉnh táo.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11285,
+      "gen_completion_tokens": 4996,
+      "gen_total_tokens": 16281,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16281,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1465,
+          "total_tokens": 3011
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4162,
+          "completion_tokens": 938,
+          "total_tokens": 5100
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4230,
+          "completion_tokens": 1109,
+          "total_tokens": 5339
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1347,
+          "completion_tokens": 1484,
+          "total_tokens": 2831
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 4
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:20-21:20",
+    "crime_time": "20:45",
+    "patch_retries": 0,
+    "latency_sec": 1377.29,
+    "title": "Lời Chứng Giả Trong Biệt Thự An Bình",
+    "summary": "Trong đêm tĩnh lặng của biệt thự cổ An Bình, ông Trần Văn Khải, một người giàu có, được tìm thấy đã tử vong tại phòng làm việc. Một bản di chúc mới được ký có dấu vết lạ, dẫn đến nghi vấn về một âm mưu tranh chấp quyền thừa kế phức tạp.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11262,
+      "gen_completion_tokens": 5586,
+      "gen_total_tokens": 16848,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16848,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1699,
+          "total_tokens": 3245
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4165,
+          "completion_tokens": 947,
+          "total_tokens": 5112
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4219,
+          "completion_tokens": 1099,
+          "total_tokens": 5318
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1332,
+          "completion_tokens": 1841,
+          "total_tokens": 3173
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 5
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:45-21:45",
+    "crime_time": "21:10",
+    "patch_retries": 0,
+    "latency_sec": 979.23,
+    "title": "Án mạng tại Biệt thự Gia tộc Blackwood: Bản Di chúc Giả",
+    "summary": "Ông Trần Gia Huy, một nhà tài phiệt đứng đầu gia tộc tại vùng ngoại ô Hà Nội, được phát hiện tử vong trong phòng làm việc của mình tại biệt thự cổ. Hiện trường được phong tỏa, nhưng sự xuất hiện của một tài liệu có chữ ký nạn nhân vào giờ muộn gây ra nghi vấn lớn về tính xác thực của cái chết.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11277,
+      "gen_completion_tokens": 5042,
+      "gen_total_tokens": 16319,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16319,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1384,
+          "total_tokens": 2930
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4174,
+          "completion_tokens": 906,
+          "total_tokens": 5080
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4230,
+          "completion_tokens": 1059,
+          "total_tokens": 5289
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1327,
+          "completion_tokens": 1693,
+          "total_tokens": 3020
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 6
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-03",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 1197.25,
+    "title": "Bí Ẩn Di Chúc Tại Biệt Thự Blackwood: Màn Sát Hại Trong Bóng Đêm",
+    "summary": "Một vụ án mạng kinh hoàng xảy ra tại biệt thự cổ Blackwood, nơi những bí mật gia tộc và tranh chấp tài sản bị chôn giấu. Nạn nhân được phát hiện đã tử vong trong phòng làm việc, nhưng những tài liệu pháp lý được ký vào đêm đó lại gây ra một mâu thuẫn lớn về thời điểm cái chết.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11297,
+      "gen_completion_tokens": 4970,
+      "gen_total_tokens": 16267,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16267,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1783,
+          "total_tokens": 3329
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4183,
+          "completion_tokens": 858,
+          "total_tokens": 5041
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4227,
+          "completion_tokens": 1056,
+          "total_tokens": 5283
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1341,
+          "completion_tokens": 1273,
+          "total_tokens": 2614
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 7
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:20-22:20",
+    "crime_time": "21:45",
+    "patch_retries": 0,
+    "latency_sec": 1144.12,
+    "title": "Bí ẩn Di chúc Màu Đen tại Biệt Thự Blackwood",
+    "summary": "Một buổi tối mưa gió tại dinh thự Blackwood danh tiếng, ông Trần Minh Khôi, chủ sở hữu tài sản khổng lồ, được tìm thấy đã tử vong tại phòng làm việc. Vụ án dường như là một hành động bạo lực cá nhân, nhưng những tài liệu còn sót lại lại hé lộ một màn kịch giả mạo về thời điểm cái chết.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11390,
+      "gen_completion_tokens": 5943,
+      "gen_total_tokens": 17333,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17333,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 2050,
+          "total_tokens": 3596
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4199,
+          "completion_tokens": 933,
+          "total_tokens": 5132
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4261,
+          "completion_tokens": 1052,
+          "total_tokens": 5313
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1384,
+          "completion_tokens": 1908,
+          "total_tokens": 3292
+        }
+      }
+    },
+    "c2_latency_ms": 0.015,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 8
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:45-21:45",
+    "crime_time": "21:10",
+    "patch_retries": 0,
+    "latency_sec": 1180.47,
+    "title": "Bí Ẩn Di Chúc Tại Biệt Thự Blackwood",
+    "summary": "Chủ tịch Nguyễn Đình Phong được phát hiện đã tử vong trong phòng làm việc riêng tại Biệt thự Blackwood với những dấu hiệu của một vụ sát hại dã man. Tuy nhiên, sự hiện diện của một tài liệu được ký tên bởi nạn nhân tại thời điểm nghi vấn đã gây ra một mâu thuẫn nghiêm trọng trong điều tra.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11271,
+      "gen_completion_tokens": 5995,
+      "gen_total_tokens": 17266,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17266,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 2106,
+          "total_tokens": 3652
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4167,
+          "completion_tokens": 931,
+          "total_tokens": 5098
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4237,
+          "completion_tokens": 1047,
+          "total_tokens": 5284
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1321,
+          "completion_tokens": 1911,
+          "total_tokens": 3232
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 9
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:20-22:20",
+    "crime_time": "21:45",
+    "patch_retries": 0,
+    "latency_sec": 1247.33,
+    "title": "Bí Ẩn Di Chúc Bị Giả Mạo Tại Biệt Thự Blackwood",
+    "summary": "Trong một đêm tĩnh lặng tại biệt thự cổ, chủ doanh nghiệp Nguyễn Văn Phát được tìm thấy đã chết trong phòng làm việc. Một tài liệu quan trọng được phát hiện có chữ ký của nạn nhân vào giờ muộn, nhưng những manh mối vật lý lại hé lộ một sự thao túng khủng khiếp.",
+    "theme": "Bí ẩn Biệt thự Cổ Blackwood",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11241,
+      "gen_completion_tokens": 5570,
+      "gen_total_tokens": 16811,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16811,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1546,
+          "completion_tokens": 1942,
+          "total_tokens": 3488
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4170,
+          "completion_tokens": 904,
+          "total_tokens": 5074
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4213,
+          "completion_tokens": 1063,
+          "total_tokens": 5276
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1312,
+          "completion_tokens": 1661,
+          "total_tokens": 2973
+        }
+      }
+    },
+    "c2_latency_ms": 0.01,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 10
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "22:20-23:20",
+    "crime_time": "22:45",
+    "patch_retries": 0,
+    "latency_sec": 1295.12,
+    "title": "Bí Mật Trong Hầm Núi: Vụ Án Mạng Trên Chuyến Tàu Thống Nhất",
+    "summary": "Một thương nhân giàu có được tìm thấy đã thiệt mạng trong khoang giường nằm VIP của chuyến tàu đêm. Hiện trường được phong tỏa hoàn toàn, và mọi lời khai đều dẫn đến những góc khuất của hành trình dài xuyên qua vùng núi hiểm trở.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11952,
+      "gen_completion_tokens": 5283,
+      "gen_total_tokens": 17235,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17235,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1732,
+          "total_tokens": 3463
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4382,
+          "completion_tokens": 931,
+          "total_tokens": 5313
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4453,
+          "completion_tokens": 1079,
+          "total_tokens": 5532
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1386,
+          "completion_tokens": 1541,
+          "total_tokens": 2927
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 11
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:20-22:20",
+    "crime_time": "21:45",
+    "patch_retries": 0,
+    "latency_sec": 1131.47,
+    "title": "Bí Ẩn Khoang Giường Nằm Trên Chuyến Tàu Thống Nhất",
+    "summary": "Một thương nhân giàu có được phát hiện đã chết trong khoang giường nằm VIP của mình trên Chuyến tàu Thống Nhất. Hiện trường không có dấu hiệu đột nhập, khiến cơ quan điều tra phải đối mặt với một vụ án mạng xảy ra trong không gian khép kín và cô lập của chuyến tàu đêm.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11982,
+      "gen_completion_tokens": 4911,
+      "gen_total_tokens": 16893,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16893,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1600,
+          "total_tokens": 3331
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4390,
+          "completion_tokens": 953,
+          "total_tokens": 5343
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4440,
+          "completion_tokens": 1041,
+          "total_tokens": 5481
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1421,
+          "completion_tokens": 1317,
+          "total_tokens": 2738
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 12
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 951.29,
+    "title": "Bí Ẩn Khoang Giường Số 4: Cuộc Giết Người Trên Chuyến Tàu Thống Nhất",
+    "summary": "Trong đêm tàu Thống Nhất chạy xuyên qua vùng núi hiểm trở, một hành khách giàu có được tìm thấy đã bị sát hại dã man trong khoang giường nằm VIP. Mọi dấu hiệu cho thấy đây là một vụ án mạng đã được lên kế hoạch kỹ lưỡng, nhưng lời khai của các nghi phạm lại chứa đựng một mâu thuẫn vật lý không thể bỏ qua.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11912,
+      "gen_completion_tokens": 5055,
+      "gen_total_tokens": 16967,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16967,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1435,
+          "total_tokens": 3166
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4370,
+          "completion_tokens": 919,
+          "total_tokens": 5289
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4442,
+          "completion_tokens": 1042,
+          "total_tokens": 5484
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1369,
+          "completion_tokens": 1659,
+          "total_tokens": 3028
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 13
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:05-22:05",
+    "crime_time": "21:30",
+    "patch_retries": 0,
+    "latency_sec": 1065.76,
+    "title": "Bí Mật Trong Khoang Giường Nằm Thống Nhất",
+    "summary": "Một vụ án mạng kinh hoàng xảy ra trong sự cô lập của chuyến tàu đêm Thống Nhất khi nó xuyên qua những cung đường đèo hẻo lánh. Nạn nhân được phát hiện đã bị sát hại dã man ngay trong khoang cá nhân, để lại những manh mối mâu thuẫn về lời khai của các nhân viên tàu.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11934,
+      "gen_completion_tokens": 5506,
+      "gen_total_tokens": 17440,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17440,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1755,
+          "total_tokens": 3486
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4376,
+          "completion_tokens": 887,
+          "total_tokens": 5263
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4425,
+          "completion_tokens": 1030,
+          "total_tokens": 5455
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1402,
+          "completion_tokens": 1834,
+          "total_tokens": 3236
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 14
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:35-22:35",
+    "crime_time": "22:00",
+    "patch_retries": 0,
+    "latency_sec": 1165.14,
+    "title": "Bí ẩn Khoang Giường VIP Trên Chuyến Tàu Thống Nhất",
+    "summary": "Một thương nhân giàu có được phát hiện đã tử vong trong khoang giường nằm VIP số 3 của chuyến tàu Thống Nhất đêm. Căn phòng được khóa từ bên trong, và những lời khai mâu thuẫn về các cuộc liên lạc điện thoại trong khu vực bị nghi ngờ là chìA khóa giải mã vụ án.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 12017,
+      "gen_completion_tokens": 5179,
+      "gen_total_tokens": 17196,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17196,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1555,
+          "total_tokens": 3286
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4386,
+          "completion_tokens": 918,
+          "total_tokens": 5304
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4463,
+          "completion_tokens": 1066,
+          "total_tokens": 5529
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1437,
+          "completion_tokens": 1640,
+          "total_tokens": 3077
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 15
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:40-22:40",
+    "crime_time": "22:05",
+    "patch_retries": 0,
+    "latency_sec": 1072.01,
+    "title": "Bí Mật Trong Khoang Giường VIP: Mạng Săn Giữa Hầm Đèo",
+    "summary": "Giữa hành trình xuyên đêm trên đoàn tàu Thống Nhất, một doanh nhân giàu có bị sát hại dã man ngay tại khoang giường nằm riêng. Vụ án diễn ra trong một không gian kín, nơi mọi dấu vết vật lý đều chỉ ra một cuộc thanh toán đầy tính cá nhân, nhưng lời khai của các nghi phạm lại chứa đựng một mâu thuẫn về tính vật lý không thể chối cãi.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 12010,
+      "gen_completion_tokens": 5418,
+      "gen_total_tokens": 17428,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17428,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1406,
+          "total_tokens": 3137
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4384,
+          "completion_tokens": 998,
+          "total_tokens": 5382
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4481,
+          "completion_tokens": 1027,
+          "total_tokens": 5508
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1414,
+          "completion_tokens": 1987,
+          "total_tokens": 3401
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 16
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 1243.25,
+    "title": "Bí Mật Trong Hành Lang Đêm: Vụ Án Trên Chuyến Tàu Thống Nhất",
+    "summary": "Trên hành trình đêm cô độc của chuyến tàu Thống Nhất, một thương nhân giàu có được phát hiện đã chết trong khoang giường nằm VIP của mình. Mọi dấu hiệu đều chỉ ra một vụ giết người bí ẩn, nhưng lời khai ngoại phạm của các nghi phạm lại chứa một mâu thuẫn vật lý không thể bỏ qua liên quan đến hành trình của đoàn tàu.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11961,
+      "gen_completion_tokens": 5664,
+      "gen_total_tokens": 17625,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17625,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1943,
+          "total_tokens": 3674
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4378,
+          "completion_tokens": 916,
+          "total_tokens": 5294
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4448,
+          "completion_tokens": 1093,
+          "total_tokens": 5541
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1404,
+          "completion_tokens": 1712,
+          "total_tokens": 3116
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 17
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:15-21:15",
+    "crime_time": "20:40",
+    "patch_retries": 0,
+    "latency_sec": 1033.16,
+    "title": "Bóng Đêm Giữa Hầm Sắt: Vụ Án Trên Chuyến Tàu Thống Nhất",
+    "summary": "Một hành khách giàu có tỉnh dậy trong khoang giường nằm VIP của chuyến tàu đêm Thống Nhất và phát hiện người đồng hành đã bị sát hại dã man. Trong một không gian khép kín và cách biệt hoàn toàn với thế giới bên ngoài, mọi manh mối đều dẫn đến một mâu thuẫn về thời gian và vị trí của hung thủ.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11997,
+      "gen_completion_tokens": 4505,
+      "gen_total_tokens": 16502,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16502,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1245,
+          "total_tokens": 2976
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4391,
+          "completion_tokens": 890,
+          "total_tokens": 5281
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4445,
+          "completion_tokens": 1075,
+          "total_tokens": 5520
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1430,
+          "completion_tokens": 1295,
+          "total_tokens": 2725
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 18
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:35-22:35",
+    "crime_time": "22:00",
+    "patch_retries": 0,
+    "latency_sec": 1245.78,
+    "title": "Bí Ẩn Khoang Giường Tàu Thống Nhất: Cái Chết Giữa Hầm Núi",
+    "summary": "Trên chuyến tàu đêm Thống Nhất xuyên Việt, một thương nhân giàu có được phát hiện đã tử vong trong khoang giường nằm VIP riêng. Căn phòng bị khóa từ bên trong, và lời khai của các nhân viên và hành khách đều có những điểm mâu thuẫn về thời điểm xảy ra án mạng, đặc biệt khi tuyến đường tàu vừa đi qua một khu vực mất sóng vô tuyến kéo dài.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 12006,
+      "gen_completion_tokens": 5494,
+      "gen_total_tokens": 17500,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17500,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1832,
+          "total_tokens": 3563
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4385,
+          "completion_tokens": 938,
+          "total_tokens": 5323
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4464,
+          "completion_tokens": 1016,
+          "total_tokens": 5480
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1426,
+          "completion_tokens": 1708,
+          "total_tokens": 3134
+        }
+      }
+    },
+    "c2_latency_ms": 0.012,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 19
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 996.12,
+    "title": "Bí Ẩn Khoang Giường VIP: Lời Khai Ngoại Phạm Giữa Hầm Sắt",
+    "summary": "Một vị doanh nhân giàu có được phát hiện đã tử vong bên cạnh chiếc giường nằm riêng trong khoang VIP của Chuyến tàu đêm Thống Nhất. Mặc dù khoang được khóa từ bên trong, các manh mối vật lý và lịch trình vận hành của đoàn tàu lại hé lộ một cuộc sát hại có sự dàn dựng tinh vi, cùng một lời khai ngoại phạm hoàn toàn không thể là sự thật.",
+    "theme": "Chuyến tàu đêm Thống Nhất",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 12020,
+      "gen_completion_tokens": 5459,
+      "gen_total_tokens": 17479,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17479,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1731,
+          "completion_tokens": 1726,
+          "total_tokens": 3457
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4379,
+          "completion_tokens": 901,
+          "total_tokens": 5280
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4487,
+          "completion_tokens": 1059,
+          "total_tokens": 5546
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1423,
+          "completion_tokens": 1773,
+          "total_tokens": 3196
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 20
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:20-22:20",
+    "crime_time": "21:45",
+    "patch_retries": 0,
+    "latency_sec": 1449.48,
+    "title": "Bí Ẩn Phòng Server Lạnh: Mật Mã Giết Người",
+    "summary": "Giám đốc an ninh mạng Trần Minh Khôi được phát hiện đã tử vong trong phòng server lạnh của tập đoàn CyberTech. Mọi bằng chứng kỹ thuật số đều chỉ ra thời điểm nạn nhân còn sống và truy cập hệ thống, nhưng dữ liệu nhiệt độ cơ thể lại mâu thuẫn hoàn toàn với các bản ghi truy cập.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11526,
+      "gen_completion_tokens": 5441,
+      "gen_total_tokens": 16967,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 16967,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1578,
+          "completion_tokens": 1672,
+          "total_tokens": 3250
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4242,
+          "completion_tokens": 892,
+          "total_tokens": 5134
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4294,
+          "completion_tokens": 1086,
+          "total_tokens": 5380
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1412,
+          "completion_tokens": 1791,
+          "total_tokens": 3203
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 21
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:20-21:20",
+    "crime_time": "20:45",
+    "patch_retries": 0,
+    "latency_sec": 1266.77,
+    "title": "Mật Mã Đẫm Máu: Bí Ẩn Phòng Server CyberTech",
+    "summary": "Trong khu phức hợp CyberTech tối tân, Giám đốc Công nghệ Trần Minh Khôi được phát hiện tử vong bên trong phòng thí nghiệm an ninh lạnh. Hiện trường hoàn toàn bị khóa bằng hệ thống kiểm soát truy cập sinh trắc học, khiến lời khai của tất cả nhân viên trở nên mâu thuẫn.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 11497,
+      "gen_completion_tokens": 5544,
+      "gen_total_tokens": 17041,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 17041,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 1578,
+          "completion_tokens": 1926,
+          "total_tokens": 3504
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4227,
+          "completion_tokens": 950,
+          "total_tokens": 5177
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4301,
+          "completion_tokens": 894,
+          "total_tokens": 5195
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1391,
+          "completion_tokens": 1774,
+          "total_tokens": 3165
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 22
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:08-21:08",
+    "crime_time": "20:33",
+    "patch_retries": 2,
+    "latency_sec": 1398.97,
+    "title": "Vụ Án Mã Độc Trong Phòng Server Lạnh",
+    "summary": "Nạn nhân, một chuyên gia an ninh mạng hàng đầu, được tìm thấy trong khu vực phòng server chính của CyberTech, một phòng kín được kiểm soát nhiệt độ nghiêm ngặt. Hiện trường cho thấy một cuộc xung đột cục bộ, nhưng các nhật ký điện tử lại chỉ ra một kịch bản ngoại phạm hoàn hảo.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gemma4:e4b-it-qat",
+      "CharacterAgent": "gh/gpt-3.5-turbo-0613",
+      "ClueAgent": "gh/gpt-3.5-turbo-0613",
+      "DeductionAgent": "gemma4:e4b-it-qat"
+    },
+    "fallback_triggered": true,
+    "token_usage": {
+      "gen_prompt_tokens": 10476,
+      "gen_completion_tokens": 4770,
+      "gen_total_tokens": 15246,
+      "patch_prompt_tokens": 1191,
+      "patch_completion_tokens": 1793,
+      "patch_total_tokens": 2984,
+      "patch_payload_tokens": 636,
+      "avg_patch_payload_tokens": 318.0,
+      "total_tokens": 18230,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 612,
+          "completion_tokens": 1032,
+          "total_tokens": 1644
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4212,
+          "completion_tokens": 906,
+          "total_tokens": 5118
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4277,
+          "completion_tokens": 1135,
+          "total_tokens": 5412
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 1375,
+          "completion_tokens": 1697,
+          "total_tokens": 3072
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gemma4:e4b-it-qat",
+    "trial": 23
+  }
+]

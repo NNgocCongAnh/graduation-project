@@ -32,6 +32,31 @@ from database import (
     get_case_statistics
 )
 from security import ClientIntegrityMiddleware
+import hmac
+from fastapi import Header
+
+# Fields that reveal the solution and must never appear in player-facing listings
+SPOILER_SUMMARY_FIELDS = ("culprit_id", "actual_crime_time")
+
+
+def require_internal_token(token: Optional[str]) -> None:
+    """Guard evaluation-only endpoints that expose ground truth.
+
+    The HMAC client secret is embedded in the game client, so it cannot protect
+    spoiler data. Internal endpoints require a separate server-side token
+    (INTERNAL_API_TOKEN) that is never shipped to players. Fail-closed: if the
+    token is not configured, the endpoints are disabled.
+    """
+    expected = os.getenv("INTERNAL_API_TOKEN", "").strip()
+    if not expected:
+        raise HTTPException(status_code=403, detail="Internal endpoints are disabled (INTERNAL_API_TOKEN not configured).")
+    if not token or not hmac.compare_digest(token, expected):
+        raise HTTPException(status_code=403, detail="Invalid or missing X-Internal-Token header.")
+
+
+def strip_spoilers(summary: Dict) -> Dict:
+    """Return a copy of a case summary without solution fields."""
+    return {k: v for k, v in summary.items() if k not in SPOILER_SUMMARY_FIELDS}
 
 
 # Logging Configuration
@@ -452,7 +477,7 @@ def list_all_cases():
     """List all saved cases currently in SQLite database and disk storage."""
     db_cases = list_cases_from_db(limit=None)
     if db_cases:
-        return {"total_cases": len(db_cases), "cases": db_cases}
+        return {"total_cases": len(db_cases), "cases": [strip_spoilers(c) for c in db_cases]}
 
     cases = []
     # Fallback to disk storage
@@ -466,7 +491,6 @@ def list_all_cases():
                         "case_id": c.case_id,
                         "title": c.title,
                         "summary": c.summary,
-                        "culprit_id": c.ground_truth.culprit_id,
                         "suspects_count": len(c.suspects),
                         "evidences_count": len(c.evidences)
                     })
@@ -485,7 +509,7 @@ def query_cases(
     filters = {"country": country, "mystery_type": mystery_type, "is_valid_only": is_valid_only}
     records = list_cases_from_db(skip=skip, limit=limit, **filters)
     total = count_cases_in_db(**filters)
-    return {"total": total, "skip": skip, "limit": limit, "items": records}
+    return {"total": total, "skip": skip, "limit": limit, "items": [strip_spoilers(r) for r in records]}
 
 
 @app.get("/api/case/presets")
@@ -508,8 +532,12 @@ def get_case_by_id(case_id: str):
 
 
 @app.get("/api/case/{case_id}/internal", response_model=CaseDossier)
-def get_internal_case_by_id(case_id: str):
-    """Retrieve full internal case dossier with Ground Truth for benchmark runners and evaluation."""
+def get_internal_case_by_id(case_id: str, x_internal_token: Optional[str] = Header(None)):
+    """Retrieve full internal case dossier with Ground Truth for benchmark runners and evaluation.
+
+    Requires X-Internal-Token (server-side secret, never shipped in the game client).
+    """
+    require_internal_token(x_internal_token)
     case = load_case_persistent(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
@@ -518,8 +546,12 @@ def get_internal_case_by_id(case_id: str):
 
 
 @app.get("/api/case/{case_id}/graph")
-def get_case_bipartite_graph(case_id: str):
-    """Retrieve explicit Bipartite Graph representation (nodes & edges) for Corkboard visualization."""
+def get_case_bipartite_graph(case_id: str, x_internal_token: Optional[str] = Header(None)):
+    """Retrieve the bipartite case graph (contains culprit labels) for evaluation/debugging only.
+
+    Requires X-Internal-Token because the graph encodes the solution.
+    """
+    require_internal_token(x_internal_token)
     from case_graph import build_bipartite_case_graph
     case = load_case_persistent(case_id)
     if not case:

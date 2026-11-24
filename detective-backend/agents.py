@@ -10,6 +10,8 @@ Each agent provides localized repair methods (Paper 7: ConWriter) to fix specifi
 constraint violations without discarding the entire narrative.
 """
 
+import os
+
 import json
 import logging
 from typing import Dict, Any, List, Optional, Tuple
@@ -24,13 +26,17 @@ from models import (
 logger = logging.getLogger(__name__)
 
 
+# Placeholder resolved at call time to the LLM_API_KEY env var (never hardcoded).
+_GATEWAY_KEY = "<LLM_API_KEY>"
+
+
 class BaseAgent:
     """Base class for specialized generative agents."""
 
     FALLBACK_CANDIDATES = [
-        ("http://localhost:20128/v1", "sk-9router-local", "gemini/gemma-4-31b-it"),
-        ("http://localhost:20128/v1", "sk-9router-local", "gh/gpt-3.5-turbo-0613"),
-        ("http://localhost:20128/v1", "sk-9router-local", "gh/gpt-4o-mini"),
+        ("http://localhost:20128/v1", _GATEWAY_KEY, "gemini/gemma-4-31b-it"),
+        ("http://localhost:20128/v1", _GATEWAY_KEY, "gh/gpt-3.5-turbo-0613"),
+        ("http://localhost:20128/v1", _GATEWAY_KEY, "gh/gpt-4o-mini"),
         ("http://localhost:11434/v1", "ollama", "gemma4:e4b-it-qat"),
     ]
 
@@ -130,6 +136,8 @@ class BaseAgent:
             if fb_model == self.model and fb_base.rstrip("/") == primary_base:
                 continue
             try:
+                if fb_key == _GATEWAY_KEY:
+                    fb_key = os.getenv("LLM_API_KEY", "").strip()
                 fb_client = AsyncOpenAI(base_url=fb_base, api_key=fb_key)
                 data = await self._invoke_single_model(fb_client, fb_model, system_prompt, user_prompt)
                 self.last_used_model = fb_model
@@ -573,6 +581,9 @@ class ClueAgent(BaseAgent):
 
     async def generate(self, victim: Victim, suspects: List[Suspect], ground_truth: GroundTruth, theme: str) -> List[Evidence]:
         culprit = next((s for s in suspects if s.is_culprit), suspects[0])
+        # Red herrings must point at INNOCENT suspects, whichever ID the culprit has.
+        innocents = [s.id for s in suspects if s.id != culprit.id] + ["SUSP-02", "SUSP-03"]
+        innocent_a, innocent_b = innocents[0], innocents[1]
         guidance = _get_setting_guidance(theme)
         mechanic = _get_mystery_style_mechanic(theme)
         system_prompt = (
@@ -582,9 +593,9 @@ class ClueAgent(BaseAgent):
             "CRITICAL MYSTERY DEDUCTION MECHANIC: Follow the specific Mystery Deduction Mechanic provided below to craft intellectually challenging clues that require synthesizing multiple pieces of information. "
             "MULTI-HOP DEDUCTIVE DESIGN REQUIREMENTS: "
             "1. EV-01 (Timeline / Forensic Baseline - Crucial): A broken clock, dispatch log, medical monitor, or ambient record that was tampered with to show a false time, or medical toxicology indicating delayed reaction. Contradicts true Henssge Time of Death window. "
-            "2. EV-02 (Red Herring for Suspect 2): An incriminating piece of evidence pointing to SUSP-02's secret non-murder wrongdoing within the setting, proving they did not commit the murder. "
-            "3. EV-03 (Red Herring for Suspect 3): Suspicious physical trace of SUSP-03 in the setting, but independent verified records clear them during true TOD. "
-            "4. EV-04 (Alibi-Breaking Environmental or Documentary Clue - Crucial): Objective physical state or official record that irrefutably refutes SUSP-01's claimed activity according to the Mystery Deduction Mechanic (e.g. railway tunnel transmission blackout log, cold appliance, intact blister pack, dry mud/drainage, unpunched tickets). "
+            f"2. EV-02 (Red Herring for innocent suspect {innocent_a}): An incriminating piece of evidence pointing to {innocent_a}'s secret non-murder wrongdoing within the setting, proving they did not commit the murder. "
+            f"3. EV-03 (Red Herring for innocent suspect {innocent_b}): Suspicious physical trace of {innocent_b} in the setting, but independent verified records clear them during true TOD. "
+            f"4. EV-04 (Alibi-Breaking Environmental or Documentary Clue - Crucial): Objective physical state or official record that irrefutably refutes the culprit {culprit.id}'s claimed activity according to the Mystery Deduction Mechanic (e.g. railway tunnel transmission blackout log, cold appliance, intact blister pack, dry mud/drainage, unpunched tickets). "
             "5. EV-05 (Murder Weapon - Crucial): The hidden weapon concealed in an environment-appropriate hiding spot (e.g. air duct, maintenance panel, cargo crate). The forensic lab analysis must report ONLY objective technical parameters: weapon blade/edge dimensions matching the wound, blood matching victim, and specialized industrial/chemical traces (e.g. machine grease, carriage brake dust, marine lubricant) that link logically to the culprit's domain of access. "
             "STRICT FAIR-PLAY & ZERO-SPOILER RULES: "
             "- NEVER state the suspect's name, ID, or direct identity in fingerprint_analysis or blood_dna_analysis! "
@@ -621,28 +632,28 @@ Output JSON with 5 distinct evidences strictly located in {theme}:
     }},
     {{
       "id": "EV-02",
-      "title": "<Vật chứng red-herring nghi phạm 2>",
+      "title": "<Vật chứng red-herring của nghi phạm vô tội {innocent_a}>",
       "location": "<Vị trí phù hợp bối cảnh>",
-      "description": "<Mô tả vật phẩm liên quan đến bí mật riêng của SUSP-02>",
+      "description": "<Mô tả vật phẩm liên quan đến bí mật riêng của {innocent_a}>",
       "is_weapon": false,
-      "fingerprint_analysis": "<Dấu vân tay của SUSP-02 trên đồ vật>",
+      "fingerprint_analysis": "<Dấu vân tay của {innocent_a} trên đồ vật>",
       "blood_dna_analysis": "Không phát hiện dấu vết máu.",
-      "physical_condition": "<Chứng minh SUSP-02 chỉ phạm lỗi riêng chứ không liên quan đến cái chết của nạn nhân>",
-      "linked_suspect_id": "SUSP-02",
+      "physical_condition": "<Chứng minh {innocent_a} chỉ phạm lỗi riêng chứ không liên quan đến cái chết của nạn nhân>",
+      "linked_suspect_id": "{innocent_a}",
       "is_crucial": false,
       "is_red_herring": true,
       "image_url": "/static/assets/evidences/evidence_sedative.png"
     }},
     {{
       "id": "EV-03",
-      "title": "<Vật chứng red-herring nghi phạm 3>",
+      "title": "<Vật chứng red-herring của nghi phạm vô tội {innocent_b}>",
       "location": "<Vị trí phù hợp bối cảnh>",
-      "description": "<Dấu vết để lại của SUSP-03>",
+      "description": "<Dấu vết để lại của {innocent_b}>",
       "is_weapon": false,
-      "fingerprint_analysis": "<Dấu vết của SUSP-03>",
+      "fingerprint_analysis": "<Dấu vết của {innocent_b}>",
       "blood_dna_analysis": "Không có dấu vết máu.",
-      "physical_condition": "<Chứng minh SUSP-03 có chứng cứ ngoại phạm xác đáng trong khung giờ tử vong thực tế>",
-      "linked_suspect_id": "SUSP-03",
+      "physical_condition": "<Chứng minh {innocent_b} có chứng cứ ngoại phạm xác đáng trong khung giờ tử vong thực tế>",
+      "linked_suspect_id": "{innocent_b}",
       "is_crucial": false,
       "is_red_herring": true,
       "image_url": "/static/assets/evidences/evidence_letter.png"

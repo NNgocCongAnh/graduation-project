@@ -330,6 +330,18 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
                     message=f"Evidence '{ev.id}' cannot simultaneously be crucial and a red herring.",
                     target_id=ev.id
                 ))
+        # A red herring is meant to clear an innocent suspect; linking it to the culprit
+        # would hand the player evidence that "exonerates" the murderer.
+        if ev.is_red_herring and ev.linked_suspect_id and len(culprits) == 1 and ev.linked_suspect_id == culprits[0].id:
+            violations.append(ConstraintViolation(
+                violation_type=ViolationType.SCHEMA_ERROR,
+                component="clue",
+                message=(
+                    f"Red-herring evidence '{ev.id}' links to the culprit '{ev.linked_suspect_id}'; "
+                    f"red herrings must point to innocent suspects."
+                ),
+                target_id=ev.id
+            ))
 
     if len(crucial_evidences) == 0:
         violations.append(ConstraintViolation(

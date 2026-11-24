@@ -147,19 +147,23 @@ TANHNV*
 # ------------------------------------------------------------------------------
 # 7. Benchmark, Evaluation & Automation Scripts (LOCAL ONLY)
 # ------------------------------------------------------------------------------
+# Runners (benchmark_runner.py, fault_injection_runner.py, solver_agent.py) and their
+# raw result JSON files ARE versioned so that every reported number is reproducible.
+# Superseded/mixed-version runs kept locally only (pre-fix prompt runs merged with later runs)
+detective-backend/benchmark_results.json
+detective-backend/benchmark_results_gpt4omini.json
+RA_SOAT_TRUOC_KHI_NOP.md
+_ban_cu/
 benchmark_evaluation.ipynb
 detective-backend/run_gemma4_overnight.ps1
-detective-backend/solver_agent.py
-detective-backend/fault_injection_runner.py
-detective-backend/benchmark_runner.py
-detective-backend/*_results*.json
-detective-backend/ablation_results.json
 *.ps1
 
 # ------------------------------------------------------------------------------
-# 8. Test Suites (LOCAL ONLY)
+# 8. Test Suites (versioned) - only exclude scratch scripts that call external APIs
 # ------------------------------------------------------------------------------
-detective-backend/test_*.py
+detective-backend/test_models.py
+detective-backend/test_pollinations_flux.py
+detective-backend/test_sd15_gen.py
 detective-backend/cases/*TEST*.json
 
 # ------------------------------------------------------------------------------
