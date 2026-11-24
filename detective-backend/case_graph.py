@@ -143,9 +143,15 @@ def build_bipartite_case_graph(case: CaseDossier) -> BipartiteCaseGraph:
                 description=f"Dấu vết nghi binh làm chệch hướng điều tra sang {ev.linked_suspect_id}"
             ))
 
-    # Solvability verification over Graph:
-    # A case is graph-theoretically solvable if there exists a decisive edge from Crucial Evidence -> Culprit Alibi
-    is_solvable = (decisive_edge is not None)
+    # Solvability verification over Bipartite Graph:
+    # A case is graph-theoretically solvable if:
+    # 1. There exists a decisive edge from Crucial Evidence -> Culprit Alibi
+    # 2. No crucial clue falsely incriminates an innocent suspect
+    has_false_incrimination = any(
+        ev.is_crucial and ev.linked_suspect_id and ev.linked_suspect_id != culprit_id
+        for ev in case.evidences
+    )
+    is_solvable = (decisive_edge is not None) and (not has_false_incrimination)
 
     return BipartiteCaseGraph(
         case_id=case.case_id,

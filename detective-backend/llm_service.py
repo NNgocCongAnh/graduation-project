@@ -27,14 +27,18 @@ from agents import OutlineAgent, CharacterAgent, ClueAgent, DeductionAgent
 
 from dotenv import load_dotenv
 
-# Load environment variables from .env if present
-load_dotenv()
+# Load environment variables from .env in backend directory if present
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
+else:
+    load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 # LLM Gateway Configuration (Default to local 9Router proxy if not set)
 LLM_API_BASE = os.getenv("LLM_API_BASE", "http://localhost:20128/v1")
-LLM_API_KEY = os.getenv("LLM_API_KEY", "sk-9router-local")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini/gemma-4-31b-it")
 
 
@@ -42,9 +46,19 @@ class CaseGeneratorService:
     """Service orchestrating specialized agents and neuro-symbolic localized repair."""
 
     def __init__(self, api_base: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_base = api_base or LLM_API_BASE
-        self.api_key = api_key or LLM_API_KEY
         self.model = model or LLM_MODEL
+
+        # Smart routing: auto-route local Ollama models to Ollama daemon
+        if not api_base:
+            if "gemma4:e4b" in self.model or "ollama" in self.model:
+                self.api_base = "http://localhost:11434/v1"
+                self.api_key = api_key or "ollama"
+            else:
+                self.api_base = LLM_API_BASE
+                self.api_key = api_key or LLM_API_KEY
+        else:
+            self.api_base = api_base
+            self.api_key = api_key or LLM_API_KEY
 
         # Initialize Async OpenAI Client
         self.client = AsyncOpenAI(
@@ -77,11 +91,87 @@ class CaseGeneratorService:
         self.deduction_agent = DeductionAgent(self.client, self.model)
         logger.info(f"Updated LLM Config -> Model: '{self.model}', Base: '{self.api_base}'")
 
-    async def generate_case(self, theme: str = "Bí ẩn Biệt thự Cổ (Locked-Room Mystery)", max_retries: int = 2) -> CaseDossier:
+    async def _generate_case_monolithic(self, theme: str) -> CaseDossier:
+        """Generate full case dossier using a single monolithic prompt without multi-agent decomposition (Ablation Config 1)."""
+        start_total = time.time()
+        system_prompt = (
+            "You are an End-to-End Mystery Case Generator. "
+            "Generate a complete, cohesive locked-room mystery case dossier in a single JSON payload. "
+            "The JSON must include: title, summary, victim (with complete forensic_data), "
+            "suspects (array of 3 suspects with alibis, motives, statements), "
+            "evidences (array of 5 evidences: 1 timing/baseline, 2 red herrings, 1 alibi-breaking crucial clue, 1 weapon), "
+            "ground_truth (actual_crime_time, culprit_id, motive, method, core_contradiction), "
+            "and reasoning_chain (4 deduction steps, final_conclusion, decisive_contradiction). "
+            "Make sure the suspect alibis and crime times are consistent."
+        )
+        user_prompt = f"""Theme: {theme}\nOutput a complete CaseDossier JSON adhering strictly to the schema."""
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.7,
+        )
+        total_lat = round(time.time() - start_total, 2)
+
+        prompt_tokens = 0
+        completion_tokens = 0
+        total_tokens = 0
+        if getattr(response, "usage", None):
+            prompt_tokens = getattr(response.usage, "prompt_tokens", 0) or 0
+            completion_tokens = getattr(response.usage, "completion_tokens", 0) or 0
+            total_tokens = getattr(response.usage, "total_tokens", 0) or 0
+
+        raw_text = response.choices[0].message.content or "{}"
+        clean_text = self.outline_agent._clean_json_string(raw_text)
+        import json
+        data = json.loads(clean_text)
+
+        if "case_id" not in data:
+            data["case_id"] = f"CASE-{os.urandom(3).hex().upper()}"
+        dossier = CaseDossier.model_validate(data)
+
+        diag = validate_case_diagnostics(dossier)
+        dossier.metadata = GenerationMetadata(
+            model_name=self.model,
+            pipeline_version="monolithic-single-prompt",
+            config_mode="monolithic",
+            agent_latencies={"Monolithic": total_lat},
+            agent_models={"Monolithic": self.model},
+            fallback_triggered=False,
+            used_fallback_sample=False,
+            total_latency=total_lat,
+            patch_retries=0,
+            validator_score=1.0 if diag.is_valid else 0.0,
+            token_usage={
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": total_tokens,
+                "patch_tokens": 0
+            }
+        )
+        return dossier
+
+    async def generate_case(
+        self,
+        theme: str = "Bí ẩn Biệt thự Cổ (Locked-Room Mystery)",
+        max_retries: int = 2,
+        enable_post_processing: bool = True,
+        enable_patch_repair: bool = True,
+        mode: str = "pipeline"
+    ) -> CaseDossier:
         """Generate a logically sound Case Dossier via Multi-Agent pipeline with Localized Repair."""
+        if mode == "monolithic":
+            return await self._generate_case_monolithic(theme)
+
         start_total = time.time()
         agent_latencies: Dict[str, float] = {}
         patch_retries = 0
+        patch_prompt_tokens = 0
+        patch_completion_tokens = 0
+        patch_payload_tokens = 0
 
         for attempt in range(1, max_retries + 1):
             logger.info(f"Multi-Agent Generation Run {attempt}/{max_retries} for theme: '{theme}' (Model: {self.model})")
@@ -89,13 +179,16 @@ class CaseGeneratorService:
                 # 1. OutlineAgent: Premise & Ground Truth
                 t0 = time.time()
                 title, summary, victim, ground_truth = await self.outline_agent.generate(theme)
-                # Symbolic engine owns the TOD window: derive it from Henssge, not from the LLM.
-                apply_henssge_tod_window(victim.forensic_data)
+                if enable_post_processing:
+                    # Symbolic engine owns the TOD window: derive it from Henssge, not from the LLM.
+                    apply_henssge_tod_window(victim.forensic_data)
                 agent_latencies["OutlineAgent"] = round(time.time() - t0, 2)
 
                 # 2. CharacterAgent: Suspects & Alibis
                 t1 = time.time()
-                suspects = await self.character_agent.generate(victim, ground_truth, theme)
+                suspects = await self.character_agent.generate(
+                    victim, ground_truth, theme, enable_post_processing=enable_post_processing
+                )
                 agent_latencies["CharacterAgent"] = round(time.time() - t1, 2)
 
                 # 3. ClueAgent: Evidences & Red Herrings
@@ -117,20 +210,44 @@ class CaseGeneratorService:
 
                 # 4. Neuro-Symbolic Validator & Localized Patch Repair (Paper 7)
                 diag = validate_case_diagnostics(candidate_dossier)
-                if not diag.is_valid:
+                if not diag.is_valid and enable_patch_repair:
                     logger.warning(f"Initial validation flagged {len(diag.violations)} violations. Initiating Localized Patch Repair...")
                     # Localized repair loop: fix only the flawed component
                     for violation in diag.violations:
                         feedback = violation.message
                         if violation.component == "clue":
                             evidences = await self.clue_agent.repair_clues(evidences, suspects, ground_truth, feedback)
+                            patch_prompt_tokens += self.clue_agent.last_usage.get("prompt_tokens", 0)
+                            patch_completion_tokens += self.clue_agent.last_usage.get("completion_tokens", 0)
+                            patch_payload_tokens += self.clue_agent.last_payload_tokens
                             patch_retries += 1
                         elif violation.component == "character":
                             suspects = await self.character_agent.repair_suspects(suspects, ground_truth, feedback)
+                            patch_prompt_tokens += self.character_agent.last_usage.get("prompt_tokens", 0)
+                            patch_completion_tokens += self.character_agent.last_usage.get("completion_tokens", 0)
+                            patch_payload_tokens += self.character_agent.last_payload_tokens
                             patch_retries += 1
                         elif violation.component == "outline":
                             victim, ground_truth = await self.outline_agent.repair_tod(victim, ground_truth, feedback)
-                            apply_henssge_tod_window(victim.forensic_data)
+                            if enable_post_processing:
+                                apply_henssge_tod_window(victim.forensic_data)
+                                if ground_truth.actual_crime_time:
+                                    try:
+                                        c_h, c_m = map(int, ground_truth.actual_crime_time.split(':'))
+                                        c_tot = c_h * 60 + c_m
+                                        for s in suspects:
+                                            if s.is_culprit:
+                                                s_h, s_m = map(int, s.alibi_start.split(':'))
+                                                e_h, e_m = map(int, s.alibi_end.split(':'))
+                                                if not (s_h * 60 + s_m <= c_tot <= e_h * 60 + e_m):
+                                                    s.alibi_start = f"{max(0, c_tot - 25) // 60:02d}:{max(0, c_tot - 25) % 60:02d}"
+                                                    s.alibi_end = f"{min(1439, c_tot + 35) // 60:02d}:{min(1439, c_tot + 35) % 60:02d}"
+                                                    s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+                                    except Exception:
+                                        pass
+                            patch_prompt_tokens += self.outline_agent.last_usage.get("prompt_tokens", 0)
+                            patch_completion_tokens += self.outline_agent.last_usage.get("completion_tokens", 0)
+                            patch_payload_tokens += self.outline_agent.last_payload_tokens
                             patch_retries += 1
 
                     # Re-assemble and re-validate
@@ -164,16 +281,54 @@ class CaseGeneratorService:
                     self.deduction_agent.fallback_used if reasoning_chain is not None else False,
                 ])
 
+                gen_prompt_tokens = (
+                    self.outline_agent.last_usage.get("prompt_tokens", 0) +
+                    self.character_agent.last_usage.get("prompt_tokens", 0) +
+                    self.clue_agent.last_usage.get("prompt_tokens", 0) +
+                    (self.deduction_agent.last_usage.get("prompt_tokens", 0) if reasoning_chain is not None else 0)
+                )
+                gen_completion_tokens = (
+                    self.outline_agent.last_usage.get("completion_tokens", 0) +
+                    self.character_agent.last_usage.get("completion_tokens", 0) +
+                    self.clue_agent.last_usage.get("completion_tokens", 0) +
+                    (self.deduction_agent.last_usage.get("completion_tokens", 0) if reasoning_chain is not None else 0)
+                )
+
+                config_mode = "full_pipeline"
+                if not enable_post_processing and not enable_patch_repair:
+                    config_mode = "pipeline_no_postproc"
+                elif enable_post_processing and not enable_patch_repair:
+                    config_mode = "pipeline_no_repair"
+
                 candidate_dossier.reasoning_chain = reasoning_chain
                 candidate_dossier.metadata = GenerationMetadata(
                     model_name=self.model,
                     pipeline_version="2.0-neuro-symbolic",
+                    config_mode=config_mode,
                     agent_latencies=agent_latencies,
                     agent_models=agent_models,
                     fallback_triggered=fallback_triggered,
+                    used_fallback_sample=False,
                     total_latency=total_latency,
                     patch_retries=patch_retries,
-                    validator_score=1.0 if diag.is_valid else 0.5
+                    validator_score=1.0 if diag.is_valid else 0.5,
+                    token_usage={
+                        "gen_prompt_tokens": gen_prompt_tokens,
+                        "gen_completion_tokens": gen_completion_tokens,
+                        "gen_total_tokens": gen_prompt_tokens + gen_completion_tokens,
+                        "patch_prompt_tokens": patch_prompt_tokens,
+                        "patch_completion_tokens": patch_completion_tokens,
+                        "patch_total_tokens": patch_prompt_tokens + patch_completion_tokens,
+                        "patch_payload_tokens": patch_payload_tokens,
+                        "avg_patch_payload_tokens": round(patch_payload_tokens / patch_retries, 1) if patch_retries else 0.0,
+                        "total_tokens": gen_prompt_tokens + gen_completion_tokens + patch_prompt_tokens + patch_completion_tokens,
+                        "per_agent": {
+                            "OutlineAgent": self.outline_agent.last_usage,
+                            "CharacterAgent": self.character_agent.last_usage,
+                            "ClueAgent": self.clue_agent.last_usage,
+                            "DeductionAgent": self.deduction_agent.last_usage if reasoning_chain is not None else {}
+                        }
+                    }
                 )
 
                 logger.info(
@@ -187,7 +342,18 @@ class CaseGeneratorService:
 
         # Fallback to offline deterministic sample case
         logger.info("Using high-quality deterministic seed case fallback.")
-        return self.get_sample_case()
+        sample = self.get_sample_case()
+        sample.metadata = GenerationMetadata(
+            model_name=self.model,
+            pipeline_version="fallback-seed",
+            config_mode="fallback",
+            fallback_triggered=True,
+            used_fallback_sample=True,
+            total_latency=round(time.time() - start_total, 2),
+            patch_retries=0,
+            validator_score=1.0
+        )
+        return sample
 
     @staticmethod
     def get_sample_case() -> CaseDossier:

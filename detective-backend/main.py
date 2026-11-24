@@ -16,9 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from models import CaseDossier, VerifyRequest, VerifyResponse
+from models import CaseDossier, ClientCaseDossier, VerifyRequest, VerifyResponse
 from llm_service import CaseGeneratorService
-from validator import validate_case_logic, evaluate_player_deduction
+from validator import validate_case_logic, validate_case_diagnostics, evaluate_player_deduction
 from asset_service import asset_service, STATIC_DIR
 from rooms import RoomManager
 from lan_discovery import start_lan_discovery, stop_lan_discovery
@@ -70,13 +70,26 @@ def load_case_from_disk(case_id: str) -> Optional[CaseDossier]:
 
 def save_case_persistent(
     case: CaseDossier,
-    is_valid: bool = True,
-    validator_score: float = 1.0,
+    is_valid: Optional[bool] = None,
+    validator_score: Optional[float] = None,
     country: Optional[str] = None,
     era: Optional[str] = None,
     mystery_type: Optional[str] = None
 ) -> None:
-    """Persist case dossier across SQLite database, disk JSON backup, and in-memory cache."""
+    """Persist case dossier across SQLite database, disk JSON backup, and in-memory cache.
+
+    Derives is_valid and validator_score from case.metadata telemetry if not explicitly given.
+    """
+    if is_valid is None:
+        if case.metadata and hasattr(case.metadata, "validator_score"):
+            validator_score = case.metadata.validator_score
+            is_valid = (validator_score >= 1.0)
+        else:
+            is_valid = True
+            validator_score = 1.0
+    elif validator_score is None:
+        validator_score = 1.0 if is_valid else 0.5
+
     CASE_CACHE[case.case_id] = case
     try:
         save_case_to_db(
@@ -120,11 +133,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for Unity WebGL and Frontend Clients
+# Configure CORS: Allow explicit origins or development wildcard without credentials conflict
+RAW_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "").strip()
+if RAW_CORS_ORIGINS:
+    cors_origins = [o.strip() for o in RAW_CORS_ORIGINS.split(",") if o.strip()]
+    cors_allow_credentials = True
+else:
+    cors_origins = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080"
+    ]
+    if os.getenv("ALLOW_ALL_ORIGINS", "true").lower() in ("true", "1", "yes"):
+        cors_origins = ["*"]
+        cors_allow_credentials = False
+    else:
+        cors_allow_credentials = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -403,13 +435,16 @@ def health_check():
     }
 
 
-@app.get("/api/case/sample", response_model=CaseDossier)
+@app.get("/api/case/sample", response_model=ClientCaseDossier)
 def get_sample_case():
-    """Retrieve verified sample seed case dossier for offline testing and initial game load."""
+    """Retrieve verified sample seed case dossier for offline testing and initial game load.
+
+    Returns sanitized ClientCaseDossier without secret ground truth or cheat flags.
+    """
     case = CaseGeneratorService.get_sample_case()
     asset_service.enrich_case_dossier(case)
     CASE_CACHE[case.case_id] = case
-    return case
+    return case.to_client_dossier()
 
 
 @app.get("/api/case/all")
@@ -459,9 +494,22 @@ def get_case_presets():
     return PRESET_SETTINGS
 
 
-@app.get("/api/case/{case_id}", response_model=CaseDossier)
+@app.get("/api/case/{case_id}", response_model=ClientCaseDossier)
 def get_case_by_id(case_id: str):
-    """Retrieve a specific case dossier by its ID from memory, SQLite DB, or disk."""
+    """Retrieve a specific case dossier by its ID from memory, SQLite DB, or disk.
+
+    Returns sanitized ClientCaseDossier for client gameplay without spoiler flags.
+    """
+    case = load_case_persistent(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
+    asset_service.enrich_case_dossier(case)
+    return case.to_client_dossier()
+
+
+@app.get("/api/case/{case_id}/internal", response_model=CaseDossier)
+def get_internal_case_by_id(case_id: str):
+    """Retrieve full internal case dossier with Ground Truth for benchmark runners and evaluation."""
     case = load_case_persistent(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case with ID '{case_id}' not found.")
@@ -528,7 +576,7 @@ def update_settings(payload: UpdateSettingsRequest):
     }
 
 
-@app.post("/api/case/generate", response_model=CaseDossier)
+@app.post("/api/case/generate", response_model=ClientCaseDossier)
 async def generate_case(payload: GenerateCaseRequest = Body(default_factory=GenerateCaseRequest)):
     """Generate a new logically verified Case Dossier via 4-step LLM pipeline and save to disk."""
     import random
@@ -578,12 +626,38 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
 
         logger.info(f"Generating case with synthesized theme: '{theme}' (Model: {active_gen.model})")
         case = await active_gen.generate_case(theme=theme)
-        # Enrich with semantic assets
+
+        # Rigorous Neuro-Symbolic Validation Check
+        diag = validate_case_diagnostics(case)
+        is_valid = diag.is_valid
+        validator_score = 1.0 if is_valid else 0.5
+        if case.metadata:
+            case.metadata.validator_score = validator_score
+
+        # Block invalid cases fail-closed with HTTP 422
+        if not is_valid:
+            save_case_persistent(case, is_valid=False, validator_score=validator_score, country=country, era=era, mystery_type=mystery)
+            logger.warning(f"Case '{case.case_id}' failed neuro-symbolic validation ({len(diag.violations)} violations). Blocking with HTTP 422.")
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "error": "Case failed neuro-symbolic validation after localized repair retries.",
+                    "case_id": case.case_id,
+                    "is_valid": False,
+                    "validator_score": validator_score,
+                    "violations": [v.model_dump() for v in diag.violations],
+                    "message": "Hồ sơ vụ án không đáp ứng tiêu chuẩn tính giải được hoặc vi phạm tính nhất quán logic."
+                }
+            )
+
+        # Enrich valid case with semantic assets
         asset_service.enrich_case_dossier(case)
         # Save to memory cache, SQLite database, and persistent disk storage
-        save_case_persistent(case, country=country, era=era, mystery_type=mystery)
-        return case
+        save_case_persistent(case, is_valid=True, validator_score=1.0, country=country, era=era, mystery_type=mystery)
+        return case.to_client_dossier()
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to generate case: {e}")
         raise HTTPException(status_code=500, detail=f"Case generation error: {str(e)}")
@@ -603,7 +677,8 @@ def verify_solution(request: VerifyRequest):
     response = evaluate_player_deduction(
         case=case,
         accused_id=request.selected_suspect_id,
-        selected_clue_ids=request.selected_evidence_ids
+        selected_clue_ids=request.selected_evidence_ids,
+        reasoning=request.reasoning
     )
 
     # Persist deduction trial to database audit log for research analytics

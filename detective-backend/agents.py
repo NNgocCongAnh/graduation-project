@@ -39,6 +39,8 @@ class BaseAgent:
         self.model = model
         self.last_used_model: str = model
         self.fallback_used: bool = False
+        self.last_usage: Dict[str, int] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+        self.last_payload_tokens: int = 0
 
     @staticmethod
     def _clean_json_string(text: str) -> str:
@@ -60,22 +62,55 @@ class BaseAgent:
         return text
 
     async def _invoke_single_model(self, client: AsyncOpenAI, model: str, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
-        """Invoke a single LLM endpoint and parse non-empty JSON payload."""
-        response = await client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.7,
-        )
-        raw_text = response.choices[0].message.content or "{}"
-        clean_text = self._clean_json_string(raw_text)
-        parsed = json.loads(clean_text)
-        if not parsed:
-            raise ValueError(f"Empty JSON object returned by model '{model}'")
-        return parsed
+        """Invoke a single LLM endpoint and parse non-empty JSON payload with automatic 429 backoff."""
+        # Calculate local text payload token footprint (~1.33 tokens per word)
+        self.last_payload_tokens = int(len((system_prompt + " " + user_prompt).split()) * 1.33)
+
+        max_attempts = 8
+        last_exc: Optional[Exception] = None
+        for attempt in range(max_attempts):
+            try:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.7,
+                )
+                # Capture API token telemetry
+                usage_info = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+                if getattr(response, "usage", None):
+                    usage_info["prompt_tokens"] = getattr(response.usage, "prompt_tokens", 0) or 0
+                    usage_info["completion_tokens"] = getattr(response.usage, "completion_tokens", 0) or 0
+                    usage_info["total_tokens"] = getattr(response.usage, "total_tokens", 0) or 0
+                self.last_usage = usage_info
+
+                raw_text = response.choices[0].message.content or "{}"
+                clean_text = self._clean_json_string(raw_text)
+                parsed = json.loads(clean_text)
+                if not parsed:
+                    raise ValueError(f"Empty JSON object returned by model '{model}'")
+                return parsed
+            except Exception as e:
+                last_exc = e
+                err_msg = str(e).lower()
+                if "429" in err_msg or "rate limit" in err_msg or "too many requests" in err_msg:
+                    import re, asyncio
+                    m_min_sec = re.search(r'reset after (\d+)m\s*(\d+)s', err_msg)
+                    m_sec = re.search(r'reset after (\d+)s', err_msg)
+                    if m_min_sec:
+                        backoff = float(int(m_min_sec.group(1)) * 60 + int(m_min_sec.group(2)) + 2)
+                    elif m_sec:
+                        backoff = float(int(m_sec.group(1)) + 2)
+                    else:
+                        backoff = float((attempt + 1) * 5.0)
+                    logger.warning(f"Rate limited (429) on model '{model}'. Waiting {backoff:.1f}s for reset window (attempt {attempt+1}/{max_attempts})...")
+                    await asyncio.sleep(backoff)
+                else:
+                    raise e
+        raise last_exc or RuntimeError(f"Failed to invoke model '{model}' after {max_attempts} attempts.")
 
     async def _call_llm_json(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
         """Call primary OpenAI-compatible LLM endpoint with per-agent smart fallback."""
@@ -214,9 +249,19 @@ def _get_mystery_style_mechanic(theme: str) -> str:
         return (
             "THỂ LOẠI: HIỆN TRƯỜNG GIẢ & ALIBI NGOẠI PHẠM DÀN DỰNG (STAGED CRIME)\n"
             "- CƠ CHẾ ĐÁNH ĐỐ NÃO BỘ (ĐÁNH LẠC HƯỚNG MỐC TỬ VONG BẰNG ĐỒNG HỒ PHÁ HỎNG):\n"
-            "  1. Đồng hồ tại hiện trường bị đập vỡ cố tình dừng lại tại một mốc giờ cố định (ví dụ 21:40), kèm hiện trường giả như một vụ xô xát.\n"
-            "  2. Toàn bộ nghi phạm đều có alibi cho mốc 21:40.\n"
-            "  3. Người chơi BẮT BUỘC phải dùng định luật nguội lạnh Henssge để tính ra giờ chết thực tế là 19:30-20:30. Ai có alibi giả mạo mốc 21:40 nhưng 'mất tích' không có alibi trong khung 19:30-20:30 chính là hung thủ!"
+            "  1. Đồng hồ hoặc thiết bị tại hiện trường bị cố ý phá hỏng dừng lại tại một mốc giờ sắp đặt, kèm hiện trường ngụy tạo xô xát.\n"
+            "  2. Toàn bộ nghi phạm đều chuẩn bị alibi cho mốc đồng hồ vỡ.\n"
+            "  3. Người chơi BẮT BUỘC phải dùng định luật nguội lạnh Henssge để tính ra giờ chết thực tế sớm hơn đáng kể. Kẻ có alibi hoàn hảo cho mốc đồng hồ vỡ nhưng không có bằng chứng ngoại phạm hợp lệ trong khung giờ chết thực tế chính là hung thủ!\n"
+            "  4. Mốc thời gian gây án thực tế actual_crime_time cần được chọn linh hoạt và phân tán tự nhiên trong khoảng 18:00 - 23:59."
+        )
+    elif any(k in t for k in ["cybertech", "công nghệ cao", "phòng thí nghiệm", "lab", "server"]):
+        return (
+            "THỂ LOẠI: PHÒNG THÍ NGHIỆM CÔNG NGHỆ CAO / VỤ ÁN AN NINH MẠNG\n"
+            "- CƠ CHẾ ĐÁNH ĐỐ NÃO BỘ (NHẬT KÝ ĐIỆN TỬ, NHIỆT ĐỘ PHÒNG LẠNH SERVER & QUẸT THẺ TỪ):\n"
+            "  1. Nạn nhân được tìm thấy trong phòng server lạnh hoặc phòng thí nghiệm kín với điều hòa nhiệt độ ổn định.\n"
+            "  2. Hung thủ tạo lập chứng cứ ngoại phạm số tinh vi (gửi email hẹn giờ, quẹt thẻ từ giả danh tại cổng an ninh).\n"
+            "  3. Tuy nhiên, thời gian tử vong xác định qua định luật Henssge (tính theo nhiệt độ phòng lạnh 18-20°C) mâu thuẫn hoàn toàn với thời điểm dữ liệu số được phát tán.\n"
+            "  4. Manh mối then chốt chứng minh thiết bị truy cập được điều khiển từ xa hoặc thẻ an ninh đã bị sao chép."
         )
     else:
         return (
@@ -241,13 +286,16 @@ class OutlineAgent(BaseAgent):
             "CRITICAL SETTING INTEGRITY RULE: The victim discovery site, residence, and summary MUST strictly adhere to the setting ontology (e.g. Train -> sleeping cabin, passenger berth; Hospital -> ward/room). DO NOT mention 'thư phòng', 'lầu hai', 'lò sưởi' unless theme is an old manor! "
             "CRITICAL DEDUCTION MECHANIC: Establish the ground_truth.core_contradiction strictly following the Mystery Deduction Mechanic provided below. Avoid cheap giveaways. "
             "Output JSON with title, summary, victim (name, age, gender, occupation, residence, forensic_data), and ground_truth. "
-            "FORENSIC RULES: ambient_temp between 18.0 and 24.0°C; body_temp between 27.0 and 34.0°C. "
+            "FORENSIC RULES: ambient_temp between 18.0 and 24.0°C. "
+            "If the murder occurred the previous night (between 19:00 and 23:30) and the body was discovered the next morning (07:00-08:30), "
+            "cooling time is approximately 8 to 12 hours. For standard body weight (65-85kg, cooling_factor C=1.0) and ambient temp 18-22°C, "
+            "the measured rectal body_temp MUST be between 30.5°C and 33.5°C (do NOT set body_temp below 29.5°C). "
             "Also give body_weight_kg (45-120), cooling_factor (Henssge C: 1.0 clothed in still air, 0.8 lightly dressed/draughty, 1.2-1.3 under warm clothes/blanket) "
-            "and discovery_time (HH:MM when the body was found and rectal temperature measured, typically 8-14 hours after the murder). "
+            "and discovery_time (HH:MM between 07:00 and 08:30 when the body was found and rectal temperature measured). "
             "Include rich forensic pathology details: livor_mortis_state, rigor_mortis_state, wound_description, cause_of_death, manner_of_death, clothing_state. "
             "The time-of-death window is recomputed by a Henssge physics engine from these values. "
-            "ground_truth.actual_crime_time must fall inside this cooling window. "
-            "ground_truth.culprit_id must be 'SUSP-01'."
+            "ground_truth.actual_crime_time must fall inside this cooling window (typically between 18:00 and 23:59). "
+            "ground_truth.culprit_id should select one suspect identifier ('SUSP-01', 'SUSP-02', or 'SUSP-03') to ensure balanced diversity across cases."
         )
         user_prompt = f"""
 Theme: {theme}
@@ -268,24 +316,24 @@ Format:
     "occupation": "<Nghề nghiệp phù hợp bối cảnh>",
     "residence": "<Địa chỉ / Vị trí cụ thể trong bối cảnh>",
     "forensic_data": {{
-      "ambient_temp": 18.5,
-      "body_temp": 27.5,
+      "ambient_temp": 20.0,
+      "body_temp": 31.5,
       "livor_mortis_state": "Hoen tử thi tím sẫm cố định ở lưng, mông và mặt sau đùi, không phai màu khi ấn ngón tay.",
       "rigor_mortis_state": "Co cứng toàn phần (Full Rigor Mortis) ở cơ hàm, cổ và các khớp lớn ngoại biên.",
       "wound_description": "Vết đâm trực diện khoang liên sườn 4-5 bên trái sâu 8.5cm, thấu tim và rách quai động mạch chủ ngực.",
       "cause_of_death": "Sốc mất máu cấp tính do tổn thương thấu tim (Acute Hemorrhagic Shock).",
       "manner_of_death": "Vụ án mạng sát hại (Homicide).",
       "clothing_state": "Y phục nạn nhân còn nguyên vẹn, không có vết rách do xô xát vật lý trước đó.",
-      "estimated_tod_start": "20:30",
-      "estimated_tod_end": "20:50",
-      "body_weight_kg": 76.0,
-      "cooling_factor": 1.25,
-      "discovery_time": "06:30"
+      "estimated_tod_start": "<Giờ ước lượng HH:MM>",
+      "estimated_tod_end": "<Giờ ước lượng HH:MM>",
+      "body_weight_kg": 70.0,
+      "cooling_factor": 1.0,
+      "discovery_time": "08:00"
     }}
   }},
   "ground_truth": {{
-    "culprit_id": "SUSP-01",
-    "actual_crime_time": "20:40",
+    "culprit_id": "<Mã định danh nghi phạm hung thủ: chọn một trong SUSP-01, SUSP-02, hoặc SUSP-03>",
+    "actual_crime_time": "<Mốc giờ gây án thực tế HH:MM trong khoảng 20:45 - 23:15>",
     "murder_weapon": "<Tên hung khí cụ thể>",
     "core_contradiction": "<Mâu thuẫn then chốt giữa lời khai ngoại phạm của hung thủ và manh mối vật lý hiện trường>"
   }}
@@ -299,22 +347,44 @@ Format:
     async def repair_tod(self, victim: Victim, ground_truth: GroundTruth, diagnostic: str) -> Tuple[Victim, GroundTruth]:
         """Localized patch repair for TOD / Crime Time violations (Paper 7)."""
         logger.info(f"[OutlineAgent] Applying localized patch repair: {diagnostic}")
+        from validator import henssge_tod_window
+        window = henssge_tod_window(victim.forensic_data)
+        start_str, end_str = ("20:30", "23:30")
+        mid_str = "21:30"
+        if window:
+            start_str, end_str = window
+            try:
+                sh, sm = map(int, start_str.split(':'))
+                eh, em = map(int, end_str.split(':'))
+                stot = sh * 60 + sm
+                etot = eh * 60 + em
+                if etot < stot:
+                    etot += 1440
+                mid_tot = (stot + etot) // 2 % 1440
+                mid_str = f"{mid_tot // 60:02d}:{mid_tot % 60:02d}"
+            except Exception:
+                pass
+
         system_prompt = (
             "You are a Forensic Logic Repair Specialist. "
-            "Fix the discrepancy between actual_crime_time and estimated_tod_start/estimated_tod_end based on diagnostic feedback. "
+            "Fix the discrepancy between actual_crime_time and the valid Henssge Time of Death window. "
             "Output JSON with corrected 'forensic_data' and 'actual_crime_time'. "
-            "FORENSIC PHYSICS RULE: When discovery_time is 06:30 and ambient_temp is 18.5°C, to have death occur around 20:30-20:50 the previous night (cooling time ~9.5-10.0 hours), "
-            "body_temp MUST be between 31.5°C and 32.5°C (weight 70-80kg, cooling factor C=1.0). Never set body_temp close to ambient temperature!"
+            "FORENSIC PHYSICS RULE: body_temp MUST be between 30.5°C and 33.5°C (warmer than ambient_temp 18.0-22.0°C). "
+            f"actual_crime_time MUST be set to a time inside [{start_str} - {end_str}]."
         )
         user_prompt = f"""
 Current Forensic: {victim.forensic_data.model_dump_json()}
 Current Crime Time: {ground_truth.actual_crime_time}
+Valid Henssge Calculated TOD Window: [{start_str} - {end_str}]
+Recommended Crime Time: '{mid_str}'
 Diagnostic Violation: {diagnostic}
-Requirement: Move actual_crime_time inside the valid Henssge cooling window (e.g. 20:40), and keep body_temp between 31.5°C and 32.5°C with cooling_factor 1.0.
+Requirement: Keep ambient_temp (~20°C) and body_temp (~31.5°C) physically sound. Move actual_crime_time into [{start_str} - {end_str}] (e.g. '{mid_str}').
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
         if "forensic_data" in data:
-            victim.forensic_data = ForensicData.model_validate(data["forensic_data"])
+            candidate_fd = ForensicData.model_validate(data["forensic_data"])
+            if candidate_fd.body_temp > candidate_fd.ambient_temp + 2.0:
+                victim.forensic_data = candidate_fd
         if "actual_crime_time" in data:
             ground_truth.actual_crime_time = data["actual_crime_time"]
         return victim, ground_truth
@@ -323,7 +393,7 @@ Requirement: Move actual_crime_time inside the valid Henssge cooling window (e.g
 class CharacterAgent(BaseAgent):
     """Responsible for generating suspects, personalities, alibis, and secrets."""
 
-    async def generate(self, victim: Victim, ground_truth: GroundTruth, theme: str) -> List[Suspect]:
+    async def generate(self, victim: Victim, ground_truth: GroundTruth, theme: str, enable_post_processing: bool = True) -> List[Suspect]:
         guidance = _get_setting_guidance(theme)
         mechanic = _get_mystery_style_mechanic(theme)
 
@@ -341,21 +411,71 @@ class CharacterAgent(BaseAgent):
         sug_innocent2_start = f"{max(0, crime_mins + 10) // 60:02d}:{max(0, crime_mins + 10) % 60:02d}"
         sug_innocent2_end = f"{min(1439, crime_mins + 70) // 60:02d}:{min(1439, crime_mins + 70) % 60:02d}"
 
+        target_culprit_id = ground_truth.culprit_id if ground_truth.culprit_id in ["SUSP-01", "SUSP-02", "SUSP-03"] else "SUSP-01"
+
         system_prompt = (
             "You are a Character Specialist in detective fiction (CharacterAgent). "
             "Generate 3 distinct, realistic suspects (SUSP-01, SUSP-02, SUSP-03). "
             "CRITICAL CULTURAL RULE: All suspect names MUST match the cultural background and nationality of the Victim (e.g. if Victim is Vietnamese, ALL suspect names MUST be authentic Vietnamese names. If British/Western, all names must be British). "
             "CRITICAL SETTING INTEGRITY RULE: Suspect occupations, residences, and alibi locations MUST strictly conform to the Setting Guidelines below. If the setting is a train, hospital, or ship, NEVER use manor/mansion tropes ('quản gia', 'thư phòng', 'lầu hai', 'lò sưởi', 'ban công'). "
             "CRITICAL STATEMENT ACTION & RICHNESS RULE: Every suspect's `statement` MUST describe concrete tasks, physical actions, and sensory interactions (e.g. 'đang pha ấm trà hoa cúc và kiểm kê 15 kiện hàng số 4', 'đang ghi chép sổ lộ trình chuyến tàu và nghe thấy tiếp viên gõ cửa khoang bên', 'đang sửa chữa van áp suất đồng hồ số 2'). TUYỆT ĐỐI KHÔNG chỉ nói cộc lốc 'Tôi ở phòng X từ giờ Y đến Z'. Lời khai phải có đồ vật cụ thể, âm thanh hoặc người đi qua để người chơi có dữ kiện bóc tách mâu thuẫn. "
-            "CRITICAL TIMELINE INTEGRITY RULE: For SUSP-01 (Culprit), `alibi_start` and `alibi_end` MUST strictly bracket actual_crime_time (e.g. start 15-30 mins BEFORE crime time, end 30-50 mins AFTER crime time). `statement` MUST open with the EXACT interval 'Từ [alibi_start] đến [alibi_end], tôi đang [hành động cụ thể] tại [vị trí]...'. TUYỆT ĐỐI KHÔNG gán mốc giờ trong statement lệch khỏi alibi_start và alibi_end. "
+            f"CRITICAL TIMELINE INTEGRITY RULE: For {target_culprit_id} (Culprit), `alibi_start` and `alibi_end` MUST strictly bracket actual_crime_time (e.g. start 15-30 mins BEFORE crime time, end 30-50 mins AFTER crime time). `statement` MUST open with the EXACT interval 'Từ [alibi_start] đến [alibi_end], tôi đang [hành động cụ thể] tại [vị trí]...'. TUYỆT ĐỐI KHÔNG gán mốc giờ trong statement lệch khỏi alibi_start và alibi_end. "
             "CRITICAL MYSTERY DEDUCTION MECHANIC: Align suspects' timelines and statements with the Mystery Deduction Mechanic provided below. "
             "STRICT ANTI-GIVEAWAY / FAIR-PLAY RULES: "
-            "1. SUSP-01 MUST have is_culprit = True (matches GroundTruth). "
-            "2. SUSP-02 and SUSP-03 MUST have is_culprit = False. "
-            "3. NO PHYSICAL SMOKING GUNS ON SUSPECTS: TUYỆT ĐỐI KHÔNG gán vết thương rớm máu, đứt tay, băng bó ngón tay, quần áo rách hay vết máu cho bất kỳ nghi phạm nào! Hung thủ SUSP-01 phải tỏ ra điềm tĩnh, ngoại hình gọn gàng, có vị thế đáng tin cậy. interview_notes chỉ mô tả phong thái tâm lý, thái độ điềm tĩnh hoặc né tránh ánh mắt khi bị hỏi sâu về lịch trình, và nhóm máu thông thường. "
-            "4. SUSP-01's alibi statement claims an activity or location during actual_crime_time that seems completely plausible, but contains the specific documentary or environmental impossibility defined in the Mystery Deduction Mechanic (e.g. claiming a phone call while train is in a tunnel, or having dinner while delayed toxin was digesting). "
-            "5. SUSP-02 and SUSP-03 MUST have strong motives and suspicious behavior (red herrings) that make them appear guilty, but their whereabouts during the ACTUAL Henssge crime window are verified by independent logs (witnesses, telephone switchboard, distant tickets)."
+            f"1. The suspect with id '{target_culprit_id}' MUST have is_culprit = True (matches GroundTruth). "
+            "2. The remaining suspects MUST have is_culprit = False. "
+            "3. NO PHYSICAL SMOKING GUNS ON SUSPECTS: TUYỆT ĐỐI KHÔNG gán vết thương rớm máu, đứt tay, băng bó ngón tay, quần áo rách hay vết máu cho bất kỳ nghi phạm nào! Hung thủ phải tỏ ra điềm tĩnh, ngoại hình gọn gàng, có vị thế đáng tin cậy. interview_notes chỉ mô tả phong thái tâm lý, thái độ điềm tĩnh hoặc né tránh ánh mắt khi bị hỏi sâu về lịch trình, và nhóm máu thông thường. "
+            f"4. {target_culprit_id}'s alibi statement claims an activity or location during actual_crime_time that seems completely plausible, but contains the specific documentary or environmental impossibility defined in the Mystery Deduction Mechanic. "
+            "5. Innocent suspects MUST have strong motives and suspicious behavior (red herrings) that make them appear guilty, but their whereabouts during the ACTUAL Henssge crime window are verified by independent logs."
         )
+
+        def make_susp_spec(sid: str, name_hint: str, role_hint: str, age: int, gender: str, occ: str, sug_s: str, sug_e: str, img: str):
+            is_c = (sid == target_culprit_id)
+            if is_c:
+                return f'''    {{
+      "id": "{sid}",
+      "name": "<Họ tên {sid} (Hung thủ) thuần bản địa>",
+      "age": {age},
+      "gender": "{gender}",
+      "occupation": "<{occ}>",
+      "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
+      "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
+      "motive": "<Động cơ gây án cụ thể>",
+      "statement": "Từ {sug_culprit_start} đến {sug_culprit_end}, tôi ở <residence> đang <mô tả hành động công việc cụ thể, chi tiết đồ vật/âm thanh/tương tác>.",
+      "timeline_claimed": "{sug_culprit_start} - {sug_culprit_end}",
+      "interview_notes": "<Ghi chú thẩm vấn: phong thái tâm lý điềm tĩnh, trả lời mạch lạc, né tránh ánh mắt khi nhắc đến mốc giờ gây án, Nhóm máu A/B/O/AB>",
+      "alibi_start": "{sug_culprit_start}",
+      "alibi_end": "{sug_culprit_end}",
+      "alibi_statement": "<Hoạt động ngoại phạm chứa mâu thuẫn vật lý hoặc tài liệu sẽ bị bẻ gãy>",
+      "secret_innocent_fact": null,
+      "is_culprit": true,
+      "image_url": "{img}"
+    }}'''
+            else:
+                return f'''    {{
+      "id": "{sid}",
+      "name": "<Họ tên {sid} (Người vô tội) thuần bản địa>",
+      "age": {age},
+      "gender": "{gender}",
+      "occupation": "<{occ}>",
+      "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
+      "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
+      "motive": "<Động cơ đáng ngờ>",
+      "statement": "Từ {sug_s} đến {sug_e}, tôi ở <residence> đang <mô tả hành động cụ thể>.",
+      "timeline_claimed": "{sug_s} - {sug_e}",
+      "interview_notes": "<Ghi chú thẩm vấn: thái độ lo lắng về bí mật riêng, Nhóm máu A/B/O/AB>",
+      "alibi_start": "{sug_s}",
+      "alibi_end": "{sug_e}",
+      "alibi_statement": "<Hoạt động ngoại phạm được người khác hoặc sổ sách xác nhận>",
+      "secret_innocent_fact": "<Bí mật phi pháp hoặc riêng tư nhưng không giết người>",
+      "is_culprit": false,
+      "image_url": "{img}"
+    }}'''
+
+        s1_json = make_susp_spec("SUSP-01", "Nghi phạm 1", "Quản gia / Trợ lý", 48, "Nam", "Nghề nghiệp phù hợp bối cảnh", sug_innocent1_start, sug_innocent1_end, "/static/assets/suspects/butler_male_50s.png")
+        s2_json = make_susp_spec("SUSP-02", "Nghi phạm 2", "Bác sĩ / Kỹ sư", 39, "Nam", "Nghề nghiệp phù hợp bối cảnh", sug_innocent1_start, sug_innocent1_end, "/static/assets/suspects/businessman_male_50s.png")
+        s3_json = make_susp_spec("SUSP-03", "Nghi phạm 3", "Nữ thừa kế / Nhân viên", 26, "Nữ", "Nghề nghiệp phù hợp bối cảnh", sug_innocent2_start, sug_innocent2_end, "/static/assets/suspects/female_30s.png")
+
         user_prompt = f"""
 Theme: {theme}
 Setting Guidelines:
@@ -370,121 +490,82 @@ Ground Truth: Culprit={ground_truth.culprit_id}, Crime Time={ground_truth.actual
 Output JSON (all professions and residences MUST strictly fit {theme}):
 {{
   "suspects": [
-    {{
-      "id": "SUSP-01",
-      "name": "<Họ tên nghi phạm 1 (Hung thủ) thuần bản địa>",
-      "age": 48,
-      "gender": "Nam",
-      "occupation": "<Nghề nghiệp phù hợp bối cảnh>",
-      "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
-      "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
-      "motive": "<Động cơ gây án cụ thể>",
-      "statement": "Từ {sug_culprit_start} đến {sug_culprit_end}, tôi ở <residence> đang <mô tả hành động công việc cụ thể, chi tiết đồ vật/âm thanh/tương tác>.",
-      "timeline_claimed": "{sug_culprit_start} - {sug_culprit_end}",
-      "interview_notes": "<Ghi chú thẩm vấn: phong thái tâm lý điềm tĩnh, trả lời mạch lạc, né tránh ánh mắt khi nhắc đến mốc giờ gây án, Nhóm máu A/B/O/AB>",
-      "alibi_start": "{sug_culprit_start}",
-      "alibi_end": "{sug_culprit_end}",
-      "alibi_statement": "<Hoạt động ngoại phạm chứa mâu thuẫn vật lý hoặc tài liệu sẽ bị bẻ gãy>",
-      "secret_innocent_fact": null,
-      "is_culprit": true,
-      "image_url": "/static/assets/suspects/butler_male_50s.png"
-    }},
-    {{
-      "id": "SUSP-02",
-      "name": "<Họ tên nghi phạm 2 (Người vô tội có hành vi mờ ám riêng)>",
-      "age": 39,
-      "gender": "Nam",
-      "occupation": "<Nghề nghiệp phù hợp bối cảnh>",
-      "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
-      "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
-      "motive": "<Động cơ đáng ngờ>",
-      "statement": "Từ {sug_innocent1_start} đến {sug_innocent1_end}, tôi ở <residence> đang <mô tả hành vi cụ thể gắn với bí mật tài chính/tình cảm riêng>.",
-      "timeline_claimed": "{sug_innocent1_start} - {sug_innocent1_end}",
-      "interview_notes": "<Ghi chú thẩm vấn: thái độ căng thẳng, lo lắng về bí mật tài chính/tình cảm riêng, Nhóm máu A/B/O/AB>",
-      "alibi_start": "{sug_innocent1_start}",
-      "alibi_end": "{sug_innocent1_end}",
-      "alibi_statement": "<Hoạt động ngoại phạm được người khác hoặc sổ sách xác nhận>",
-      "secret_innocent_fact": "<Bí mật phi pháp hoặc riêng tư nhưng không giết người>",
-      "is_culprit": false,
-      "image_url": "/static/assets/suspects/businessman_male_50s.png"
-    }},
-    {{
-      "id": "SUSP-03",
-      "name": "<Họ tên nghi phạm 3 (Người vô tội bị nghi oan)>",
-      "age": 26,
-      "gender": "Nữ",
-      "occupation": "<Nghề nghiệp phù hợp bối cảnh>",
-      "relationship_to_victim": "<Mối quan hệ với nạn nhân>",
-      "residence": "<Vị trí/Khoang/Phòng cụ thể trong bối cảnh>",
-      "motive": "<Động cơ bị nghi ngờ>",
-      "statement": "Từ {sug_innocent2_start} đến {sug_innocent2_end}, tôi ở <residence> đang <mô tả hành động cụ thể độc lập>.",
-      "timeline_claimed": "{sug_innocent2_start} - {sug_innocent2_end}",
-      "interview_notes": "<Ghi chú thẩm vấn: buồn bã hoặc sợ hãi, khẳng định vô tội, Nhóm máu A/B/O/AB>",
-      "alibi_start": "{sug_innocent2_start}",
-      "alibi_end": "{sug_innocent2_end}",
-      "alibi_statement": "<Hoạt động ngoại phạm độc lập>",
-      "secret_innocent_fact": "<Hành vi khả nghi nhưng độc lập với vụ án>",
-      "is_culprit": false,
-      "image_url": "/static/assets/suspects/female_30s.png"
-    }}
+{s1_json},
+{s2_json},
+{s3_json}
   ]
 }}
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
         suspects = [Suspect.model_validate(s) for s in data.get("suspects", [])]
 
-        # Post-Processing: Deterministic Synchronization of Timeline and Action Statement
-        for s in suspects:
-            s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+        if enable_post_processing:
+            # Post-Processing: Deterministic Synchronization of Timeline and Action Statement
+            for s in suspects:
+                s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
 
-            # Enforce culprit alibi bracket
-            if s.is_culprit and ground_truth.actual_crime_time:
-                try:
-                    c_h, c_m = map(int, ground_truth.actual_crime_time.split(':'))
-                    c_tot = c_h * 60 + c_m
-                    s_h, s_m = map(int, s.alibi_start.split(':'))
-                    e_h, e_m = map(int, s.alibi_end.split(':'))
-                    s_tot = s_h * 60 + s_m
-                    e_tot = e_h * 60 + e_m
-                    if not (s_tot <= c_tot <= e_tot):
-                        s.alibi_start = sug_culprit_start
-                        s.alibi_end = sug_culprit_end
-                        s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
-                except Exception:
-                    pass
+                # Enforce culprit alibi bracket
+                if s.is_culprit and ground_truth.actual_crime_time:
+                    try:
+                        c_h, c_m = map(int, ground_truth.actual_crime_time.split(':'))
+                        c_tot = c_h * 60 + c_m
+                        s_h, s_m = map(int, s.alibi_start.split(':'))
+                        e_h, e_m = map(int, s.alibi_end.split(':'))
+                        s_tot = s_h * 60 + s_m
+                        e_tot = e_h * 60 + e_m
+                        if not (s_tot <= c_tot <= e_tot):
+                            s.alibi_start = sug_culprit_start
+                            s.alibi_end = sug_culprit_end
+                            s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+                    except Exception:
+                        pass
 
-            # Synchronize statement prefix with exact alibi interval
-            if s.statement:
-                prefix = f"Từ {s.alibi_start} đến {s.alibi_end}"
-                if prefix not in s.statement and f"{s.alibi_start} - {s.alibi_end}" not in s.statement:
-                    # Clean out any conflicting arbitrary time from the front
-                    cleaned = re.sub(
-                        r'^(Tôi|Tôi đã|Vào lúc|Khoảng|Từ)?\s*(ở|tại)?\s*.*?(từ|lúc|khoảng)?\s*\d{1,2}:\d{2}.*?(đến|cho đến khi)?\s*(\d{1,2}:\d{2}|kết thúc)?[\.,;:]?\s*',
-                        '',
-                        s.statement,
-                        flags=re.IGNORECASE
-                    ).strip()
-                    if not cleaned:
-                        cleaned = f"ở {s.residence} làm việc và không rời khỏi đây"
-                    s.statement = f"{prefix}, tôi {cleaned}"
+                # Synchronize statement prefix with exact alibi interval
+                if s.statement:
+                    prefix = f"Từ {s.alibi_start} đến {s.alibi_end}"
+                    if prefix not in s.statement and f"{s.alibi_start} - {s.alibi_end}" not in s.statement:
+                        # Clean out any conflicting arbitrary time from the front
+                        cleaned = re.sub(
+                            r'^(Tôi|Tôi đã|Vào lúc|Khoảng|Từ)?\s*(ở|tại)?\s*.*?(từ|lúc|khoảng)?\s*\d{1,2}:\d{2}.*?(đến|cho đến khi)?\s*(\d{1,2}:\d{2}|kết thúc)?[\.,;:]?\s*',
+                            '',
+                            s.statement,
+                            flags=re.IGNORECASE
+                        ).strip()
+                        if not cleaned:
+                            cleaned = f"ở {s.residence} làm việc và không rời khỏi đây"
+                        s.statement = f"{prefix}, tôi {cleaned}"
+        else:
+            # Without post-processing: keep raw alibi and statement as produced by LLM
+            for s in suspects:
+                if not s.timeline_claimed:
+                    s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
 
         return suspects
 
     async def repair_suspects(self, suspects: List[Suspect], ground_truth: GroundTruth, diagnostic: str) -> List[Suspect]:
-        """Localized patch repair for duplicate IDs or culprit flags (Paper 7)."""
+        """Localized patch repair for duplicate IDs, culprit flags, or broken alibi bracketing (Paper 7)."""
         logger.info(f"[CharacterAgent] Applying localized patch repair: {diagnostic}")
         system_prompt = (
             "You are a Character Consistency Repair Agent. "
-            "Fix suspect IDs or culprit assignment flaws based on the diagnostic feedback. "
-            "Output JSON with corrected 'suspects' array. Exactly 1 suspect must have is_culprit=True matching culprit_id."
+            "Fix suspect IDs, culprit flags, or alibi bracketing flaws based on the diagnostic feedback. "
+            f"REQUIREMENTS: "
+            f"1. Unique IDs: Each suspect must have a unique ID (SUSP-01, SUSP-02, SUSP-03). "
+            f"2. Culprit: Exactly 1 suspect must have is_culprit=True with id='{ground_truth.culprit_id}'. "
+            f"3. Alibi Bracket: The culprit's alibi_start and alibi_end MUST bracket actual_crime_time ('{ground_truth.actual_crime_time}'). "
+            "4. Rich Statement: Preserve each suspect's full statement (must be >= 6 words). "
+            "Output JSON with corrected 'suspects' array."
         )
         user_prompt = f"""
 Current Suspects: {[s.model_dump() for s in suspects]}
 Ground Truth Culprit ID: {ground_truth.culprit_id}
+Actual Crime Time: {ground_truth.actual_crime_time}
 Diagnostic Violation: {diagnostic}
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
-        return [Suspect.model_validate(s) for s in data.get("suspects", [])]
+        repaired = [Suspect.model_validate(s) for s in data.get("suspects", [])]
+        for s in repaired:
+            s.timeline_claimed = f"{s.alibi_start} - {s.alibi_end}"
+        return repaired
 
 
 class ClueAgent(BaseAgent):
@@ -601,17 +682,22 @@ Output JSON with 5 distinct evidences strictly located in {theme}:
         return [Evidence.model_validate(e) for e in data.get("evidences", [])]
 
     async def repair_clues(self, evidences: List[Evidence], suspects: List[Suspect], ground_truth: GroundTruth, diagnostic: str) -> List[Evidence]:
-        """Localized patch repair for missing crucial clue or unbroken alibi (Paper 7)."""
+        """Localized patch repair for missing crucial clues, broken alibis, or referential schema errors (Paper 7)."""
         logger.info(f"[ClueAgent] Applying localized patch repair: {diagnostic}")
         culprit = next((s for s in suspects if s.is_culprit), suspects[0])
+        valid_suspect_ids = [s.id for s in suspects]
         system_prompt = (
             "You are a Forensic Clue Repair Specialist. "
-            "The case validator flagged a flaw: missing crucial clue or unbroken culprit alibi. "
-            "Modify or add an evidence item so there is at least one clear crucial clue (is_crucial=True) "
-            "that definitively breaks the culprit's alibi. Output JSON with updated 'evidences' array."
+            "Fix evidence flaws according to the diagnostic feedback. "
+            "REQUIREMENTS: "
+            f"1. Referential Integrity: Every evidence linked_suspect_id MUST be one of {valid_suspect_ids} or null. "
+            f"2. Fair-Play: Crucial evidence (is_crucial=True) MUST link to culprit '{culprit.id}' or null; NEVER link crucial clues to innocent suspects! "
+            f"3. Solvability: At least 1 crucial clue (is_crucial=True, is_red_herring=False) MUST definitively break {culprit.id}'s alibi. "
+            "Output JSON with updated 'evidences' array containing 4 to 5 evidences."
         )
         user_prompt = f"""
 Culprit: {culprit.id} ({culprit.name})
+All Suspects: {[{'id': s.id, 'name': s.name, 'is_culprit': s.is_culprit} for s in suspects]}
 Culprit Claimed Alibi: "{culprit.alibi_statement}" [{culprit.alibi_start} - {culprit.alibi_end}]
 Core Contradiction: {ground_truth.core_contradiction}
 Current Evidences: {[e.model_dump() for e in evidences]}

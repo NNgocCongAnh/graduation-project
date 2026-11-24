@@ -118,6 +118,7 @@ public class VerifyRequest
     public string case_id;
     public string selected_suspect_id;
     public List<string> selected_evidence_ids = new List<string>();
+    public string reasoning;
 }
 
 [Serializable]

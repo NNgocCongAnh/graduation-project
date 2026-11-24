@@ -183,6 +183,7 @@ class GenerationMetadata(BaseModel):
     model_config = {"protected_namespaces": ()}
     model_name: str = Field(default="unknown")
     pipeline_version: str = Field(default="2.0-neuro-symbolic")
+    config_mode: str = Field(default="full_pipeline", description="Ablation configuration mode.")
     agent_latencies: Dict[str, float] = Field(default_factory=dict, description="Latency per agent in seconds.")
     agent_models: Dict[str, str] = Field(
         default_factory=dict,
@@ -191,6 +192,14 @@ class GenerationMetadata(BaseModel):
     fallback_triggered: bool = Field(
         default=False,
         description="Whether any agent fell back to a secondary/smaller model."
+    )
+    used_fallback_sample: bool = Field(
+        default=False,
+        description="Whether offline seed sample case was used due to catastrophic generation failure."
+    )
+    token_usage: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Detailed real token telemetry (prompt_tokens, completion_tokens, total_tokens, patch_tokens)."
     )
     total_latency: float = Field(default=0.0, description="Total generation time in seconds.")
     patch_retries: int = Field(default=0, description="Count of localized patch repairs performed.")
@@ -220,8 +229,51 @@ class DeductionScoreBreakdown(BaseModel):
     total_score: float = Field(default=0.0, ge=0.0, le=100.0, description="Final composite score (0 - 100).")
 
 
+class ClientSuspect(BaseModel):
+    """Sanitized suspect profile sent to game clients (no ground-truth cheat flags)."""
+    id: str = Field(..., description="Unique suspect identifier (e.g., 'SUSP-01').")
+    name: str = Field(..., description="Full name of the suspect.")
+    age: int = Field(..., ge=1, le=120, description="Age of the suspect.")
+    occupation: str = Field(..., description="Occupation or relationship with the victim.")
+    motive: str = Field(..., description="Motive or underlying conflict with the victim.")
+    alibi_start: str = Field(..., description="Start time of claimed alibi (HH:MM).")
+    alibi_end: str = Field(..., description="End time of claimed alibi (HH:MM).")
+    alibi_statement: str = Field(..., description="Verbal alibi testimony given by the suspect.")
+    image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the portrait photograph.")
+    gender: Optional[str] = Field(default="Nam", description="Gender of the suspect.")
+    relationship_to_victim: Optional[str] = Field(default=None, description="Relationship with victim.")
+    residence: Optional[str] = Field(default=None, description="Residence address or room location.")
+    statement: Optional[str] = Field(default=None, description="Full verbatim formal interrogation statement.")
+    timeline_claimed: Optional[str] = Field(default=None, description="Claimed movement timeline string.")
+    interview_notes: Optional[str] = Field(default=None, description="Confidential interrogation notes by detective.")
+
+
+class ClientEvidence(BaseModel):
+    """Sanitized evidence item sent to game clients (no crucial/red-herring labels)."""
+    id: str = Field(..., description="Unique evidence identifier (e.g., 'EV-01').")
+    title: str = Field(..., description="Short descriptive name of the evidence.")
+    location: str = Field(..., description="Location where the evidence was discovered.")
+    description: str = Field(..., description="Detailed description and forensic traits of the item.")
+    image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the physical evidence photograph.")
+    is_weapon: Optional[bool] = Field(default=False, description="Whether this evidence is the murder weapon.")
+    fingerprint_analysis: Optional[str] = Field(default=None, description="Latent fingerprint forensic analysis report.")
+    blood_dna_analysis: Optional[str] = Field(default=None, description="Serological and DNA forensic analysis report.")
+    physical_condition: Optional[str] = Field(default=None, description="Detailed physical condition and mechanical traits.")
+
+
+class ClientCaseDossier(BaseModel):
+    """Public case dossier for player-facing endpoints without solutions or cheat flags."""
+    case_id: str = Field(..., description="Unique case code (e.g., 'CASE-2026-001').")
+    title: str = Field(..., description="Title of the murder case.")
+    summary: str = Field(..., description="Introduction and context of the locked-room mystery.")
+    victim: Victim = Field(..., description="Victim profile and autopsy findings.")
+    suspects: List[ClientSuspect] = Field(..., min_length=2, max_length=5, description="List of suspects.")
+    evidences: List[ClientEvidence] = Field(..., min_length=2, description="List of physical evidences.")
+    metadata: Optional[GenerationMetadata] = Field(default=None, description="Telemetry metadata.")
+
+
 class CaseDossier(BaseModel):
-    """Complete Case Dossier structure returned to client and stored in database."""
+    """Complete Case Dossier structure stored internally in database and used by solver."""
     case_id: str = Field(..., description="Unique case code (e.g., 'CASE-2026-001').")
     title: str = Field(..., description="Title of the murder case.")
     summary: str = Field(..., description="Introduction and context of the locked-room mystery.")
@@ -232,12 +284,59 @@ class CaseDossier(BaseModel):
     reasoning_chain: Optional[ReasoningChain] = Field(default=None, description="Multi-hop deduction chain from Paper 3.")
     metadata: Optional[GenerationMetadata] = Field(default=None, description="Diagnostic telemetry and metrics.")
 
+    def to_client_dossier(self) -> ClientCaseDossier:
+        """Strip secret ground truth and internal flags before sending to client."""
+        client_suspects = [
+            ClientSuspect(
+                id=s.id,
+                name=s.name,
+                age=s.age,
+                occupation=s.occupation,
+                motive=s.motive,
+                alibi_start=s.alibi_start,
+                alibi_end=s.alibi_end,
+                alibi_statement=s.alibi_statement,
+                image_url=s.image_url,
+                gender=s.gender,
+                relationship_to_victim=s.relationship_to_victim,
+                residence=s.residence,
+                statement=s.statement,
+                timeline_claimed=s.timeline_claimed,
+                interview_notes=s.interview_notes
+            )
+            for s in self.suspects
+        ]
+        client_evidences = [
+            ClientEvidence(
+                id=e.id,
+                title=e.title,
+                location=e.location,
+                description=e.description,
+                image_url=e.image_url,
+                is_weapon=e.is_weapon,
+                fingerprint_analysis=e.fingerprint_analysis,
+                blood_dna_analysis=e.blood_dna_analysis,
+                physical_condition=e.physical_condition
+            )
+            for e in self.evidences
+        ]
+        return ClientCaseDossier(
+            case_id=self.case_id,
+            title=self.title,
+            summary=self.summary,
+            victim=self.victim,
+            suspects=client_suspects,
+            evidences=client_evidences,
+            metadata=self.metadata
+        )
+
 
 class VerifyRequest(BaseModel):
     """Request payload from player submitting their deduction."""
     case_id: str = Field(..., description="The ID of the case being solved.")
     selected_suspect_id: str = Field(..., description="The ID of the suspect accused by the player.")
     selected_evidence_ids: List[str] = Field(default_factory=list, description="IDs of evidences submitted as proof.")
+    reasoning: Optional[str] = Field(default=None, description="Optional free-text deductive reasoning from player.")
 
 
 class VerifyResponse(BaseModel):

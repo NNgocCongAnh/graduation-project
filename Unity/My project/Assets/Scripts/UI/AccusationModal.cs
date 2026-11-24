@@ -415,7 +415,8 @@ public class AccusationModal : MonoBehaviour
     }
 
     /// <summary>
-    /// Xử lý gửi lệnh bắt giữ: So khớp Hung thủ & Đối soát lập luận với Ground Truth
+    /// Xử lý gửi lệnh bắt giữ: Gửi yêu cầu thẩm định tới Backend API (Server-Authoritative Evaluation).
+    /// Loại bỏ hoàn toàn việc đọc Ground Truth hay cờ Cheat tại Client.
     /// </summary>
     private void OnSubmitButtonClicked()
     {
@@ -432,119 +433,54 @@ public class AccusationModal : MonoBehaviour
             return;
         }
 
-        SuspectData selectedSuspect = currentCase.suspects.Find(s => s.id == selectedSuspectId);
-        bool isCulprit = (selectedSuspect != null && selectedSuspect.is_culprit) ||
-                         (selectedSuspectId == currentCase.ground_truth?.culprit_id);
-
         string reasoning = reasoningInputField != null ? reasoningInputField.text.Trim() : "";
-        bool hasReasoning = !string.IsNullOrEmpty(reasoning);
 
         AudioManager.Instance?.PlayConanClimaxTheme();
 
-        // ---------------------------------------------------------------------
-        // 1. TRƯỜNG HỢP BẮT SAI HUNG THỦ
-        // ---------------------------------------------------------------------
-        if (!isCulprit)
+        var req = new VerifyRequest
         {
-            string innocentReason = selectedSuspect != null && !string.IsNullOrEmpty(selectedSuspect.secret_innocent_fact)
-                ? selectedSuspect.secret_innocent_fact
-                : "Đối tượng có ngoại phạm độc lập và không có động cơ/phương tiện thực hiện vụ án.";
+            case_id = currentCase.case_id,
+            selected_suspect_id = selectedSuspectId,
+            selected_evidence_ids = new List<string>(),
+            reasoning = reasoning
+        };
 
-            ShowVerdict(
-                title: "❌ LỆNH BẮT GIỮ BỊ BÁC BỎ // BẮT OAN NGƯỜI VÔ TỘI",
-                titleColor: new Color(0.92f, 0.25f, 0.25f),
-                feedback: $"Tòa án và Viện Kiểm sát bác bỏ lệnh bắt giữ đối với <b>{selectedSuspectName}</b> ({selectedSuspectOccupation})!\n\n" +
-                          $"<b>SỰ THẬT VỀ ĐỐI TƯỢNG VÔ CAN:</b>\n{innocentReason}\n\n" +
-                          $"⚠️ <i>Cảnh báo: Bắt sai đối tượng vi phạm quy tắc tố tụng và tạo cơ hội cho kẻ thủ ác tẩu thoát. Hãy đối soát lại Báo cáo pháp y Henssge và các vật chứng hiện trường!</i>",
-                contradiction: currentCase.ground_truth != null ? $"Hung thủ thật sự là {currentCase.ground_truth.culprit_id}" : "",
-                score: 0
-            );
-            return;
-        }
-
-        // ---------------------------------------------------------------------
-        // 2. TRƯỜNG HỢP BẮT ĐÚNG HUNG THỦ
-        // ---------------------------------------------------------------------
-        string coreContradiction = currentCase.ground_truth?.core_contradiction ?? "";
-        string actualCrimeTime = currentCase.ground_truth?.actual_crime_time ?? "";
-
-        if (!hasReasoning)
+        if (DetectiveAPIManager.Instance != null)
         {
-            // Người chơi BỎ TRỐNG ô lập luận: Công nhận đúng hung thủ, hiển thị kết quả
-            ShowVerdict(
-                title: "⚖️ PHÁN QUYẾT: CHÍNH XÁC // BẮT GIỮ ĐÚNG HUNG THỦ",
-                titleColor: new Color(0.2f, 0.82f, 0.45f),
-                feedback: $"Chúc mừng Thám tử! Đối tượng <b>{selectedSuspectName}</b> ({selectedSuspectOccupation}) chính là thủ phạm thực sự của vụ án.\n\n" +
-                          $"<b>TÓM TẮT DIỄN BIẾN VỤ ÁN:</b>\n{currentCase.summary}\n\n" +
-                          $"<b>MÂU THUẪN THEN CHỐT VẠCH TRẦN HUNG THỦ (GROUND TRUTH):</b>\n{coreContradiction}\n\n" +
-                          $"<b>THỜI ĐIỂM GÂY ÁN THẬT:</b> {actualCrimeTime}",
-                contradiction: coreContradiction,
-                score: 75
-            );
+            if (warningText != null)
+            {
+                warningText.color = new Color(0.7f, 0.9f, 1f);
+                warningText.text = "⏳ Đang trình Tòa án và Viện Kiểm sát thẩm định lệnh bắt giữ...";
+            }
+
+            DetectiveAPIManager.Instance.VerifyDeduction(req, (success, response) =>
+            {
+                if (success && response != null)
+                {
+                    ShowVerdict(response);
+                }
+                else
+                {
+                    ShowVerdict(
+                        title: "⚠️ LỖI KẾT NỐI TÒA ÁN // HỆ THỐNG NGOẠI TUYẾN",
+                        titleColor: new Color(0.95f, 0.65f, 0.2f),
+                        feedback: "Không thể kết nối tới Dịch vụ Thẩm định Tòa án (FastAPI Backend) để phê chuẩn lệnh bắt.\n\n" +
+                                  "Vui lòng đảm bảo server 'detective-backend' đang chạy tại http://127.0.0.1:8000.",
+                        contradiction: "",
+                        score: 0
+                    );
+                }
+            });
         }
         else
         {
-            // Người chơi CÓ NHẬP lập luận: Đối chiếu với Ground Truth
-            int score = 70;
-            List<string> matchedPoints = new List<string>();
-            string lowerReasoning = reasoning.ToLowerInvariant();
-
-            // So khớp giờ án mạng & Henssge
-            if (!string.IsNullOrEmpty(actualCrimeTime) && (lowerReasoning.Contains(actualCrimeTime) || lowerReasoning.Contains("henssge") || lowerReasoning.Contains("nhiệt") || lowerReasoning.Contains("tử vong") || lowerReasoning.Contains("pháp y")))
-            {
-                score += 10;
-                matchedPoints.Add("✓ Xác định chuẩn xác thời gian tử vong theo nhiệt học Henssge (+10đ)");
-            }
-
-            // So khớp mâu thuẫn ngoại phạm (từ core_contradiction)
-            string[] flawKeywords = new string[] { "ngoại phạm", "sổ", "đồng hồ", "cháy", "vé", "tàu", "hầm", "bếp", "ấm", "thuốc", "vết thương", "mâu thuẫn", "giả", "vỡ", "dừng", "alibi", "lời khai" };
-            int flawHits = 0;
-            foreach (var kw in flawKeywords)
-            {
-                if (lowerReasoning.Contains(kw) && coreContradiction.ToLowerInvariant().Contains(kw))
-                {
-                    flawHits++;
-                }
-            }
-            if (flawHits >= 1)
-            {
-                score += 15;
-                matchedPoints.Add("✓ Bóc trần thành công mâu thuẫn ngoại phạm của đối tượng (+15đ)");
-            }
-
-            // So khớp hung khí & thương tích
-            if (lowerReasoning.Contains("dao") || lowerReasoning.Contains("đâm") || lowerReasoning.Contains("vũ khí") || lowerReasoning.Contains("hung khí") || lowerReasoning.Contains("thuốc") || lowerReasoning.Contains("độc"))
-            {
-                score += 5;
-                matchedPoints.Add("✓ Chỉ điểm đúng hung khí và cơ chế sát hại (+5đ)");
-            }
-
-            score = Mathf.Clamp(score, 70, 100);
-            string pointsFeedback = matchedPoints.Count > 0 ? string.Join("\n", matchedPoints) : "• Lập luận phù hợp với hồ sơ vụ án.";
-
             ShowVerdict(
-                title: score >= 90 ? "🏆 PHÁN QUYẾT TOÀN THẮNG // LẬP LUẬN XUẤT SẮC" : "⚖️ PHÁN QUYẾT: CHÍNH XÁC // LẬP LUẬN HỢP LỆ",
-                titleColor: score >= 90 ? new Color(1f, 0.85f, 0.25f) : new Color(0.2f, 0.82f, 0.45f),
-                feedback: $"Xuất sắc! Lập luận suy luận của bạn đã thuyết phục hoàn toàn Hội đồng xét xử.\n\n" +
-                          $"<b>LẬP LUẬN CỦA BẠN:</b>\n\"{reasoning}\"\n\n" +
-                          $"<b>ĐỐI CHIẾU DẪN CHỨNG:</b>\n{pointsFeedback}\n\n" +
-                          $"<b>MÂU THUẪN THEN CHỐT VẠCH TRẦN HUNG THỦ (GROUND TRUTH):</b>\n{coreContradiction}\n\n" +
-                          $"<b>THỜI ĐIỂM GÂY ÁN THẬT:</b> {actualCrimeTime}",
-                contradiction: coreContradiction,
-                score: score
+                title: "⚠️ CHƯA KHỞI ĐỘNG APIMANAGER",
+                titleColor: new Color(0.95f, 0.65f, 0.2f),
+                feedback: "Hệ thống chưa tìm thấy DetectiveAPIManager để gửi yêu cầu xác thực kết án.",
+                contradiction: "",
+                score: 0
             );
-        }
-
-        // Đồng bộ lên API Backend nếu có kết nối
-        if (DetectiveAPIManager.Instance != null && currentCase != null)
-        {
-            var req = new VerifyRequest
-            {
-                case_id = currentCase.case_id,
-                selected_suspect_id = selectedSuspectId,
-                selected_evidence_ids = new List<string>()
-            };
-            DetectiveAPIManager.Instance.VerifyDeduction(req, (ok, res) => { });
         }
     }
 

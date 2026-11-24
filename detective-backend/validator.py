@@ -21,6 +21,7 @@ from models import (
     ConstraintViolation, ValidationResult, ViolationType,
     VerifyResponse, DeductionVerdict, DeductionScoreBreakdown
 )
+from case_graph import build_bipartite_case_graph
 
 
 def robust_time_to_minutes(time_str: str) -> Optional[int]:
@@ -95,6 +96,10 @@ HENSSGE_AMBIENT_SWITCH = 23.2
 HENSSGE_SEARCH_MAX_HOURS = 48.0
 HENSSGE_EPSILON = 1e-4
 HENSSGE_MAX_ITERATIONS = 100
+# In forensic medicine (Henssge 1988, Madea 2004), the empirical 95% confidence
+# interval for adult casework is approximately +-2.8 hours. For deduction game
+# playability, the system uses a tighter gamified tolerance window of +-1.5 hours
+# centered on t* to create a focused, dramatic deduction bottleneck.
 # Thesis eq. TOD = [T_discovery - (t* + 1.5), T_discovery - (t* - 1.5)]
 HENSSGE_TOD_TOLERANCE_HOURS = 1.5
 MINUTES_PER_DAY = 1440
@@ -307,6 +312,24 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
             ))
         if ev.is_crucial:
             crucial_evidences.append(ev)
+            # Guarantee innocent suspects are never falsely incriminated by crucial clues
+            if ev.linked_suspect_id and len(culprits) == 1 and ev.linked_suspect_id != culprits[0].id:
+                violations.append(ConstraintViolation(
+                    violation_type=ViolationType.SCHEMA_ERROR,
+                    component="clue",
+                    message=(
+                        f"Crucial evidence '{ev.id}' links to innocent suspect '{ev.linked_suspect_id}', "
+                        f"which would falsely incriminate an innocent person."
+                    ),
+                    target_id=ev.id
+                ))
+            if ev.is_red_herring:
+                violations.append(ConstraintViolation(
+                    violation_type=ViolationType.SCHEMA_ERROR,
+                    component="clue",
+                    message=f"Evidence '{ev.id}' cannot simultaneously be crucial and a red herring.",
+                    target_id=ev.id
+                ))
 
     if len(crucial_evidences) == 0:
         violations.append(ConstraintViolation(
@@ -394,6 +417,19 @@ def validate_case_diagnostics(case: CaseDossier) -> ValidationResult:
                 ),
                 target_id=culprit.id
             ))
+        else:
+            # Bipartite Graph Structural Solvability Verification
+            case_graph = build_bipartite_case_graph(case)
+            if not case_graph.is_connected_and_solvable:
+                violations.append(ConstraintViolation(
+                    violation_type=ViolationType.ALIBI_UNBROKEN,
+                    component="clue",
+                    message=(
+                        f"Bipartite graph verification failed: No decisive contradict edge connects "
+                        f"crucial evidence to culprit '{culprit.id}' alibi node."
+                    ),
+                    target_id=culprit.id
+                ))
 
         # Check statement quality and action details
         for s in case.suspects:
@@ -442,7 +478,8 @@ def validate_case_logic(case: CaseDossier) -> Tuple[bool, List[str]]:
 def evaluate_player_deduction(
     case: CaseDossier,
     accused_id: str,
-    selected_clue_ids: List[str]
+    selected_clue_ids: List[str],
+    reasoning: Optional[str] = None
 ) -> VerifyResponse:
     """Evaluate a player's submitted accusation using Neuro-Symbolic Scoring.
 
@@ -452,6 +489,8 @@ def evaluate_player_deduction(
     3. Deduction Precision Bonus (20 pts): Did the player present a concise case without irrelevant clutter?
     4. Anti-Spam Penalty: If player selects all or >= 80% clues without reasoning, flags SPAM_DETECTED (0 pts).
     5. Red Herring Trap: If player falls for deceptive clues, applies a -25 pt deduction.
+    6. Optional Free-Text Reasoning Support: Evaluates analytical arguments referencing Henssge TOD,
+       alibi contradiction, and murder weapon.
 
     Latency: Pure in-memory calculation (< 0.1ms).
     """
@@ -478,8 +517,23 @@ def evaluate_player_deduction(
     red_herrings_count = len(found_herrings)
     irrelevant_count = len(irrelevant_clues)
 
-    # 1. Anti-Spam Defense: Reject bulk 'Select All' submissions
-    if total_evidences >= 3 and len(submitted_set) >= total_evidences:
+    # Free-text reasoning evaluation
+    reasoning_bonus = 0.0
+    reasoning_points: List[str] = []
+    if reasoning and str(reasoning).strip():
+        r_low = str(reasoning).lower()
+        if any(w in r_low for w in ["giờ", "thời gian", "henssge", "tử vong", "nhiệt độ", "tod"]):
+            reasoning_bonus += 10.0
+            reasoning_points.append("• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)")
+        if any(w in r_low for w in ["ngoại phạm", "alibi", "mâu thuẫn", "lời khai", "không thể", "bác bỏ"]):
+            reasoning_bonus += 10.0
+            reasoning_points.append("• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)")
+        if any(w in r_low for w in ["hung khí", "vật chứng", "dao", "độc", "vết thương", "dấu vết", "khí", "súng", "bằng chứng"]):
+            reasoning_bonus += 10.0
+            reasoning_points.append("• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)")
+
+    # 1. Anti-Spam Defense: Reject bulk 'Select All' submissions without substantive reasoning
+    if total_evidences >= 3 and len(submitted_set) >= total_evidences and not reasoning_points:
         return VerifyResponse(
             case_id=case.case_id,
             is_correct=False,
@@ -547,6 +601,10 @@ def evaluate_player_deduction(
     crucial_ratio = (found_crucial_count / max(1, total_crucial_count))
     crucial_score = round(crucial_ratio * 40.0, 1)
 
+    # If player used text reasoning instead of clicking clue checkboxes
+    if found_crucial_count == 0 and len(reasoning_points) >= 2:
+        crucial_score = 35.0
+
     # Precision bonus: 20 pts if clean, decremented for irrelevant clues
     precision_bonus = max(0.0, 20.0 - (irrelevant_count * 10.0))
 
@@ -554,7 +612,7 @@ def evaluate_player_deduction(
     red_herring_penalty = round(red_herrings_count * 25.0, 1)
 
     composite_score = max(0.0, min(100.0, round(
-        base_culprit_score + crucial_score + precision_bonus - red_herring_penalty, 1
+        base_culprit_score + crucial_score + precision_bonus + reasoning_bonus - red_herring_penalty, 1
     )))
 
     breakdown = DeductionScoreBreakdown(
@@ -565,8 +623,10 @@ def evaluate_player_deduction(
         total_score=composite_score
     )
 
-    # Outcome A: Missing Crucial Clue
-    if found_crucial_count == 0:
+    reasoning_summary = ("\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n" + "\n".join(reasoning_points)) if reasoning_points else ""
+
+    # Outcome A: Missing Crucial Clue and no sufficient text reasoning
+    if found_crucial_count == 0 and len(reasoning_points) < 2:
         return VerifyResponse(
             case_id=case.case_id,
             is_correct=False,
@@ -582,6 +642,7 @@ def evaluate_player_deduction(
             feedback=(
                 f"GẦN ĐÚNG: Bạn đã nhận diện chính xác hung thủ {accused_name}! "
                 "Tuy nhiên, chứng cứ bạn đưa ra chưa có manh mối then chốt nào đủ sức bẻ gãy Alibi trước tòa án."
+                + reasoning_summary
             ),
             core_contradiction=None
         )
@@ -604,6 +665,7 @@ def evaluate_player_deduction(
                 f"BỊ GÀI BẪY CHỨNG CỨ: Dù bạn chỉ đúng hung thủ {accused_name}, nhưng bạn lại nộp kèm "
                 f"{red_herrings_count} manh mối nghi binh được tạo ra nhằm gài bẫy người khác! "
                 "Việc này làm ô nhiễm hồ sơ tố tụng và khiến lệnh bắt giữ chưa đủ căn cứ pháp lý."
+                + reasoning_summary
             ),
             core_contradiction=None
         )
@@ -625,11 +687,12 @@ def evaluate_player_deduction(
             feedback=(
                 f"PHÁ ÁN THÀNH CÔNG: Bạn đã vạch trần hung thủ {accused_name} bằng manh mối then chốt! "
                 f"Tuy nhiên, cáo trạng của bạn vẫn còn đính kèm {irrelevant_count} vật chứng dư thừa không liên quan."
+                + reasoning_summary
             ),
             core_contradiction=ground_truth.core_contradiction
         )
 
-    # Outcome D: Perfect Deduction (100% Master Detective)
+    # Outcome D: Perfect Deduction
     return VerifyResponse(
         case_id=case.case_id,
         is_correct=True,
@@ -640,11 +703,12 @@ def evaluate_player_deduction(
         total_crucial_count=total_crucial_count,
         red_herrings_selected_count=0,
         irrelevant_clues_count=0,
-        score=100.0,
+        score=composite_score,
         score_breakdown=breakdown,
         feedback=(
-            f"XUẤT SẮC TUYỆT ĐỐI! Bạn đã phá giải hoàn hảo vụ án '{case.title}'. "
-            f"Lập luận đanh thép, vạch trần hoàn toàn sơ hở Alibi của hung thủ {accused_name}!"
+            f"XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án '{case.title}'. "
+            f"Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ {accused_name}!"
+            + reasoning_summary
         ),
         core_contradiction=ground_truth.core_contradiction
     )

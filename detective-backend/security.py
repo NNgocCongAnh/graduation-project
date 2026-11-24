@@ -16,21 +16,66 @@ import hmac
 import hashlib
 import logging
 from typing import Tuple, Dict
+from dotenv import load_dotenv
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+# Load environment configuration
+load_dotenv()
+
 logger = logging.getLogger("security")
 
-DEFAULT_SECRET = "Phenikaa_UCF_AI_SecretKey_2026_SecureHmacKey_x9!"
-CLIENT_SECRET = os.getenv("GAME_CLIENT_SECRET", DEFAULT_SECRET)
+# Configuration of shared HMAC secret and signature requirement
+# Never hardcode production secrets in source code; enforce strict environment configuration
+CLIENT_SECRET = os.getenv("GAME_CLIENT_SECRET", "").strip()
 REQUIRE_SIGNATURE = os.getenv("REQUIRE_CLIENT_SIGNATURE", "true").lower() in ("true", "1", "yes")
+
+# Fail-closed policy: Refuse to start if signature verification is required but no secret is configured
+if not CLIENT_SECRET:
+    if os.getenv("PYTEST_CURRENT_TEST") or os.getenv("TESTING"):
+        CLIENT_SECRET = "test_temporary_hmac_secret_for_unit_tests_only"
+    elif REQUIRE_SIGNATURE:
+        raise RuntimeError(
+            "CRITICAL SECURITY CONFIGURATION ERROR: 'GAME_CLIENT_SECRET' environment variable is missing or empty. "
+            "The system enforces request integrity verification and will not start with an unconfigured secret. "
+            "Please specify GAME_CLIENT_SECRET in your environment or .env file."
+        )
 
 # Max allowed time drift between client and server (in seconds)
 MAX_TIME_DRIFT = 60.0
 
 # In-memory sliding window nonce cache: nonce -> timestamp
 _SEEN_NONCES: Dict[str, float] = {}
+
+# Rate Limiting configuration for expensive generative endpoints
+RATE_LIMIT_CASE_GEN_PER_MIN = int(os.getenv("RATE_LIMIT_CASE_GEN_PER_MIN", "5"))
+_RATE_LIMIT_STORE: Dict[str, list] = {}
+
+
+def check_rate_limit(client_identifier: str, limit: int = RATE_LIMIT_CASE_GEN_PER_MIN, window_seconds: float = 60.0) -> Tuple[bool, int]:
+    """Check if client identifier exceeds the sliding window rate limit.
+
+    Returns (allowed: bool, retry_after_seconds: int)
+    """
+    now = time.time()
+    timestamps = _RATE_LIMIT_STORE.get(client_identifier, [])
+    valid_timestamps = [ts for ts in timestamps if now - ts < window_seconds]
+
+    if len(valid_timestamps) >= limit:
+        oldest_ts = valid_timestamps[0]
+        retry_after = max(1, int(window_seconds - (now - oldest_ts)))
+        _RATE_LIMIT_STORE[client_identifier] = valid_timestamps
+        return False, retry_after
+
+    valid_timestamps.append(now)
+    _RATE_LIMIT_STORE[client_identifier] = valid_timestamps
+    return True, 0
+
+
+def reset_rate_limits() -> None:
+    """Clear all rate limit tracking entries (for unit tests)."""
+    _RATE_LIMIT_STORE.clear()
 
 
 def _clean_expired_nonces(current_time: float) -> None:
@@ -99,6 +144,30 @@ def verify_signature(
     return True, "Valid"
 
 
+def sign_request(
+    method: str,
+    path: str,
+    body: bytes = b"",
+    secret: str = CLIENT_SECRET,
+    client_id: str = "UnsolvedCaseFiles-v1",
+    ts_offset: float = 0.0
+) -> Dict[str, str]:
+    """Generate valid HMAC security headers for client requests and integration tests."""
+    import uuid
+    clean_path = path.split("?")[0]
+    ts = str(int(time.time() + ts_offset))
+    nonce = str(uuid.uuid4())
+    body_hash = hashlib.sha256(body if body else b"").hexdigest()
+    canonical = f"{method.upper()}\n{clean_path}\n{ts}\n{nonce}\n{body_hash}"
+    sig = hmac.new(secret.encode("utf-8"), canonical.encode("utf-8"), hashlib.sha256).hexdigest()
+    return {
+        "X-Game-Client": client_id,
+        "X-Game-Timestamp": ts,
+        "X-Game-Nonce": nonce,
+        "X-Game-Signature": sig
+    }
+
+
 class ClientIntegrityMiddleware(BaseHTTPMiddleware):
     """FastAPI Middleware to enforce client integrity checks."""
 
@@ -161,5 +230,22 @@ class ClientIntegrityMiddleware(BaseHTTPMiddleware):
                     "security_model": "HMAC-SHA256 Client Integrity Verification"
                 }
             )
+
+        # Check Rate Limit for expensive generation endpoint
+        if path == "/api/case/generate" and request.method == "POST":
+            client_ip = request.client.host if request.client else "unknown"
+            allowed, retry_after = check_rate_limit(client_ip)
+            if not allowed:
+                logger.warning(f"[SECURITY] Rate limit exceeded for IP {client_ip} on {path}. Retry after {retry_after}s.")
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "error": "Too Many Requests",
+                        "status_code": 429,
+                        "detail": f"Rate limit exceeded: Tối đa {RATE_LIMIT_CASE_GEN_PER_MIN} yêu cầu sinh vụ án mỗi phút. Vui lòng thử lại sau {retry_after} giây.",
+                        "retry_after": retry_after
+                    },
+                    headers={"Retry-After": str(retry_after)}
+                )
 
         return await call_next(request)

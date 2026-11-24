@@ -224,8 +224,8 @@ def _guess_from_text(text: str, candidates: List[str]) -> Optional[str]:
 def save_case_to_db(
     case: CaseDossier,
     db: Optional[Session] = None,
-    is_valid: bool = True,
-    validator_score: float = 1.0,
+    is_valid: Optional[bool] = None,
+    validator_score: Optional[float] = None,
     country: Optional[str] = None,
     era: Optional[str] = None,
     mystery_type: Optional[str] = None
@@ -234,7 +234,18 @@ def save_case_to_db(
 
     country / era / mystery_type should come from the generation request; when absent
     (legacy JSON migration), they are guessed from the title and summary.
+    is_valid and validator_score default to case.metadata telemetry if present.
     """
+    if is_valid is None:
+        if case.metadata and hasattr(case.metadata, "validator_score"):
+            validator_score = case.metadata.validator_score
+            is_valid = (validator_score >= 1.0)
+        else:
+            is_valid = True
+            validator_score = 1.0
+    elif validator_score is None:
+        validator_score = 1.0 if is_valid else 0.5
+
     own_session = False
     if db is None:
         db = SessionLocal()

@@ -133,14 +133,40 @@ Unity/My project/Assets/Editor/*.py.meta
 Thumbs.db
 
 # ------------------------------------------------------------------------------
-# 6. Deliverable Whitelist (ALLOW ESSENTIALS)
+# 6. Presentations, PDFs, Advisor Reviews & Planning (EXCLUDE FROM REPO)
+# ------------------------------------------------------------------------------
+*.pptx
+*.pdf
+*GOP_Y*
+*GVHD*
+*KHOA_LUAN*
+*DO_AN*
+KE_HOACH_VA_GIAI_TRINH_GOP_Y_GVHD.md
+TANHNV*
+
+# ------------------------------------------------------------------------------
+# 7. Benchmark, Evaluation & Automation Scripts (LOCAL ONLY)
+# ------------------------------------------------------------------------------
+benchmark_evaluation.ipynb
+detective-backend/run_gemma4_overnight.ps1
+detective-backend/solver_agent.py
+detective-backend/fault_injection_runner.py
+detective-backend/benchmark_runner.py
+detective-backend/*_results*.json
+detective-backend/ablation_results.json
+*.ps1
+
+# ------------------------------------------------------------------------------
+# 8. Test Suites (LOCAL ONLY)
+# ------------------------------------------------------------------------------
+detective-backend/test_*.py
+detective-backend/cases/*TEST*.json
+
+# ------------------------------------------------------------------------------
+# 9. Deliverable Whitelist (ALLOW ESSENTIALS)
 # ------------------------------------------------------------------------------
 !docker-compose.yml
 !detective-backend/Dockerfile
 !CHAY_GAME_TRON_GOI.bat
 !detective-backend/cases/CASE-2026-001.json
-!/BAO_CAO_LUAN_VAN_TOT_NGHIEP_22010201.pdf
-!/BAO_CAO_TOT_NGHIEP_22010201_NguyenNgocCongAnh.pdf
-!/BAO_VE_KHOA_LUAN_TOT_NGHIEP.pptx
-!/benchmark_evaluation.ipynb
 !/README.md
