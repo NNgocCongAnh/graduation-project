@@ -60,10 +60,12 @@ class CaseGeneratorService:
             self.api_base = api_base
             self.api_key = api_key or LLM_API_KEY
 
-        # Initialize Async OpenAI Client
+        # Initialize Async OpenAI Client (generous timeout for local Ollama models)
+        is_local = "11434" in self.api_base or "gemma4:e4b" in self.model or "ollama" in self.model
         self.client = AsyncOpenAI(
             base_url=self.api_base,
-            api_key=self.api_key
+            api_key=self.api_key,
+            timeout=1800.0 if is_local else 180.0
         )
 
         # Initialize Specialized Agents (Paper 3)
@@ -81,9 +83,11 @@ class CaseGeneratorService:
         if api_key and api_key.strip():
             self.api_key = api_key.strip()
 
+        is_local = "11434" in self.api_base or "gemma4:e4b" in self.model or "ollama" in self.model
         self.client = AsyncOpenAI(
             base_url=self.api_base,
-            api_key=self.api_key
+            api_key=self.api_key,
+            timeout=1800.0 if is_local else 180.0
         )
         self.outline_agent = OutlineAgent(self.client, self.model)
         self.character_agent = CharacterAgent(self.client, self.model)
@@ -311,6 +315,7 @@ class CaseGeneratorService:
                 elif enable_post_processing and not enable_patch_repair:
                     config_mode = "pipeline_no_repair"
 
+                raw_culprit_id = candidate_dossier.ground_truth.culprit_id if candidate_dossier.ground_truth else "NONE"
                 candidate_dossier.reasoning_chain = reasoning_chain
                 candidate_dossier.metadata = GenerationMetadata(
                     model_name=self.model,
@@ -324,6 +329,7 @@ class CaseGeneratorService:
                     patch_retries=patch_retries,
                     validator_score=1.0 if diag.is_valid else 0.5,
                     token_usage={
+                        "raw_culprit_id": raw_culprit_id,
                         "gen_prompt_tokens": gen_prompt_tokens,
                         "gen_completion_tokens": gen_completion_tokens,
                         "gen_total_tokens": gen_prompt_tokens + gen_completion_tokens,
@@ -341,6 +347,10 @@ class CaseGeneratorService:
                         }
                     }
                 )
+
+                if enable_post_processing and diag.is_valid:
+                    from id_shuffle import shuffle_case_ids
+                    candidate_dossier = shuffle_case_ids(candidate_dossier)
 
                 logger.info(
                     f"Successfully generated case '{case_id}' in {total_latency}s "

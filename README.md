@@ -14,10 +14,9 @@
 | [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
 | [`detective-backend/test_*.py`](./detective-backend) | 89 kiểm thử đơn vị và tích hợp (pytest) |
 | [`detective-backend/*_runner.py`, `solver_agent.py`](./detective-backend) | Script thực nghiệm: benchmark, nghiên cứu loại trừ, tiêm lỗi, tác tử phá án độc lập |
-| [`detective-backend/*_results*.json`](./detective-backend) | Kết quả thô của từng lượt thực nghiệm (dùng cho Chương 4 báo cáo) |
+| [`detective-backend/*_results*.json`, `benchmarks/`](./detective-backend/benchmarks) | Kết quả thô của từng lượt thực nghiệm (dùng cho Chương 4 báo cáo) |
+| [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Notebook kiểm chứng bảng số liệu và biểu đồ đối sánh thực nghiệm |
 | [`Unity/My project/`](./Unity/My%20project) | Client trò chơi Unity 6 URP 2D (Desktop và WebGL) |
-| [`V0/`](./V0) | Nguyên mẫu Web ban đầu (React + FastAPI), được thay thế bởi kiến trúc hiện tại |
-| [`docs/architecture/`](./docs/architecture) | Các bản ghi quyết định kiến trúc (ADR) |
 | [`docker-compose.yml`](./docker-compose.yml) | Khởi chạy backend bằng Docker |
 
 ## Kiến trúc
@@ -85,8 +84,7 @@ python detective-backend/solver_agent.py
 | Thực nghiệm | Tệp kết quả | Cỡ mẫu | Kết quả chính |
 | :--- | :--- | :---: | :--- |
 | Benchmark `gh/gpt-4o-mini` | `benchmark_results_gpt4o_mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 23,23 s, P95 30,90 s |
-| Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o.json` | 30 | 30/30; P50 41,95 s, P95 49,51 s (chạy trước khi sửa prompt ClueAgent) |
-| Chạy lại `gh/gpt-4o` trên mã nguồn hiện tại | `benchmark_results_gpt4o_v2.json` | 18 (dừng do hết hạn mức API) | 18/18; P50 40,98 s, P95 44,04 s |
+| Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o_v2.json` | 30 | 30/30; P50 46,81 s, P95 59,77 s |
 | Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB. CharacterAgent và ClueAgent chuyển sang mô hình dự phòng trên mây ở cả 23 lượt (hệ lai, không phải chạy hoàn toàn ngoại tuyến) |
 | Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
 | Đối chứng một lần gọi E2E-plan (theo Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
@@ -97,6 +95,5 @@ python detective-backend/solver_agent.py
 
 - Bộ kiểm định chỉ kiểm tra bất biến cấu trúc (một thủ phạm, toàn vẹn tham chiếu, vật chứng then chốt, cửa sổ TOD), chưa kiểm định ngữ nghĩa lời khai.
 - Độ trễ P50 (23,23 s) và chi phí vá (4.227,6 token) chưa đạt ngưỡng thiết kế (≤ 20 s, ≤ 500 token).
-- LLM thiên lệch khi chọn thủ phạm (`SUSP-02` ở 54/60 lượt). Khi phát hành qua API, mã nghi phạm được hoán vị ngẫu nhiên bằng code (`id_shuffle.py`) nên người chơi gặp thủ phạm phân bố đều; đây là phép đổi tên, nội dung vụ án chưa đa dạng hơn.
-- Solver Agent (A4) được đo khi dữ liệu còn chứa cờ `is_weapon`; cờ đã được gỡ nhưng chưa chạy lại do hết hạn mức API.
+- LLM thiên lệch khi chọn thủ phạm ở đầu ra thô (`SUSP-02` ở 28/30 lượt `mini` và 5/6 lượt `gpt-4o` trước hoán vị). Khi tích hợp bước hoán vị kép mã nghi phạm và vật chứng (`id_shuffle.py`), 24 lượt cuối của `gpt-4o` phân bố đều (`9/8/7`) và người chơi gặp thủ phạm/hung khí phân bố đồng đều; đây là phép đổi tên, nội dung vụ án chưa đa dạng hơn.
 - Chưa có thử nghiệm người chơi có quy trình; WebSocket phòng chơi chưa có xác thực phiên (chỉ dùng trong LAN tin cậy).

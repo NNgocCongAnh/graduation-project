@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-11-25 15:21:28",
+  "solver_model": "gemini/gemini-3-flash-preview",
+  "api_base": "http://localhost:20128/v1",
+  "total_cases_evaluated": 3,
+  "culprit_identification_rate_pct": 100.0,
+  "culprit_identification_wilson_ci_95": [
+    43.85,
+    100.0
+  ],
+  "crucial_evidence_identification_rate_pct": 100.0,
+  "crucial_evidence_wilson_ci_95": [
+    43.85,
+    100.0
+  ],
+  "red_herring_avoidance_rate_pct": 100.0,
+  "red_herring_trap_rate_pct": 0.0,
+  "perfect_verdict_rate_pct": 100.0,
+  "mean_score": 100.0,
+  "latency_p50_sec": 12.69,
+  "latency_p95_sec": 13.36,
+  "mean_tokens": 7485.7,
+  "cases": [
+    {
+      "trial": 1,
+      "case_id": "CASE-ABB8F0",
+      "title": "Bản Di Chúc Lúc Nửa Đêm",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-03",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 11.51,
+      "tokens": {
+        "prompt_tokens": 6568,
+        "completion_tokens": 619,
+        "total_tokens": 7187
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Pháp y, nhiệt độ tử thi (31.2°C) và tình trạng co cứng toàn phần (Full Rigor Mortis) cùng hoen tử thi cố định lúc 07:30 cho thấy nạn nhân đã tử vong từ nhiều giờ trước. Đặc biệt, vật chứng EV-01 (Máy đo huyết áp) ghi nhận lần kích hoạt cuối cùng lúc 21:42 và báo lỗi 'E5' (ngừng tuần hoàn/tụt áp đột ngột), xác định chính xác thời điểm tử vong thực tế là khoảng 21:45. Khung giờ này nằm ngay sau ước tính của Henssge và khớp với diễn tiến sinh học của thi thể.",
+      "solver_reasoning": "Trịnh Gia Thành là hung thủ dựa trên hai bằng chứng quyết định: 1. Hung khí (EV-03) là dao rọc giấy Damascus có dính 'Dầu bảo quản đồ cổ' - loại dầu chuyên dụng cho bộ sưu tập cá nhân của Thành, với kích thước lưỡi dao và vết máu khô (9cm) khớp hoàn hảo với vết thương thấu tim của nạn nhân. 2. Lời khai ngoại phạm của Thành bị bác bỏ bởi EV-05: Nhật ký Smart-Home cho thấy đèn phòng làm việc đã tắt từ 22:00, khiến việc ký di chúc lúc 23:15 là bất khả thi. Hơn nữa, vết hoen tử thi (lividity) trên tờ di chúc chứng minh văn bản này chỉ được tiếp xúc với thi thể sau khi nạn nhân đã chết ít nhất 2 giờ, khẳng định Thành đã sát hại cha mình vào khoảng 21:45, sau đó dùng thi thể để ngụy tạo chữ ký và dấu vân tay lên bản di chúc giả nhằm chiếm đoạt tài sản.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Bản Di Chúc Lúc Nửa Đêm'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trịnh Gia Thành' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 2,
+      "case_id": "CASE-CD8C5D",
+      "title": "Án Mạng Trên Chuyến Tàu Đêm Thống Nhất SE3",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-03",
+        "EV-04",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-02"
+      ],
+      "selected_evidence_ids": [
+        "EV-04",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 12.69,
+      "tokens": {
+        "prompt_tokens": 6839,
+        "completion_tokens": 768,
+        "total_tokens": 7607
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, khung giờ tử vong ước tính là [19:45 - 22:45]. Tuy nhiên, các dấu hiệu vật lý như hoen tử thi đã cố định và co cứng bắt đầu lan xuống chi cho thấy nạn nhân đã chết ít nhất 8-10 tiếng trước khi phát hiện (07:30), tức là khoảng 21:30 - 23:30. Vật chứng EV-03 (đồng hồ dừng ở 23:30 do bị lắp ngược pin) là một nỗ lực dàn dựng hiện trường giả nhằm kéo dài thời gian tử vong ra ngoài khung giờ gây án thực tế. Kết hợp với biểu đồ Henssge và tình trạng mất sóng tại đèo Hải Vân, thời điểm tử vong thực tế được xác định rơi vào khoảng 22:40 - 22:55.",
+      "solver_reasoning": "Lê Quốc Nam (SUSP-01) là hung thủ dựa trên hai yếu tố quyết định: 1. Sự sụp đổ của bằng chứng ngoại phạm: Nam khai gọi điện thoại cho vợ trong suốt khung giờ từ 22:20 đến 23:20, nhưng Nhật ký điều độ chạy tàu (EV-05) xác nhận tàu SE3 đi xuyên hầm đá đèo Hải Vân từ 22:40 đến 22:55, khu vực mất sóng tuyệt đối. Điều này chứng minh Nam đã nói dối để che giấu khoảng thời gian rời khoang đi sát hại nạn nhân. 2. Hung khí đặc hiệu: Con dao găm (EV-04) dính máu nạn nhân có vết dầu mỡ bôi trơn trục bánh xe lửa - loại vật liệu kỹ thuật mà Nam, với tư cách trợ lý thân tín thường xuyên xử lý các công việc hậu cần và di chuyển tự do trong các khu vực kỹ thuật, có thể dễ dàng tiếp cận. Nam đã cố tình chỉnh sửa đồng hồ (EV-03) để đánh lừa cơ quan điều tra về thời điểm tử vong, nhưng chính sự mâu thuẫn giữa tín hiệu viễn thông và lộ trình tàu đã vạch trần hắn.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án Mạng Trên Chuyến Tàu Đêm Thống Nhất SE3'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Lê Quốc Nam' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 3,
+      "case_id": "CASE-90F656",
+      "title": "Bản Giao Hưởng Chết Chóc Tại CyberTech",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-03"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-04",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-02",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 13.44,
+      "tokens": {
+        "prompt_tokens": 6908,
+        "completion_tokens": 755,
+        "total_tokens": 7663
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp: Nhiệt độ tử thi đo được lúc 08:00 là 31.5°C trong môi trường ổn định 20.0°C. Theo định luật làm lạnh Henssge, với hệ số C=1.0 và thể trọng 75kg, nạn nhân đã giảm 5.5°C so với nhiệt độ cơ thể bình thường (37°C). Tốc độ mất nhiệt này xác định thời điểm tử vong cách lúc phát hiện khoảng 10-11 giờ, tức là vào khoảng [21:00 - 22:00]. Tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi cố định cũng ủng hộ khung giờ này, bác bỏ hoàn toàn khả năng nạn nhân còn sống đến 23:45 như nhật ký hệ thống ghi lại.",
+      "solver_reasoning": "Đặng Minh Quân (SUSP-01) là hung thủ duy nhất có khả năng và phương tiện thực hiện vụ án. Thứ nhất, hung khí (EV-02) là thanh lấy mẫu tản nhiệt có kích thước vết thương trùng khớp hoàn toàn (8.5cm) và dính mỡ tản nhiệt đặc chủng (Thermal Grease) chỉ dùng cho cụm GPU mà Quân quản lý. Thứ hai, Quân đã sử dụng thiết bị Keystroke Injector (EV-03) cắm vào máy tính nạn nhân để lập trình lệnh gửi email tự động lúc 23:45, nhằm tạo ra một 'ngoại phạm kỹ thuật' giả, khiến điều tra viên tin rằng nạn nhân vẫn còn sống khi Quân đã rời khỏi công ty. Tuy nhiên, phân tích nhiệt độ tử thi (EV-01) đã vạch trần sự thật rằng nạn nhân đã chết trước đó ít nhất 2 tiếng, biến bằng chứng ngoại phạm của Quân thành bằng chứng buộc tội đanh thép nhất.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Bản Giao Hưởng Chết Chóc Tại CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Đặng Minh Quân' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    }
+  ]
+}

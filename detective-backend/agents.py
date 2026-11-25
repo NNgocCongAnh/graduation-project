@@ -127,6 +127,8 @@ class BaseAgent:
             self.fallback_used = False
             return data
         except Exception as primary_err:
+            if os.getenv("DISABLE_AGENT_FALLBACK", "0") == "1":
+                raise RuntimeError(f"[{agent_name}] Primary model '{self.model}' failed (fallback disabled): {primary_err}") from primary_err
             logger.warning(f"[{agent_name}] Primary model '{self.model}' failed ({primary_err}). Initiating fallback chain...")
 
         primary_base = str(self.client.base_url).rstrip("/") if getattr(self.client, "base_url", None) else ""
@@ -206,9 +208,9 @@ def _get_mystery_style_mechanic(theme: str) -> str:
         return (
             "THỂ LOẠI: VỤ ÁN HỒ SƠ LẠNH - ĐỘ KHÓ CAO (COLD CASE - MAXIMUM DIFFICULTY)\n"
             "- CƠ CHẾ ĐÁNH ĐỐ NÃO BỘ (MÂU THUẪN MA TRẬN TÀI LIỆU & NGHỊCH LÝ THỜI GIAN):\n"
-            "  1. Hồ sơ ban đầu có một 'Tiền đề sai lầm' (Flawed Initial Assumption): Cảnh sát điều tra cũ từng tin rằng án mạng xảy ra ở mốc giờ muộn (ví dụ 22:30) dựa vào tiếng động nhân chứng nghe thấy hoặc đồng hồ vỡ.\n"
-            "  2. Người chơi BẮT BUỘC phải đọc Báo cáo giám định tử thi nhiệt học Henssge để tính ra: thời gian chết thực sự sớm hơn đáng kể (ví dụ 19:40 - 20:30).\n"
-            "  3. Hung thủ chuẩn bị alibi cực kỳ hoàn hảo cho mốc 22:30 (mốc giờ giả), nhưng HOÀN TOÀN MẤT TÍCH hoặc có alibi mâu thuẫn trong khung giờ thực tế 19:40 - 20:30!\n"
+            "  1. Hồ sơ ban đầu có một 'Tiền đề sai lầm' (Flawed Initial Assumption): Cảnh sát điều tra cũ từng tin rằng án mạng xảy ra ở mốc giờ muộn dựa vào tiếng động nhân chứng nghe thấy hoặc đồng hồ bị phá hỏng.\n"
+            "  2. Người chơi BẮT BUỘC phải đọc Báo cáo giám định tử thi nhiệt học Henssge để tính ra: thời gian chết thực sự sớm hơn đáng kể so với giả định ban đầu.\n"
+            "  3. Hung thủ chuẩn bị alibi cực kỳ hoàn hảo cho mốc giờ ngụy tạo đó, nhưng HOÀN TOÀN MẤT TÍCH hoặc có alibi mâu thuẫn trong khung giờ tử vong thực tế do Henssge xác định!\n"
             "  4. TUYỆT ĐỐI KHÔNG để lộ sơ hở rẻ tiền như 'vết đứt tay rớm máu' hay 'sợi chỉ tạp dề'. Hung thủ phải tỏ ra vô can, điềm tĩnh, có vị thế đáng tin cậy.\n"
             "  5. Điểm mâu thuẫn cốt lõi (EV-04): Bản ghi chép nhật ký viễn thông hoặc sổ đối chiếu khách quan chứng minh hung thủ không hề ở nơi đã khai trong khung giờ Henssge thực tế."
         )
@@ -249,8 +251,8 @@ def _get_mystery_style_mechanic(theme: str) -> str:
         return (
             "THỂ LOẠI: BIỆT THỰ CÔ LẬP GIỮA ĐÊM MƯA BÃO (ISOLATED MANOR)\n"
             "- CƠ CHẾ ĐÁNH ĐỐ NÃO BỘ (DẤU VẾT VI MÔ MÔI TRƯỜNG & LỊCH TRÌNH MƯA BÃO):\n"
-            "  1. Biệt thự bị cô lập bởi trận mưa bão kinh hoàng. Nghi phạm khai chạy từ chòi vườn vào nhà chính lúc 20:45 để trú mưa.\n"
-            "  2. Nhật ký khí tượng đo mưa (EV-04) cho thấy mưa xối xả làm ngập lối đi từ 20:10. Người đi qua lối đó bắt buộc phải ướt đẫm và dính bùn đỏ.\n"
+            "  1. Biệt thự bị cô lập bởi trận mưa bão kinh hoàng. Nghi phạm khai chạy qua lối sân vườn vào nhà chính để trú mưa ngay trước thời điểm phát hiện thi thể.\n"
+            "  2. Nhật ký khí tượng đo mưa (EV-04) cho thấy mưa xối xả làm ngập toàn bộ lối đi sân vườn từ trước đó rất lâu. Người đi qua lối đó bắt buộc phải ướt đẫm và dính bùn đỏ.\n"
             "  3. Giày và thảm chùi chân của nghi phạm hoàn toàn khô ráo, chứng minh nghi phạm chưa từng rời khỏi nhà chính mà đã nấp sẵn trong hành lang gây án."
         )
     elif any(k in t for k in ["hiện trường giả", "staged"]):
@@ -275,8 +277,8 @@ def _get_mystery_style_mechanic(theme: str) -> str:
         return (
             "THỂ LOẠI: TRANH CHẤP QUYỀN LỢI & BÍ ẨN GIA TỘC (HIGH-SOCIETY DEDUCTION)\n"
             "- CƠ CHẾ ĐÁNH ĐỐ NÃO BỘ (MÂU THUẪN TRÌNH TỰ VĂN BẢN & PHÁP Y HỌC):\n"
-            "  1. Hung thủ trưng ra tài liệu/di chúc/hợp đồng có chữ ký nạn nhân ở mốc giờ muộn (ví dụ 21:30).\n"
-            "  2. Giám định y pháp chứng minh nạn nhân đã rơi vào trạng thái hôn mê sâu mất tri giác (hôn mê cấp) trước 20:00, không thể tự cầm bút ký văn bản.\n"
+            "  1. Hung thủ trưng ra tài liệu/di chúc/hợp đồng có chữ ký nạn nhân ở mốc giờ muộn hơn thời điểm tử vong thực tế.\n"
+            "  2. Giám định y pháp chứng minh nạn nhân đã rơi vào trạng thái mất tri giác hoặc đã tử vong trước thời điểm ghi trên văn bản, không thể tự cầm bút ký văn bản.\n"
             "  3. Văn bản là sản phẩm giả mạo hoặc cưỡng ép sau khi nạn nhân đã mất khả năng nhận thức."
         )
 
@@ -341,7 +343,7 @@ Format:
   }},
   "ground_truth": {{
     "culprit_id": "<Mã định danh nghi phạm hung thủ: chọn một trong SUSP-01, SUSP-02, hoặc SUSP-03>",
-    "actual_crime_time": "<Mốc giờ gây án thực tế HH:MM trong khoảng 20:45 - 23:15>",
+    "actual_crime_time": "<Mốc giờ gây án thực tế HH:MM nằm trong khoảng thời gian tử vong tính toán của Henssge (thường từ 18:00 đến 23:59)>",
     "murder_weapon": "<Tên hung khí cụ thể>",
     "core_contradiction": "<Mâu thuẫn then chốt giữa lời khai ngoại phạm của hung thủ và manh mối vật lý hiện trường>"
   }}
@@ -386,7 +388,7 @@ Current Crime Time: {ground_truth.actual_crime_time}
 Valid Henssge Calculated TOD Window: [{start_str} - {end_str}]
 Recommended Crime Time: '{mid_str}'
 Diagnostic Violation: {diagnostic}
-Requirement: Keep ambient_temp (~20°C) and body_temp (~31.5°C) physically sound. Move actual_crime_time into [{start_str} - {end_str}] (e.g. '{mid_str}').
+Requirement: Keep ambient_temp (~20°C) and body_temp (~31.5°C) physically sound. Move actual_crime_time into [{start_str} - {end_str}].
 """
         data = await self._call_llm_json(system_prompt, user_prompt)
         if "forensic_data" in data:
@@ -723,6 +725,8 @@ class DeductionAgent(BaseAgent):
 
     async def generate(self, victim: Victim, suspects: List[Suspect], evidences: List[Evidence], ground_truth: GroundTruth, theme: str = "") -> ReasoningChain:
         culprit = next((s for s in suspects if s.is_culprit), suspects[0])
+        innocents = [s.id for s in suspects if s.id != culprit.id] + ["SUSP-02", "SUSP-03"]
+        innocent_a, innocent_b = innocents[0], innocents[1]
         crucial_clues = [e.id for e in evidences if e.is_crucial]
         ev_summary_str = "\n".join([f"- {e.id}: {e.title} tại {e.location} (crucial={e.is_crucial}, weapon={e.is_weapon})" for e in evidences])
         mechanic = _get_mystery_style_mechanic(theme) if theme else ""
@@ -759,7 +763,7 @@ Output JSON (all inferences must refer to the actual clues above):
     {{
       "step_number": 2,
       "clue_ids": ["EV-02", "EV-03"],
-      "inference": "Các nghi phạm SUSP-02 và SUSP-03 được loại trừ trong khung giờ tử vong thực tế nhờ có chứng cứ ngoại phạm độc lập và tài liệu đối chiếu xác nhận không có mặt tại hiện trường.",
+      "inference": "Các nghi phạm {innocent_a} và {innocent_b} được loại trừ trong khung giờ tử vong thực tế nhờ có chứng cứ ngoại phạm độc lập và tài liệu đối chiếu xác nhận không có mặt tại hiện trường.",
       "target_suspect_id": null
     }},
     {{

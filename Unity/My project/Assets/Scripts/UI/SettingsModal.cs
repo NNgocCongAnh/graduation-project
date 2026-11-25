@@ -490,11 +490,11 @@ public class SettingsModal : MonoBehaviour
         phlg.childControlWidth = true;
         phlg.childControlHeight = true;
 
-        CreateSmallButton(provGroup.transform, "🟢 OpenAI (ChatGPT)", () => SetModelPreset("gpt-4o-mini", "https://api.openai.com/v1", ""));
-        CreateSmallButton(provGroup.transform, "🔵 Google Gemini", () => SetModelPreset("gemini-2.0-flash", "https://generativelanguage.googleapis.com/v1beta/openai/", ""));
-        CreateSmallButton(provGroup.transform, "💻 Ollama (Offline)", () => SetModelPreset("qwen2.5:7b", "http://localhost:11434/v1", "ollama"));
-        CreateSmallButton(provGroup.transform, "⭐ OpenRouter (Free)", () => SetModelPreset("meta-llama/llama-3.3-70b-instruct:free", "https://openrouter.ai/api/v1", ""));
-        CreateSmallButton(provGroup.transform, "🎓 9Router (Luận văn)", () => SetModelPreset("gh/gpt-4o-mini", "http://localhost:20128/v1", "sk-9router-local"));
+        CreateSmallButton(provGroup.transform, "OpenAI (ChatGPT)", () => SetModelPreset("gpt-4o-mini", "https://api.openai.com/v1", ""));
+        CreateSmallButton(provGroup.transform, "Google Gemini", () => SetModelPreset("gemini-2.0-flash", "https://generativelanguage.googleapis.com/v1beta/openai/", ""));
+        CreateSmallButton(provGroup.transform, "Ollama (Offline)", () => SetModelPreset("qwen2.5:7b", "http://localhost:11434/v1", "ollama"));
+        CreateSmallButton(provGroup.transform, "OpenRouter (Free)", () => SetModelPreset("meta-llama/llama-3.3-70b-instruct:free", "https://openrouter.ai/api/v1", ""));
+        CreateSmallButton(provGroup.transform, "9Router (Đồ án)", () => SetModelPreset("gh/gpt-4o-mini", "http://localhost:20128/v1", ""));
 
         // 2. Base URL
         CreateText(go.transform, "Đường dẫn API (Base URL):", 12, TextColor, FontStyle.Bold, new Vector2(-190f, 30f), new Vector2(180f, 24f));

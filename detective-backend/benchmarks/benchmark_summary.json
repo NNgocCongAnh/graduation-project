@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-11-25 14:11:56",
+  "models": {
+    "gemma4:e4b-it-qat": {
+      "file": "benchmark_gemma4.json",
+      "n": 3,
+      "schema_valid": 0,
+      "schema_rate_pct": 0.0,
+      "schema_wilson_ci_95": [
+        0.0,
+        56.15
+      ],
+      "logic_valid": 0,
+      "logic_rate_pct": 0.0,
+      "logic_wilson_ci_95": [
+        0.0,
+        56.15
+      ],
+      "avg_patch_retries": 0.0,
+      "latency_p50_sec": 540.39,
+      "latency_p95_sec": 598.78,
+      "mean_tokens": 0.0,
+      "fallback_runs": 3,
+      "fallback_sample_runs": 3,
+      "agent_models_observed": [
+        []
+      ],
+      "diversity": {}
+    },
+    "gh/gpt-4o-mini": {
+      "file": "benchmark_gpt-4o-mini.json",
+      "n": 30,
+      "schema_valid": 30,
+      "schema_rate_pct": 100.0,
+      "schema_wilson_ci_95": [
+        88.65,
+        100.0
+      ],
+      "logic_valid": 30,
+      "logic_rate_pct": 100.0,
+      "logic_wilson_ci_95": [
+        88.65,
+        100.0
+      ],
+      "avg_patch_retries": 0.47,
+      "latency_p50_sec": 22.34,
+      "latency_p95_sec": 28.05,
+      "mean_tokens": 19380.2,
+      "fallback_runs": 0,
+      "fallback_sample_runs": 0,
+      "agent_models_observed": [
+        [
+          "gh/gpt-4o-mini"
+        ]
+      ],
+      "diversity": {
+        "time_distribution": {
+          "mean_crime_time": "21:34",
+          "min_crime_time": "20:45",
+          "max_crime_time": "22:08",
+          "range_minutes": 83,
+          "std_dev_minutes": 22.52
+        },
+        "culprit_distribution": {
+          "SUSP-02": 26.7,
+          "SUSP-01": 36.7,
+          "SUSP-03": 36.7
+        },
+        "average_lexical_jaccard": 0.199,
+        "valid_evaluated_cases": 30
+      }
+    },
+    "gh/gpt-4o": {
+      "file": "benchmark_gpt-4o.json",
+      "n": 24,
+      "schema_valid": 24,
+      "schema_rate_pct": 100.0,
+      "schema_wilson_ci_95": [
+        86.2,
+        100.0
+      ],
+      "logic_valid": 24,
+      "logic_rate_pct": 100.0,
+      "logic_wilson_ci_95": [
+        86.2,
+        100.0
+      ],
+      "avg_patch_retries": 0.5,
+      "latency_p50_sec": 45.51,
+      "latency_p95_sec": 54.78,
+      "mean_tokens": 20106.6,
+      "fallback_runs": 0,
+      "fallback_sample_runs": 0,
+      "agent_models_observed": [
+        [
+          "gh/gpt-4o"
+        ]
+      ],
+      "diversity": {
+        "time_distribution": {
+          "mean_crime_time": "21:41",
+          "min_crime_time": "21:15",
+          "max_crime_time": "22:45",
+          "range_minutes": 90,
+          "std_dev_minutes": 29.29
+        },
+        "culprit_distribution": {
+          "SUSP-02": 33.3,
+          "SUSP-01": 37.5,
+          "SUSP-03": 29.2
+        },
+        "average_lexical_jaccard": 0.22,
+        "valid_evaluated_cases": 24
+      }
+    }
+  },
+  "cloud_combined": {
+    "n": 54,
+    "logic_valid": 54,
+    "logic_wilson_ci_95": [
+      93.36,
+      100.0
+    ],
+    "avg_patch_retries": 0.48,
+    "latency_p50_sec": 27.63,
+    "latency_p95_sec": 51.53
+  }
+}

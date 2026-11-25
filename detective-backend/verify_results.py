@@ -25,9 +25,8 @@ BE = Path(__file__).resolve().parent
 EXPECTED = {
     "mini.n": 30, "mini.logic": 30, "mini.p50": 23.23, "mini.p95": 30.90, "mini.tokens": 18396,
     "mini.culprit_SUSP-02": 28, "mini.crime_21:30": 23,
-    "gpt4o.n": 30, "gpt4o.logic": 30, "gpt4o.p50": 41.95, "gpt4o.p95": 49.51,
-    "gpt4o_v2.n": 18, "gpt4o_v2.logic": 18, "gpt4o_v2.p50": 40.98, "gpt4o_v2.p95": 44.04,
-    "cloud.p50": 38.41, "cloud.p95": 46.76,
+    "gpt4o.n": 30, "gpt4o.logic": 30, "gpt4o.p50": 46.81, "gpt4o.p95": 59.77,
+    "cloud.p50": 39.50, "cloud.p95": 54.33,
     "gemma.n": 23, "gemma.logic": 23, "gemma.p50": 1180.47, "gemma.fallback_runs": 23,
     "ablation.config1_valid": 0, "ablation.config2_valid": 3, "ablation.config3_valid": 3, "ablation.config4_valid": 3,
     "e2e.n": 9, "e2e.schema": 5, "e2e.logic": 1,
@@ -68,10 +67,9 @@ def bench(name: str) -> dict:
 
 got: dict[str, float] = {}
 mini = bench("benchmark_results_gpt4o_mini.json")
-g4o = bench("benchmark_results_gpt4o.json")
-g4o2 = bench("benchmark_results_gpt4o_v2.json")
+g4o = bench("benchmark_results_gpt4o_v2.json")  # 30 no-anchor runs: 24 post-shuffle + 6 pre-shuffle CyberTech
 gem = bench("benchmark_results_gemma4_local.json")
-for key, b in (("mini", mini), ("gpt4o", g4o), ("gpt4o_v2", g4o2), ("gemma", gem)):
+for key, b in (("mini", mini), ("gpt4o", g4o), ("gemma", gem)):
     for f in ("n", "logic", "p50", "p95"):
         got[f"{key}.{f}"] = b[f]
 got["mini.tokens"] = mini["tokens"]
@@ -114,6 +112,6 @@ print(f"mini Wilson logic: {wilson(mini['logic'], mini['n'])}; cloud Wilson: {wi
 print(f"patch savings vs mini full regen: tokens {100 * (1 - fault['overall_mean_tokens'] / mini['tokens']):.1f}%, "
       f"latency {100 * (1 - fault['overall_latency_p50_sec'] / mini['p50']):.1f}%")
 print(f"gemma agent_models: {dict(gem['models'])}")
-print(f"gpt4o_v2 agent_models: {dict(g4o2['models'])}  (must be only gh/gpt-4o)")
+print(f"gpt4o agent_models: {dict(g4o['models'])}  (must be only gh/gpt-4o)")
 print(f"mini culprit distribution (raw LLM output): {dict(mini['culprits'])}")
 sys.exit(1 if failed else 0)

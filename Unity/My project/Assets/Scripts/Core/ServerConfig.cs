@@ -23,7 +23,7 @@ public static class ServerConfig
     private const string DefaultRoom = "PHONG-1";
     public const string DefaultModel = "gh/gpt-4o-mini";
     public const string DefaultApiBase = "http://localhost:20128/v1";
-    public const string DefaultApiKey = "sk-9router-local";
+    public const string DefaultApiKey = "";
 
     public static event Action OnChanged;
 

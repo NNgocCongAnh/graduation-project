@@ -39,6 +39,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from models import CaseDossier, ClientCaseDossier, VerifyResponse, DeductionVerdict
 from validator import evaluate_player_deduction, validate_case_diagnostics
 from llm_service import CaseGeneratorService
+from id_shuffle import shuffle_case_ids
 
 
 def calc_wilson_ci(k: int, n: int, confidence: float = 0.95) -> Tuple[float, float]:
@@ -189,22 +190,37 @@ async def run_solver_benchmark(
     api_key: str = "",
     model: str = "gh/gpt-4o-mini",
     target_cases_count: int = 20,
-    output_path: str = "detective-backend/solver_benchmark_results.json"
+    output_path: str = "detective-backend/benchmarks/solver_benchmark.json",
+    use_db: bool = False,
+    delay: float = 4.0
 ):
+    os.environ["DISABLE_AGENT_FALLBACK"] = "1"
     print("=" * 80)
     print("INDEPENDENT SOLVER AGENT BENCHMARK (Mục III.A4: Solvability Evaluation)")
-    print(f"Solver Model: {model} | API Base: {api_base}")
+    print(f"Solver Model: {model} | API Base: {api_base} | Fresh Generation: {not use_db} | Delay: {delay}s")
     print(f"Target test cases: {target_cases_count}")
     print("=" * 80)
 
-    client = AsyncOpenAI(base_url=api_base, api_key=api_key)
+    client = AsyncOpenAI(base_url=api_base, api_key=api_key or "dummy")
     solver = IndependentSolverAgent(client, model)
-    case_gen = CaseGeneratorService(api_base=api_base, api_key=api_key, model=model)
+    case_gen = CaseGeneratorService(api_base=api_base, api_key=api_key or "dummy", model=model)
 
-    # 1. Collect Valid Benchmark Cases
-    cases: List[CaseDossier] = []
+    # Load existing incremental progress if output_path already exists
+    results: List[Dict[str, Any]] = []
+    seen_case_ids = set()
+    if os.path.exists(output_path):
+        try:
+            existing_data = json.load(open(output_path, "r", encoding="utf-8"))
+            results = existing_data.get("cases", [])
+            seen_case_ids = {c["case_id"] for c in results if "case_id" in c}
+            if results:
+                print(f"[SolverBenchmark] Resuming from {len(results)} existing solved cases in {output_path}")
+        except Exception:
+            results = []
+
+    db_cases: List[CaseDossier] = []
     db_path = os.path.join(os.path.dirname(__file__), "detective.db")
-    if os.path.exists(db_path):
+    if use_db and os.path.exists(db_path):
         con = sqlite3.connect(db_path)
         cur = con.cursor()
         rows = cur.execute("SELECT case_id, dossier_json FROM cases").fetchall()
@@ -212,50 +228,98 @@ async def run_solver_benchmark(
             try:
                 data = json.loads(djson)
                 c = CaseDossier.model_validate(data)
-                if validate_case_diagnostics(c).is_valid:
-                    cases.append(c)
+                if c.case_id not in seen_case_ids and validate_case_diagnostics(c).is_valid:
+                    db_cases.append(c)
+                    seen_case_ids.add(c.case_id)
             except Exception:
                 pass
         con.close()
-    print(f"[SolverBenchmark] Loaded {len(cases)} valid cases from database.")
+        print(f"[SolverBenchmark] Loaded {len(db_cases)} valid cases from database.")
 
-    # If we need more cases to reach target_cases_count, generate fresh valid cases
     themes = [
         "Bí ẩn Biệt thự Cổ Blackwood",
         "Chuyến tàu đêm Thống Nhất",
         "Phòng Thí nghiệm Công nghệ cao CyberTech"
     ]
-    theme_idx = 0
-    while len(cases) < target_cases_count:
-        th = themes[theme_idx % len(themes)]
-        theme_idx += 1
-        print(f"[SolverBenchmark] Generating fresh case {len(cases)+1}/{target_cases_count} with theme '{th}'...")
-        try:
-            new_case = await case_gen.generate_case(theme=th)
-            diag = validate_case_diagnostics(new_case)
-            if diag.is_valid:
-                cases.append(new_case)
-                print(f"  -> Generated valid case: '{new_case.title}' ({new_case.case_id})")
-            else:
-                print(f"  -> Case invalid ({len(diag.violations)} violations), retrying...")
-        except Exception as ex:
-            print(f"  -> Error generating case: {ex}")
 
-    cases = cases[:target_cases_count]
-    print(f"\n[SolverBenchmark] Benchmark dataset ready: {len(cases)} fully verified locked-room mystery cases.")
+    def _compute_and_save_summary(res_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+        n = len(res_list)
+        if n == 0:
+            return {}
+        c_ok = sum(1 for r in res_list if r["culprit_identified"])
+        e_ok = sum(1 for r in res_list if r["crucial_evidences_identified"])
+        h_ok = sum(1 for r in res_list if r["red_herrings_selected_count"] == 0)
+        p_ok = sum(1 for r in res_list if r["verdict"] == "solved_perfect")
+        sc = [r["score"] for r in res_list]
+        lt = [r["latency_sec"] for r in res_list]
+        tk = [r["tokens"].get("total_tokens", 0) for r in res_list]
 
-    # 2. Run Independent Solver Agent on Each Case
-    results: List[Dict[str, Any]] = []
-    correct_culprit_count = 0
-    crucial_evidence_found_count = 0
-    red_herrings_avoided_count = 0
-    perfect_verdict_count = 0
-    scores: List[float] = []
-    latencies: List[float] = []
-    total_tokens: List[int] = []
+        culprit_acc = round((c_ok / n) * 100.0, 2)
+        culprit_ci = calc_wilson_ci(c_ok, n)
+        crucial_acc = round((e_ok / n) * 100.0, 2)
+        crucial_ci = calc_wilson_ci(e_ok, n)
+        herring_avoidance = round((h_ok / n) * 100.0, 2)
+        perfect_rate = round((p_ok / n) * 100.0, 2)
+        mean_score = round(sum(sc) / n, 2)
+        p50_lat = calc_percentile(lt, 0.50)
+        p95_lat = calc_percentile(lt, 0.95)
+        mean_tokens = round(sum(tk) / n, 1)
 
-    for idx, case in enumerate(cases):
-        print(f"\n---> [Case {idx+1:02d}/{len(cases)}] Solving '{case.title}' ({case.case_id})...")
+        out = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "solver_model": model,
+            "api_base": api_base,
+            "total_cases_evaluated": n,
+            "culprit_identification_rate_pct": culprit_acc,
+            "culprit_identification_wilson_ci_95": culprit_ci,
+            "crucial_evidence_identification_rate_pct": crucial_acc,
+            "crucial_evidence_wilson_ci_95": crucial_ci,
+            "red_herring_avoidance_rate_pct": herring_avoidance,
+            "red_herring_trap_rate_pct": round(100.0 - herring_avoidance, 2),
+            "perfect_verdict_rate_pct": perfect_rate,
+            "mean_score": mean_score,
+            "latency_p50_sec": p50_lat,
+            "latency_p95_sec": p95_lat,
+            "mean_tokens": mean_tokens,
+            "cases": res_list
+        }
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2, ensure_ascii=False)
+        return out
+
+    db_idx = 0
+    while len(results) < target_cases_count:
+        idx = len(results)
+        if db_idx < len(db_cases):
+            case = db_cases[db_idx]
+            db_idx += 1
+        else:
+            th = themes[idx % len(themes)]
+            print(f"\n[SolverBenchmark] Generating fresh case {idx+1}/{target_cases_count} with theme '{th}'...")
+            try:
+                new_case = await case_gen.generate_case(theme=th)
+                if new_case.metadata and (new_case.metadata.used_fallback_sample or new_case.metadata.fallback_triggered):
+                    print("  -> Skipped fallback sample/model case, retrying...")
+                    continue
+                if new_case.case_id in seen_case_ids:
+                    print(f"  -> Duplicate case_id '{new_case.case_id}', retrying...")
+                    continue
+                diag = validate_case_diagnostics(new_case)
+                if not diag.is_valid:
+                    print(f"  -> Case invalid ({len(diag.violations)} violations), retrying...")
+                    continue
+                case = new_case
+                seen_case_ids.add(case.case_id)
+                print(f"  -> Generated valid case: '{case.title}' ({case.case_id})")
+            except Exception as ex:
+                print(f"  -> Error generating case: {ex}")
+                await asyncio.sleep(5.0)
+                continue
+
+        # Ensure both suspect and evidence IDs/positions are randomly permuted before double-blind solving
+        case = shuffle_case_ids(case)
+        print(f"---> [Case {idx+1:02d}/{target_cases_count}] Solving '{case.title}' ({case.case_id})...")
 
         # Step 1: Strip ground truth to produce ClientCaseDossier
         client_dossier = case.to_client_dossier()
@@ -283,20 +347,7 @@ async def run_solver_benchmark(
         herrings_count = verdict_resp.red_herrings_selected_count
         score = verdict_resp.score
         verdict_str = verdict_resp.verdict.value if hasattr(verdict_resp.verdict, "value") else str(verdict_resp.verdict)
-
-        if is_culprit_ok:
-            correct_culprit_count += 1
-        if is_crucial_ok:
-            crucial_evidence_found_count += 1
-        if herrings_count == 0:
-            red_herrings_avoided_count += 1
-        if verdict_str == "solved_perfect":
-            perfect_verdict_count += 1
-
-        scores.append(score)
-        latencies.append(lat)
         tokens = solver.last_usage.get("total_tokens", 0)
-        total_tokens.append(tokens)
 
         # Log to deduction_logs in SQLite database for persistent telemetry
         try:
@@ -351,58 +402,29 @@ async def run_solver_benchmark(
             "verifier_feedback": verdict_resp.feedback
         }
         results.append(case_record)
+        summary = _compute_and_save_summary(results)
 
         print(f"  Result: Accused: '{accused_id}' (True: '{case.ground_truth.culprit_id}') -> {'CORRECT' if is_culprit_ok else 'WRONG'}")
         print(f"  Verdict: {verdict_str} | Score: {score:.1f} | Crucial Found: {verdict_resp.found_crucial_count}/{verdict_resp.total_crucial_count} | Herrings: {herrings_count}")
         print(f"  Time: {lat:.2f}s | Tokens: {tokens}")
 
-        await asyncio.sleep(1.0)
+        if delay > 0 and len(results) < target_cases_count:
+            await asyncio.sleep(delay)
 
-    # 3. Aggregate Statistical Summary
-    n = len(results)
-    culprit_acc = round((correct_culprit_count / n) * 100.0, 2)
-    culprit_ci = calc_wilson_ci(correct_culprit_count, n)
-    crucial_acc = round((crucial_evidence_found_count / n) * 100.0, 2)
-    crucial_ci = calc_wilson_ci(crucial_evidence_found_count, n)
-    herring_avoidance = round((red_herrings_avoided_count / n) * 100.0, 2)
-    herring_ci = calc_wilson_ci(red_herrings_avoided_count, n)
-    perfect_rate = round((perfect_verdict_count / n) * 100.0, 2)
-    mean_score = round(sum(scores) / n, 2)
-    p50_lat = calc_percentile(latencies, 0.50)
-    p95_lat = calc_percentile(latencies, 0.95)
-    mean_tokens = round(sum(total_tokens) / n, 1)
-
-    summary = {
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "solver_model": model,
-        "api_base": api_base,
-        "total_cases_evaluated": n,
-        "culprit_identification_rate_pct": culprit_acc,
-        "culprit_identification_wilson_ci_95": culprit_ci,
-        "crucial_evidence_identification_rate_pct": crucial_acc,
-        "crucial_evidence_wilson_ci_95": crucial_ci,
-        "red_herring_avoidance_rate_pct": herring_avoidance,
-        "red_herring_trap_rate_pct": round(100.0 - herring_avoidance, 2),
-        "perfect_verdict_rate_pct": perfect_rate,
-        "mean_score": mean_score,
-        "latency_p50_sec": p50_lat,
-        "latency_p95_sec": p95_lat,
-        "mean_tokens": mean_tokens,
-        "cases": results
-    }
-
-    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2, ensure_ascii=False)
+    summary = _compute_and_save_summary(results)
+    n = summary["total_cases_evaluated"]
+    c_ok = sum(1 for r in results if r["culprit_identified"])
+    e_ok = sum(1 for r in results if r["crucial_evidences_identified"])
+    h_ok = sum(1 for r in results if r["red_herrings_selected_count"] == 0)
 
     print("\n" + "=" * 80)
     print("SOLVER AGENT BENCHMARK COMPLETED SUCCESSFULLY!")
     print(f"Results saved to: {output_path}")
-    print(f"Culprit Identification Accuracy: {culprit_acc}% [{culprit_ci[0]} - {culprit_ci[1]}] ({correct_culprit_count}/{n})")
-    print(f"Crucial Clue Identification: {crucial_acc}% [{crucial_ci[0]} - {crucial_ci[1]}] ({crucial_evidence_found_count}/{n})")
-    print(f"Red-Herring Avoidance Rate: {herring_avoidance}% ({red_herrings_avoided_count}/{n})")
-    print(f"Mean Deduction Score: {mean_score}/100 | Perfect Solved Rate: {perfect_rate}%")
-    print(f"Latency P50: {p50_lat}s (P95: {p95_lat}s) | Mean Tokens: {mean_tokens}")
+    print(f"Culprit Identification Accuracy: {summary['culprit_identification_rate_pct']}% [{summary['culprit_identification_wilson_ci_95'][0]} - {summary['culprit_identification_wilson_ci_95'][1]}] ({c_ok}/{n})")
+    print(f"Crucial Clue Identification: {summary['crucial_evidence_identification_rate_pct']}% [{summary['crucial_evidence_wilson_ci_95'][0]} - {summary['crucial_evidence_wilson_ci_95'][1]}] ({e_ok}/{n})")
+    print(f"Red-Herring Avoidance Rate: {summary['red_herring_avoidance_rate_pct']}% ({h_ok}/{n})")
+    print(f"Mean Deduction Score: {summary['mean_score']}/100 | Perfect Solved Rate: {summary['perfect_verdict_rate_pct']}%")
+    print(f"Latency P50: {summary['latency_p50_sec']}s (P95: {summary['latency_p95_sec']}s) | Mean Tokens: {summary['mean_tokens']}")
     print("=" * 80)
 
 
@@ -412,7 +434,9 @@ if __name__ == "__main__":
     parser.add_argument("--api-base", type=str, default="http://localhost:20128/v1", help="API base URL")
     parser.add_argument("--api-key", type=str, default=os.getenv("LLM_API_KEY", ""), help="API key (defaults to LLM_API_KEY env var)")
     parser.add_argument("--cases", type=int, default=20, help="Number of cases to evaluate")
-    parser.add_argument("--output", type=str, default="detective-backend/solver_benchmark_results.json", help="Output JSON path")
+    parser.add_argument("--output", type=str, default="detective-backend/benchmarks/solver_benchmark.json", help="Output JSON path")
+    parser.add_argument("--use-db", action="store_true", help="Load existing valid cases from detective.db instead of generating all fresh cases")
+    parser.add_argument("--delay", type=float, default=4.0, help="Delay seconds between solved cases")
     args = parser.parse_args()
 
     asyncio.run(
@@ -421,6 +445,8 @@ if __name__ == "__main__":
             api_key=args.api_key,
             model=args.model,
             target_cases_count=args.cases,
-            output_path=args.output
+            output_path=args.output,
+            use_db=args.use_db,
+            delay=args.delay
         )
     )

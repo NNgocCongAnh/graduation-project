@@ -12,18 +12,12 @@ AGENTS.md
 .codegraph/
 .mcp.json
 presentation_web/
-# V0 = first React web prototype (referenced in the report): source only
-V0/**/node_modules/
-V0/frontend/dist/
-V0/.env.example
-V0/**/*.db
+V0/
 Prepare(Trước khi đăng ký)/
 design/
 production/
-# docs: only architecture decision records are published
-docs/*
-!docs/architecture/
-!docs/registry/
+docs/
+HANDOFF_TON_DONG.md
 detective-backend/ablation_results_n9.json
 project.yaml
 render.yaml
@@ -160,9 +154,9 @@ TANHNV*
 # Superseded/mixed-version runs kept locally only (pre-fix prompt runs merged with later runs)
 detective-backend/benchmark_results.json
 detective-backend/benchmark_results_gpt4omini.json
+detective-backend/benchmark_results_gpt4o.json
 RA_SOAT_TRUOC_KHI_NOP.md
 _ban_cu/
-benchmark_evaluation.ipynb
 detective-backend/run_gemma4_overnight.ps1
 *.ps1
 
@@ -181,7 +175,5 @@ detective-backend/cases/*TEST*.json
 !detective-backend/Dockerfile
 !CHAY_GAME_TRON_GOI.bat
 !detective-backend/cases/CASE-2026-001.json
+!/benchmark_evaluation.ipynb
 !/README.md
-
-# V0 env template not published (kept local)
-V0/.env.example

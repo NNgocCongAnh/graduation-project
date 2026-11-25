@@ -48,6 +48,91 @@ BENCHMARK_THEMES = [
     "Chuyến tàu đêm Thống Nhất",
     "Phòng Thí nghiệm Công nghệ cao CyberTech"
 ]
+BENCHMARKS_DIR = os.path.join(os.path.dirname(__file__), "benchmarks")
+
+
+def model_output_path(model: str) -> str:
+    """Map model identifier to a clean path inside benchmarks/ (e.g. benchmark_gpt-4o-mini.json)."""
+    short = model.split("/")[-1].split(":")[0]
+    if short == "gemma4":
+        short = "gemma4"
+    safe = "".join(ch if ch.isalnum() or ch in "-_." else "_" for ch in short)
+    os.makedirs(BENCHMARKS_DIR, exist_ok=True)
+    return os.path.join(BENCHMARKS_DIR, f"benchmark_{safe}.json")
+
+
+def build_benchmark_summary(benchmarks_dir: str = BENCHMARKS_DIR) -> Dict[str, Any]:
+    """Aggregate all benchmark_*.json files into a single benchmark_summary.json."""
+    os.makedirs(benchmarks_dir, exist_ok=True)
+    summary_models: Dict[str, Any] = {}
+    all_cloud_runs: List[Dict[str, Any]] = []
+
+    for fname in sorted(os.listdir(benchmarks_dir)):
+        if not (fname.startswith("benchmark_") and fname.endswith(".json")) or fname == "benchmark_summary.json":
+            continue
+        fpath = os.path.join(benchmarks_dir, fname)
+        try:
+            runs = json.load(open(fpath, "r", encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(runs, list) or not runs:
+            continue
+
+        model_name = runs[0].get("model", fname.replace("benchmark_", "").replace(".json", ""))
+        n = len(runs)
+        k_json = sum(1 for r in runs if r.get("json_valid") and not r.get("used_fallback_sample"))
+        k_logic = sum(1 for r in runs if r.get("logic_valid") and not r.get("used_fallback_sample"))
+        fallback_sample_runs = sum(1 for r in runs if r.get("used_fallback_sample"))
+        lats = [float(r["latency_sec"]) for r in runs if "latency_sec" in r]
+        toks = [r["token_usage"]["total_tokens"] for r in runs if r.get("token_usage") and r["token_usage"].get("total_tokens")]
+        diversity = calculate_diversity_metrics([r for r in runs if not r.get("used_fallback_sample")])
+        distinct_agent_models = sorted({tuple(sorted(set(r.get("agent_models", {}).values()))) for r in runs})
+
+        summary_models[model_name] = {
+            "file": fname,
+            "n": n,
+            "schema_valid": k_json,
+            "schema_rate_pct": round(100.0 * k_json / n, 1),
+            "schema_wilson_ci_95": list(calc_wilson_ci(k_json, n)),
+            "logic_valid": k_logic,
+            "logic_rate_pct": round(100.0 * k_logic / n, 1),
+            "logic_wilson_ci_95": list(calc_wilson_ci(k_logic, n)),
+            "avg_patch_retries": round(sum(r.get("patch_retries", 0) for r in runs) / n, 2),
+            "latency_p50_sec": round(statistics.median(lats), 2) if lats else 0.0,
+            "latency_p95_sec": round(calc_percentile(lats, 0.95), 2) if lats else 0.0,
+            "mean_tokens": round(statistics.mean(toks), 1) if toks else 0.0,
+            "fallback_runs": sum(1 for r in runs if r.get("fallback_triggered")),
+            "fallback_sample_runs": fallback_sample_runs,
+            "agent_models_observed": [list(t) for t in distinct_agent_models],
+            "diversity": diversity,
+        }
+        if "gpt-4o" in model_name:
+            all_cloud_runs.extend(runs)
+
+    cloud_summary = None
+    if all_cloud_runs:
+        cn = len(all_cloud_runs)
+        ck_logic = sum(1 for r in all_cloud_runs if r.get("logic_valid") and not r.get("used_fallback_sample"))
+        clats = [float(r["latency_sec"]) for r in all_cloud_runs if "latency_sec" in r]
+        cloud_summary = {
+            "n": cn,
+            "logic_valid": ck_logic,
+            "logic_wilson_ci_95": list(calc_wilson_ci(ck_logic, cn)),
+            "avg_patch_retries": round(sum(r.get("patch_retries", 0) for r in all_cloud_runs) / cn, 2),
+            "latency_p50_sec": round(statistics.median(clats), 2) if clats else 0.0,
+            "latency_p95_sec": round(calc_percentile(clats, 0.95), 2) if clats else 0.0,
+        }
+
+    summary = {
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "models": summary_models,
+        "cloud_combined": cloud_summary,
+    }
+    summary_path = os.path.join(benchmarks_dir, "benchmark_summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+    print(f"[+] Đã cập nhật file tổng hợp benchmark: {summary_path}")
+    return summary
 
 
 def calc_percentile(data: List[float], percentile: float) -> float:
@@ -196,6 +281,9 @@ async def evaluate_single_trial(
         used_fallback = dossier.metadata.used_fallback_sample if dossier.metadata else False
         token_usage = dossier.metadata.token_usage if dossier.metadata else {}
 
+        weapon = next((e for e in dossier.evidences if e.is_weapon), None)
+        raw_culprit_id = token_usage.get("raw_culprit_id", culprit.id if culprit else "NONE")
+
         # Measure C2
         c2_eval_ms = measure_c2_deduction_latency(dossier, iterations=50)
 
@@ -208,6 +296,8 @@ async def evaluate_single_trial(
             "crucial_clues_count": len(crucial_clues),
             "red_herrings_count": len(red_herrings),
             "culprit_id": culprit.id if culprit else "NONE",
+            "raw_culprit_id": raw_culprit_id,
+            "weapon_id": weapon.id if weapon else "NONE",
             "unique_culprit": is_unique_culprit,
             "culprit_alibi_window": f"{culprit.alibi_start}-{culprit.alibi_end}" if culprit else "N/A",
             "crime_time": dossier.ground_truth.actual_crime_time if dossier.ground_truth else "N/A",
@@ -285,7 +375,14 @@ async def run_benchmark(
 ) -> List[Dict[str, Any]]:
     """Run cross-model benchmark across multiple diverse themes with Wilson CI and Linear P95."""
     themes = themes or BENCHMARK_THEMES
-    output_path = output_file or os.path.join(os.path.dirname(__file__), "benchmark_results.json")
+    if output_file:
+        output_path = output_file
+    elif len(models) == 1:
+        output_path = model_output_path(models[0])
+    else:
+        os.makedirs(BENCHMARKS_DIR, exist_ok=True)
+        output_path = os.path.join(BENCHMARKS_DIR, "benchmark_results.json")
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     all_results: List[Dict[str, Any]] = []
 
     # If output file exists, load existing runs to prevent losing prior trials
@@ -370,8 +467,8 @@ async def run_benchmark(
         if not m_runs:
             continue
         n = len(m_runs)
-        k_json = sum(1 for r in m_runs if r["json_valid"])
-        k_logic = sum(1 for r in m_runs if r["logic_valid"])
+        k_json = sum(1 for r in m_runs if r["json_valid"] and not r.get("used_fallback_sample"))
+        k_logic = sum(1 for r in m_runs if r["logic_valid"] and not r.get("used_fallback_sample"))
         
         json_rate = (k_json / n) * 100.0
         logic_rate = (k_logic / n) * 100.0
@@ -405,10 +502,10 @@ async def run_benchmark(
         print(f"  • Độ tương đồng từ vựng trung bình (Jaccard Index): {diversity.get('average_lexical_jaccard')} (Giá trị càng thấp chứng minh kịch bản càng đa dạng, không bị lặp khuôn).")
 
     # Output file
-    output_path = output_file or os.path.join(os.path.dirname(__file__), "benchmark_results.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     print(f"\n[+] Đã lưu toàn bộ telemetry benchmark vào: {output_path}")
+    build_benchmark_summary()
 
     return all_results
 
@@ -490,7 +587,8 @@ async def run_ablation_study(
     print("=" * 115)
 
     # Save ablation results
-    out_path = output_file or os.path.join(os.path.dirname(__file__), "ablation_results.json")
+    os.makedirs(BENCHMARKS_DIR, exist_ok=True)
+    out_path = output_file or os.path.join(BENCHMARKS_DIR, "ablation_results.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(ablation_results, f, ensure_ascii=False, indent=2)
     print(f"\n[+] Đã lưu kết quả Ablation Study vào: {out_path}")
@@ -567,8 +665,11 @@ def main():
     parser.add_argument("--output-benchmark", default=None, help="Tệp lưu kết quả benchmark")
     parser.add_argument("--output-ablation", default=None, help="Tệp lưu kết quả ablation")
     parser.add_argument("--delay", type=float, default=15.0, help="Độ trễ giãn cách giữa các lượt (giây)")
+    parser.add_argument("--no-fallback", action="store_true", help="Cấm chuyển mô hình dự phòng khi lỗi hoặc 429")
 
     args = parser.parse_args()
+    if args.no_fallback:
+        os.environ["DISABLE_AGENT_FALLBACK"] = "1"
 
     bench_results = []
     if args.mode in ["benchmark", "both"]:
