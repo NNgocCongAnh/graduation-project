@@ -18,6 +18,7 @@ design/
 production/
 docs/
 HANDOFF_TON_DONG.md
+tools/
 detective-backend/ablation_results_n9.json
 project.yaml
 render.yaml

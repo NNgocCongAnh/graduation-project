@@ -14,7 +14,8 @@
 | [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
 | [`detective-backend/test_*.py`](./detective-backend) | 89 kiểm thử đơn vị và tích hợp (pytest) |
 | [`detective-backend/*_runner.py`, `solver_agent.py`](./detective-backend) | Script thực nghiệm: benchmark, nghiên cứu loại trừ, tiêm lỗi, tác tử phá án độc lập |
-| [`detective-backend/*_results*.json`, `benchmarks/`](./detective-backend/benchmarks) | Kết quả thô của từng lượt thực nghiệm (dùng cho Chương 4 báo cáo) |
+| [`benchmarks/`](./benchmarks) | Thư mục kết quả thô tổng hợp của các phiên thực nghiệm (`benchmark_*.json`, `solver_benchmark.json`, `benchmark_summary.json`) |
+| [`detective-backend/*_results*.json`](./detective-backend) | Tệp kết quả thô gốc đối chiếu trực tiếp với Chương 4 báo cáo |
 | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Notebook kiểm chứng bảng số liệu và biểu đồ đối sánh thực nghiệm |
 | [`Unity/My project/`](./Unity/My%20project) | Client trò chơi Unity 6 URP 2D (Desktop và WebGL) |
 | [`docker-compose.yml`](./docker-compose.yml) | Khởi chạy backend bằng Docker |

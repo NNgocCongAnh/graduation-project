@@ -190,7 +190,7 @@ async def run_solver_benchmark(
     api_key: str = "",
     model: str = "gh/gpt-4o-mini",
     target_cases_count: int = 20,
-    output_path: str = "detective-backend/benchmarks/solver_benchmark.json",
+    output_path: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "benchmarks", "solver_benchmark.json"),
     use_db: bool = False,
     delay: float = 4.0
 ):
@@ -434,7 +434,7 @@ if __name__ == "__main__":
     parser.add_argument("--api-base", type=str, default="http://localhost:20128/v1", help="API base URL")
     parser.add_argument("--api-key", type=str, default=os.getenv("LLM_API_KEY", ""), help="API key (defaults to LLM_API_KEY env var)")
     parser.add_argument("--cases", type=int, default=20, help="Number of cases to evaluate")
-    parser.add_argument("--output", type=str, default="detective-backend/benchmarks/solver_benchmark.json", help="Output JSON path")
+    parser.add_argument("--output", type=str, default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "benchmarks", "solver_benchmark.json"), help="Output JSON path")
     parser.add_argument("--use-db", action="store_true", help="Load existing valid cases from detective.db instead of generating all fresh cases")
     parser.add_argument("--delay", type=float, default=4.0, help="Delay seconds between solved cases")
     args = parser.parse_args()

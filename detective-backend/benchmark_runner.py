@@ -48,7 +48,7 @@ BENCHMARK_THEMES = [
     "Chuyến tàu đêm Thống Nhất",
     "Phòng Thí nghiệm Công nghệ cao CyberTech"
 ]
-BENCHMARKS_DIR = os.path.join(os.path.dirname(__file__), "benchmarks")
+BENCHMARKS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "benchmarks")
 
 
 def model_output_path(model: str) -> str:
