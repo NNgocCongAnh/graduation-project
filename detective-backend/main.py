@@ -32,6 +32,7 @@ from database import (
     get_case_statistics
 )
 from security import ClientIntegrityMiddleware
+from id_shuffle import shuffle_suspect_ids
 import hmac
 from fastapi import Header
 
@@ -681,6 +682,12 @@ async def generate_case(payload: GenerateCaseRequest = Body(default_factory=Gene
                     "message": "Hồ sơ vụ án không đáp ứng tiêu chuẩn tính giải được hoặc vi phạm tính nhất quán logic."
                 }
             )
+
+        # LLMs do not pick the culprit uniformly (SUSP-02 dominates), so the published case gets a
+        # code-level random relabelling of suspect IDs. Pure renaming: the case logic is unchanged.
+        case = shuffle_suspect_ids(case)
+        if not validate_case_diagnostics(case).is_valid:
+            raise HTTPException(status_code=500, detail="Suspect ID relabelling produced an inconsistent case.")
 
         # Enrich valid case with semantic assets
         asset_service.enrich_case_dossier(case)

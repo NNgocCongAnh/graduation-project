@@ -99,7 +99,6 @@ class IndependentSolverAgent:
             evidences_info.append(
                 f"- ID: {ev.id} | Tên: {ev.title} | Vị trí tìm thấy: {ev.location}\n"
                 f"  Miêu tả vật thể: {ev.description}\n"
-                f"  Là hung khí khả nghi: {ev.is_weapon}\n"
                 f"  Giám định vân tay: {ev.fingerprint_analysis or 'Không có'}\n"
                 f"  Giám định máu & ADN: {ev.blood_dna_analysis or 'Không có'}\n"
                 f"  Hiện trạng cơ học/vật lý: {ev.physical_condition or 'Bình thường'}"

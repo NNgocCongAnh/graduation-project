@@ -255,7 +255,7 @@ class ClientEvidence(BaseModel):
     location: str = Field(..., description="Location where the evidence was discovered.")
     description: str = Field(..., description="Detailed description and forensic traits of the item.")
     image_url: Optional[str] = Field(default=None, description="Static or on-demand URL of the physical evidence photograph.")
-    is_weapon: Optional[bool] = Field(default=False, description="Whether this evidence is the murder weapon.")
+    # is_weapon is intentionally omitted: it would reveal which item is the murder weapon.
     fingerprint_analysis: Optional[str] = Field(default=None, description="Latent fingerprint forensic analysis report.")
     blood_dna_analysis: Optional[str] = Field(default=None, description="Serological and DNA forensic analysis report.")
     physical_condition: Optional[str] = Field(default=None, description="Detailed physical condition and mechanical traits.")
@@ -313,7 +313,6 @@ class CaseDossier(BaseModel):
                 location=e.location,
                 description=e.description,
                 image_url=e.image_url,
-                is_weapon=e.is_weapon,
                 fingerprint_analysis=e.fingerprint_analysis,
                 blood_dna_analysis=e.blood_dna_analysis,
                 physical_condition=e.physical_condition

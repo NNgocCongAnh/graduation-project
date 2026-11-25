@@ -54,6 +54,7 @@ def test_sample_case_client_isolation():
         assert "is_crucial" not in e, f"CRITICAL: is_crucial leaked for evidence {e.get('id')}"
         assert "is_red_herring" not in e, f"CRITICAL: is_red_herring leaked for evidence {e.get('id')}"
         assert "linked_suspect_id" not in e, f"CRITICAL: linked_suspect_id leaked for evidence {e.get('id')}"
+        assert "is_weapon" not in e, f"CRITICAL: is_weapon (murder weapon flag) leaked for evidence {e.get('id')}"
 
 
 def test_get_case_by_id_client_isolation():
