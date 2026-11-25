@@ -91,20 +91,29 @@ class CaseGeneratorService:
         self.deduction_agent = DeductionAgent(self.client, self.model)
         logger.info(f"Updated LLM Config -> Model: '{self.model}', Base: '{self.api_base}'")
 
-    async def _generate_case_monolithic(self, theme: str) -> CaseDossier:
-        """Generate full case dossier using a single monolithic prompt without multi-agent decomposition (Ablation Config 1)."""
+    async def _generate_case_monolithic(self, theme: str, with_agent_instructions: bool = False) -> CaseDossier:
+        """Generate a full case dossier in ONE LLM call (ablation controls).
+
+        with_agent_instructions=False: minimal single prompt (Ablation Config 1).
+        with_agent_instructions=True: E2E-plan control following Huot et al. (ICLR 2025):
+        same agent instructions + full JSON Schema, still a single call (see e2e_baseline.py).
+        """
         start_total = time.time()
-        system_prompt = (
-            "You are an End-to-End Mystery Case Generator. "
-            "Generate a complete, cohesive locked-room mystery case dossier in a single JSON payload. "
-            "The JSON must include: title, summary, victim (with complete forensic_data), "
-            "suspects (array of 3 suspects with alibis, motives, statements), "
-            "evidences (array of 5 evidences: 1 timing/baseline, 2 red herrings, 1 alibi-breaking crucial clue, 1 weapon), "
-            "ground_truth (actual_crime_time, culprit_id, motive, method, core_contradiction), "
-            "and reasoning_chain (4 deduction steps, final_conclusion, decisive_contradiction). "
-            "Make sure the suspect alibis and crime times are consistent."
-        )
-        user_prompt = f"""Theme: {theme}\nOutput a complete CaseDossier JSON adhering strictly to the schema."""
+        if with_agent_instructions:
+            from e2e_baseline import build_e2e_plan_prompts
+            system_prompt, user_prompt = await build_e2e_plan_prompts(theme)
+        else:
+            system_prompt = (
+                "You are an End-to-End Mystery Case Generator. "
+                "Generate a complete, cohesive locked-room mystery case dossier in a single JSON payload. "
+                "The JSON must include: title, summary, victim (with complete forensic_data), "
+                "suspects (array of 3 suspects with alibis, motives, statements), "
+                "evidences (array of 5 evidences: 1 timing/baseline, 2 red herrings, 1 alibi-breaking crucial clue, 1 weapon), "
+                "ground_truth (actual_crime_time, culprit_id, motive, method, core_contradiction), "
+                "and reasoning_chain (4 deduction steps, final_conclusion, decisive_contradiction). "
+                "Make sure the suspect alibis and crime times are consistent."
+            )
+            user_prompt = f"""Theme: {theme}\nOutput a complete CaseDossier JSON adhering strictly to the schema."""
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -136,8 +145,8 @@ class CaseGeneratorService:
         diag = validate_case_diagnostics(dossier)
         dossier.metadata = GenerationMetadata(
             model_name=self.model,
-            pipeline_version="monolithic-single-prompt",
-            config_mode="monolithic",
+            pipeline_version="e2e-plan-single-call" if with_agent_instructions else "monolithic-single-prompt",
+            config_mode="monolithic_plan" if with_agent_instructions else "monolithic",
             agent_latencies={"Monolithic": total_lat},
             agent_models={"Monolithic": self.model},
             fallback_triggered=False,
@@ -165,6 +174,8 @@ class CaseGeneratorService:
         """Generate a logically sound Case Dossier via Multi-Agent pipeline with Localized Repair."""
         if mode == "monolithic":
             return await self._generate_case_monolithic(theme)
+        if mode == "monolithic_plan":
+            return await self._generate_case_monolithic(theme, with_agent_instructions=True)
 
         start_total = time.time()
         agent_latencies: Dict[str, float] = {}
