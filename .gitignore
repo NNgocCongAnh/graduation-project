@@ -81,11 +81,8 @@ detective_server.spec
 *copy*.ipynb
 detective-backend/test_outputs*/
 detective-backend/generated_*.json
-detective-backend/cases/CASE-HP-*.json
-detective-backend/cases/CASE-3*.json
-detective-backend/cases/CASE-A*.json
-detective-backend/cases/CASE-B*.json
-detective-backend/cases/CASE-D*.json
+detective-backend/cases/*.json
+detective-backend/e2e_plan_prompt_example.txt
 detective-backend/demo_haiphong_case.py
 detective-backend/fetch_and_build_real_assets.py
 detective-backend/normalize_case_assets.py
@@ -153,9 +150,8 @@ TANHNV*
 # Runners (benchmark_runner.py, fault_injection_runner.py, solver_agent.py) and their
 # raw result JSON files ARE versioned so that every reported number is reproducible.
 # Superseded/mixed-version runs kept locally only (pre-fix prompt runs merged with later runs)
-detective-backend/benchmark_results.json
-detective-backend/benchmark_results_gpt4omini.json
-detective-backend/benchmark_results_gpt4o.json
+detective-backend/benchmark_results*.json
+*_v2.json
 RA_SOAT_TRUOC_KHI_NOP.md
 _ban_cu/
 detective-backend/run_gemma4_overnight.ps1

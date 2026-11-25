@@ -1,7 +1,7 @@
 """Run the single-call E2E-plan baseline (see e2e_baseline.py) with the benchmark's own metrics.
 
 Usage (from repository root):
-    python detective-backend/run_e2e_baseline.py --model gh/gpt-4o-mini --trials-per-theme 3
+    python benchmarks/scripts/run_e2e_baseline.py --model gh/gpt-4o-mini --trials-per-theme 3
 """
 
 import argparse
@@ -11,7 +11,11 @@ import os
 import statistics
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+_BACKEND_DIR = os.path.join(os.path.dirname(os.path.dirname(_SCRIPTS_DIR)), "detective-backend")
+for _d in (_SCRIPTS_DIR, _BACKEND_DIR):
+    if _d not in sys.path:
+        sys.path.insert(0, _d)
 
 from benchmark_runner import BENCHMARK_THEMES, calc_wilson_ci, evaluate_single_trial  # noqa: E402
 from llm_service import CaseGeneratorService  # noqa: E402
@@ -50,7 +54,7 @@ def main() -> None:
     parser.add_argument("--model", default="gh/gpt-4o-mini")
     parser.add_argument("--trials-per-theme", type=int, default=3)
     parser.add_argument("--delay", type=float, default=3.0)
-    parser.add_argument("--output", default=os.path.join(os.path.dirname(__file__), "e2e_plan_baseline_results.json"))
+    parser.add_argument("--output", default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", "e2e_plan_baseline_results.json"))
     args = parser.parse_args()
     asyncio.run(run(args.model, args.trials_per_theme, args.output, args.delay))
 

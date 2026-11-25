@@ -11,11 +11,10 @@
 
 | Thư mục / tệp | Nội dung |
 | :--- | :--- |
-| [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
+| [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), hoán vị định danh (`id_shuffle.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
 | [`detective-backend/tests/`](./detective-backend/tests) | 89 kiểm thử đơn vị và tích hợp (pytest) |
-| [`detective-backend/*_runner.py`, `solver_agent.py`](./detective-backend) | Script thực nghiệm: benchmark, nghiên cứu loại trừ, tiêm lỗi, tác tử phá án độc lập |
-| [`benchmarks/`](./benchmarks) | Thư mục kết quả thô tổng hợp của các phiên thực nghiệm (`benchmark_*.json`, `solver_benchmark.json`, `benchmark_summary.json`) |
-| [`detective-backend/*_results*.json`](./detective-backend) | Tệp kết quả thô gốc đối chiếu trực tiếp với Chương 4 báo cáo |
+| [`benchmarks/scripts/`](./benchmarks/scripts) | Module đánh giá thực nghiệm độc lập (`benchmark_runner.py`, `e2e_baseline.py`, `run_e2e_baseline.py`, `fault_injection_runner.py`, `solver_agent.py`, `verify_results.py`) |
+| [`benchmarks/results/`](./benchmarks/results) | Thư mục duy nhất lưu toàn bộ kết quả JSON thô của các thực nghiệm |
 | [`benchmark_evaluation.ipynb`](./benchmark_evaluation.ipynb) | Notebook kiểm chứng bảng số liệu và biểu đồ đối sánh thực nghiệm |
 | [`Unity/My project/`](./Unity/My%20project) | Client trò chơi Unity 6 URP 2D (Desktop và WebGL) |
 | [`docker-compose.yml`](./docker-compose.yml) | Khởi chạy backend bằng Docker |
@@ -75,22 +74,25 @@ Kết quả tại commit hiện tại: 89/89 kiểm thử đạt.
 
 ```bash
 # chạy từ thư mục gốc của kho mã nguồn
-python detective-backend/benchmark_runner.py --mode benchmark --models gh/gpt-4o-mini --trials-per-theme 10 --output-benchmark detective-backend/benchmark_results_gpt4o_mini.json
-python detective-backend/benchmark_runner.py --mode ablation --ablation-trials 1 --output-ablation detective-backend/ablation_results.json
-python detective-backend/run_e2e_baseline.py --trials-per-theme 3
-python detective-backend/fault_injection_runner.py
-python detective-backend/solver_agent.py
+python benchmarks/scripts/benchmark_runner.py --mode benchmark --models gh/gpt-4o-mini --trials-per-theme 10 --no-fallback
+python benchmarks/scripts/benchmark_runner.py --mode ablation --ablation-trials 1
+python benchmarks/scripts/run_e2e_baseline.py --trials-per-theme 3
+python benchmarks/scripts/fault_injection_runner.py
+python benchmarks/scripts/solver_agent.py
+python benchmarks/scripts/verify_results.py
 ```
 
-| Thực nghiệm | Tệp kết quả | Cỡ mẫu | Kết quả chính |
+| Thực nghiệm | Tệp kết quả (`benchmarks/results/`) | Cỡ mẫu | Kết quả chính |
 | :--- | :--- | :---: | :--- |
-| Benchmark `gh/gpt-4o-mini` | `benchmark_results_gpt4o_mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 23,23 s, P95 30,90 s |
-| Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o_v2.json` | 30 | 30/30; P50 46,81 s, P95 59,77 s |
-| Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB. CharacterAgent và ClueAgent chuyển sang mô hình dự phòng trên mây ở cả 23 lượt (hệ lai, không phải chạy hoàn toàn ngoại tuyến) |
+| Benchmark `gh/gpt-4o-mini` (bản sạch không neo) | `benchmark_gpt-4o-mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 22,34 s, P95 28,05 s |
+| Benchmark `gh/gpt-4o` (sau `id_shuffle`, tạm dừng tại 25 do 429) | `benchmark_gpt-4o.json` | 24 (3 chủ đề) | 24/24 vượt kiểm định (Wilson 95%: [86,2%; 100%]); P50 45,51 s, P95 54,78 s |
+| Khảo sát cục bộ `gemma4:e4b-it-qat` (hệ lai) | `benchmark_gemma4_hybrid.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB (CharacterAgent và ClueAgent fallback mây ở 23/23 lượt) |
+| Khảo sát thuần ngoại tuyến `gemma4:e4b-it-qat` (`--no-fallback`) | `benchmark_gemma4.json` | 3 | 0/3 LLM tự sinh đạt (CharacterAgent lỗi JSON ở Q4_0; P50 540,39 s) |
 | Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
-| Đối chứng một lần gọi E2E-plan (theo Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
-| Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá (giảm 77,0% so với sinh lại toàn bộ) |
-| Tác tử phá án độc lập | `solver_benchmark_results.json` | 20 | Xác định đúng thủ phạm 19/20 |
+| Đối chứng một lần gọi `E2E-plan` (Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON trong 1 lần gọi: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
+| Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá, P50 7,21 s |
+| Tác tử phá án độc lập (bộ chuẩn `gh/gpt-4o-mini`) | `solver_benchmark_baseline.json` | 20 | Xác định đúng thủ phạm 19/20 |
+| Tác tử phá án độc lập (bộ đề mới không neo, `gemini-3-flash-preview`) | `solver_benchmark.json` | 3 | 3/3 đạt 100/100 điểm (tạm dừng ở ca 4 do giới hạn 20 RPD Free Tier) |
 
 ## Hạn chế đã biết
 

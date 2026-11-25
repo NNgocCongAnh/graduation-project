@@ -38,6 +38,10 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
+BACKEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "detective-backend")
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
 from models import CaseDossier
 from llm_service import CaseGeneratorService
 from validator import validate_case_diagnostics, evaluate_player_deduction
@@ -48,7 +52,7 @@ BENCHMARK_THEMES = [
     "Chuyến tàu đêm Thống Nhất",
     "Phòng Thí nghiệm Công nghệ cao CyberTech"
 ]
-BENCHMARKS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "benchmarks")
+BENCHMARKS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results")
 
 
 def model_output_path(model: str) -> str:

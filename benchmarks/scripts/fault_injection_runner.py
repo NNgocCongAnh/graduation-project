@@ -30,8 +30,8 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add detective-backend directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "detective-backend"))
 
 from models import CaseDossier, Suspect, Evidence, ForensicData, GroundTruth, ViolationType
 from validator import (
@@ -454,7 +454,7 @@ if __name__ == "__main__":
     parser.add_argument("--api-base", type=str, default="http://localhost:20128/v1", help="API base URL")
     parser.add_argument("--api-key", type=str, default=os.getenv("LLM_API_KEY", ""), help="API key (defaults to LLM_API_KEY env var)")
     parser.add_argument("--trials", type=int, default=20, help="Number of trials per fault category")
-    parser.add_argument("--output", type=str, default="detective-backend/fault_injection_results.json", help="Output JSON path")
+    parser.add_argument("--output", type=str, default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", "fault_injection_results.json"), help="Output JSON path")
     args = parser.parse_args()
 
     asyncio.run(

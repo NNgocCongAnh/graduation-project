@@ -19,8 +19,14 @@ measures what a single call achieves when it is given the same information.
 from __future__ import annotations
 
 import json
+import os
 import re
+import sys
 from typing import Dict, Tuple
+
+_BACKEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "detective-backend")
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
 
 from agents import (
     CharacterAgent,
