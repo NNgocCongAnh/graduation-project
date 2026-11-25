@@ -77,6 +77,7 @@ Kết quả tại commit hiện tại: 85/85 kiểm thử đạt.
 # chạy từ thư mục gốc của kho mã nguồn
 python detective-backend/benchmark_runner.py --mode benchmark --models gh/gpt-4o-mini --trials-per-theme 10 --output-benchmark detective-backend/benchmark_results_gpt4o_mini.json
 python detective-backend/benchmark_runner.py --mode ablation --ablation-trials 1 --output-ablation detective-backend/ablation_results.json
+python detective-backend/run_e2e_baseline.py --trials-per-theme 3
 python detective-backend/fault_injection_runner.py
 python detective-backend/solver_agent.py
 ```
@@ -87,6 +88,7 @@ python detective-backend/solver_agent.py
 | Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o.json` | 30 | 30/30; P50 41,95 s, P95 49,51 s |
 | Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB |
 | Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
+| Đối chứng một lần gọi E2E-plan (theo Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
 | Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá (giảm 77,0% so với sinh lại toàn bộ) |
 | Tác tử phá án độc lập | `solver_benchmark_results.json` | 20 | Xác định đúng thủ phạm 19/20 |
 
