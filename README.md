@@ -86,7 +86,7 @@ python detective-backend/solver_agent.py
 | :--- | :--- | :---: | :--- |
 | Benchmark `gh/gpt-4o-mini` | `benchmark_results_gpt4o_mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 23,23 s, P95 30,90 s |
 | Benchmark `gh/gpt-4o` | `benchmark_results_gpt4o.json` | 30 | 30/30; P50 41,95 s, P95 49,51 s |
-| Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB |
+| Khảo sát cục bộ `gemma4:e4b-it-qat` | `benchmark_results_gemma4_local.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB. CharacterAgent và ClueAgent chuyển sang mô hình dự phòng trên mây ở cả 23 lượt (hệ lai, không phải chạy hoàn toàn ngoại tuyến) |
 | Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
 | Đối chứng một lần gọi E2E-plan (theo Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
 | Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá (giảm 77,0% so với sinh lại toàn bộ) |
