@@ -12,7 +12,7 @@
 | Thư mục / tệp | Nội dung |
 | :--- | :--- |
 | [`detective-backend/`](./detective-backend) | Máy chủ FastAPI: chuỗi 4 tác tử LLM (`agents.py`), bộ kiểm định ký hiệu và mô hình Henssge (`validator.py`), đồ thị hai phía (`case_graph.py`), bảo mật (`security.py`), SQLite (`database.py`), phòng chơi LAN (`rooms.py`) |
-| [`detective-backend/test_*.py`](./detective-backend) | 89 kiểm thử đơn vị và tích hợp (pytest) |
+| [`detective-backend/tests/`](./detective-backend/tests) | 89 kiểm thử đơn vị và tích hợp (pytest) |
 | [`detective-backend/*_runner.py`, `solver_agent.py`](./detective-backend) | Script thực nghiệm: benchmark, nghiên cứu loại trừ, tiêm lỗi, tác tử phá án độc lập |
 | [`benchmarks/`](./benchmarks) | Thư mục kết quả thô tổng hợp của các phiên thực nghiệm (`benchmark_*.json`, `solver_benchmark.json`, `benchmark_summary.json`) |
 | [`detective-backend/*_results*.json`](./detective-backend) | Tệp kết quả thô gốc đối chiếu trực tiếp với Chương 4 báo cáo |

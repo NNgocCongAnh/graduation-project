@@ -13,7 +13,7 @@ import sys
 import pytest
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import json
 from main import app, save_case_persistent
