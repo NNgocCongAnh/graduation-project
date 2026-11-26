@@ -37,7 +37,7 @@ public class GameController : MonoBehaviour
 
         // Đảm bảo bảng trinh thám và các hồ sơ luôn có dữ liệu vụ án mặc định (0s latency),
         // tránh tình trạng bảng bị trống trơn khi vừa khởi động hoặc khi người chơi tắt menu chính.
-        if (currentCase == null)
+        if (currentCase == null || string.IsNullOrEmpty(currentCase.case_id))
         {
             CaseDossier bundled = DetectiveAPIManager.LoadLocalSampleCase();
             if (bundled != null)
@@ -48,6 +48,34 @@ public class GameController : MonoBehaviour
             else
             {
                 StartCoroutine(LoadInitialCaseRoutine());
+            }
+        }
+
+        PolishSceneTopBar();
+    }
+
+    private void PolishSceneTopBar()
+    {
+        GameObject newCaseObj = GameObject.Find("Btn_New_Case");
+        if (newCaseObj != null)
+        {
+            Text t = newCaseObj.GetComponentInChildren<Text>(true);
+            if (t != null)
+            {
+                t.alignment = TextAnchor.MiddleCenter;
+                RectTransform rt = t.GetComponent<RectTransform>();
+                if (rt != null) { rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(8f, 2f); rt.offsetMax = new Vector2(-8f, -2f); }
+            }
+        }
+
+        foreach (Text txt in FindObjectsOfType<Text>(true))
+        {
+            if (txt != null && txt.text != null && txt.text.Trim() == "UNDER INVESTIGATION")
+            {
+                txt.text = "ĐANG ĐIỀU TRA";
+                txt.alignment = TextAnchor.MiddleCenter;
+                RectTransform rt = txt.GetComponent<RectTransform>();
+                if (rt != null) { rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(8f, 2f); rt.offsetMax = new Vector2(-8f, -2f); }
             }
         }
     }

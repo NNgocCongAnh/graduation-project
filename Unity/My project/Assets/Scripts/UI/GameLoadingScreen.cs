@@ -126,7 +126,7 @@ public class GameLoadingScreen : MonoBehaviour
             }
         }
 
-        if (subStatusText != null) subStatusText.text = "✓ Hoàn tất! Đang mở hồ sơ vụ án lên hiện trường...";
+        if (subStatusText != null) subStatusText.text = "Hoàn tất. Đang mở hồ sơ vụ án lên hiện trường...";
         if (progressBar != null) progressBar.value = 1f;
     }
 
@@ -161,18 +161,25 @@ public class GameLoadingScreen : MonoBehaviour
         crt.pivot = new Vector2(0.5f, 0.5f);
         crt.sizeDelta = new Vector2(560f, 320f);
 
-        // Spinner (Stylized rotating magnifying icon / symbol)
-        GameObject spinGo = new GameObject("Spinner", typeof(RectTransform), typeof(Text));
+        // Spinner (Geometric rotating brass emblem - no emoji dependency)
+        GameObject spinGo = new GameObject("Spinner", typeof(RectTransform), typeof(Image));
         spinner = spinGo.GetComponent<RectTransform>();
         spinner.SetParent(centerGo.transform, false);
-        spinner.anchoredPosition = new Vector2(0f, 85f);
-        spinner.sizeDelta = new Vector2(70f, 70f);
-        Text spinTxt = spinGo.GetComponent<Text>();
-        spinTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
-        spinTxt.fontSize = 42;
-        spinTxt.alignment = TextAnchor.MiddleCenter;
-        spinTxt.color = GoldColor;
-        spinTxt.text = "🔍";
+        spinner.anchoredPosition = new Vector2(0f, 88f);
+        spinner.sizeDelta = new Vector2(46f, 46f);
+        spinner.localRotation = Quaternion.Euler(0f, 0f, 45f);
+        spinGo.GetComponent<Image>().color = new Color(GoldColor.r, GoldColor.g, GoldColor.b, 0.16f);
+        Outline spinOutline = spinGo.AddComponent<Outline>();
+        spinOutline.effectColor = GoldColor;
+        spinOutline.effectDistance = new Vector2(2f, -2f);
+
+        GameObject innerDiamond = new GameObject("InnerPip", typeof(RectTransform), typeof(Image));
+        RectTransform idrt = innerDiamond.GetComponent<RectTransform>();
+        idrt.SetParent(spinner, false);
+        idrt.anchorMin = new Vector2(0.5f, 0.5f);
+        idrt.anchorMax = new Vector2(0.5f, 0.5f);
+        idrt.sizeDelta = new Vector2(18f, 18f);
+        innerDiamond.GetComponent<Image>().color = GoldColor;
 
         // Main status title
         GameObject mainTxtGo = new GameObject("MainTitle", typeof(RectTransform), typeof(Text));
@@ -246,6 +253,6 @@ public class GameLoadingScreen : MonoBehaviour
         hintTxt.fontStyle = FontStyle.Italic;
         hintTxt.alignment = TextAnchor.MiddleCenter;
         hintTxt.color = TextMuted;
-        hintTxt.text = "💡 Mẹo: Bằng chứng ngoại phạm của hung thủ luôn có lỗ hổng thời gian so với đồ thị Henssge.";
+        hintTxt.text = "Mẹo: Bằng chứng ngoại phạm của hung thủ luôn có lỗ hổng thời gian so với đồ thị Henssge.";
     }
 }

@@ -118,11 +118,11 @@ public class CorkboardManager : MonoBehaviour
         if (draggable == null) draggable = card.AddComponent<DraggableCard>();
         draggable.Initialize(id, isSuspect: false, isVictim: true);
 
-        // Position victim prominently on the left of suspects
+        // Position victim prominently on the far left of the corkboard with zero overlap
         RectTransform rt = card.GetComponent<RectTransform>();
         if (rt != null)
         {
-            rt.anchoredPosition = new Vector2(-540f, 220f);
+            rt.anchoredPosition = new Vector2(-620f, 195f);
             rt.localRotation = Quaternion.Euler(0, 0, -2f);
         }
 
@@ -207,18 +207,18 @@ public class CorkboardManager : MonoBehaviour
 
             if (isSuspect)
             {
-                // Top row for suspects
-                posX = -500f + (suspectCount * 250f);
-                posY = 220f + UnityEngine.Random.Range(-15f, 15f);
+                // Top row for suspects (spaced neatly right of Victim card)
+                posX = -320f + (suspectCount * 280f);
+                posY = 200f + UnityEngine.Random.Range(-12f, 12f);
                 suspectCount++;
             }
             else
             {
-                // Bottom area for evidences
+                // Bottom area for evidences (spaced neatly below suspects and inside bottom frame)
                 int col = evidenceCount % 4;
                 int row = evidenceCount / 4;
-                posX = -430f + (col * 250f);
-                posY = -60f - (row * 240f) + UnityEngine.Random.Range(-15f, 15f);
+                posX = -350f + (col * 280f);
+                posY = -36f - (row * 188f) + UnityEngine.Random.Range(-8f, 8f);
                 evidenceCount++;
             }
 
@@ -326,7 +326,7 @@ public class CorkboardManager : MonoBehaviour
 
             Text cardTxt = card.GetComponentInChildren<Text>();
             string cardName = cardTxt != null ? cardTxt.text.Split('\n')[0] : card.CardId;
-            ShowBanner($"🔴 Đang kéo chỉ đỏ từ [{cardName}]... Bấm vào thẻ thứ 2 để NỐI/GỠ DÂY | ESC: Hủy", 10f);
+            ShowBanner($"Đang kéo chỉ đỏ từ [{cardName}] — Bấm thẻ thứ 2 để NỐI/GỠ | ESC: Hủy", 10f);
         }
         else if (selectedPinCard == card)
         {
@@ -341,12 +341,12 @@ public class CorkboardManager : MonoBehaviour
             if (manualConnections.Contains(key))
             {
                 manualConnections.Remove(key); // Tháo dây đỏ
-                ShowBanner("✂️ ĐÃ THÁO SỢI CHỈ ĐỎ!");
+                ShowBanner("Đã tháo sợi chỉ đỏ liên kết.");
             }
             else
             {
                 manualConnections.Add(key); // Nối dây đỏ
-                ShowBanner("✅ ĐÃ NỐI CHỈ ĐỎ SUY LUẬN GIỮA 2 THẺ!");
+                ShowBanner("Đã nối chỉ đỏ suy luận giữa 2 thẻ.");
             }
 
             CancelPinSelection();

@@ -122,6 +122,7 @@ public class AutopsyReportModal : MonoBehaviour
 
         paperRootGo.SetActive(true);
         transform.SetAsLastSibling();
+        NoirUIStyle.AnimateModalOpen(this, paperRootGo, paperSheetRt);
         Debug.Log("[AutopsyReportModal] Opened Paper Autopsy Report Sheet.");
     }
 
@@ -183,37 +184,7 @@ public class AutopsyReportModal : MonoBehaviour
 
     private void CreateCloseButton(RectTransform parent)
     {
-        GameObject closeGo = new GameObject("Btn_Close_Paper", typeof(RectTransform), typeof(Image), typeof(Button));
-        RectTransform crt = closeGo.GetComponent<RectTransform>();
-        crt.SetParent(parent, false);
-        crt.anchorMin = new Vector2(1f, 1f);
-        crt.anchorMax = new Vector2(1f, 1f);
-        crt.sizeDelta = new Vector2(36f, 36f);
-        crt.anchoredPosition = new Vector2(-16f, -16f);
-
-        Image cImg = closeGo.GetComponent<Image>();
-        cImg.color = new Color(0.25f, 0.24f, 0.22f, 0.9f);
-
-        Button cBtn = closeGo.GetComponent<Button>();
-        cBtn.onClick.AddListener(Close);
-
-        GameObject txtGo = new GameObject("X_Label", typeof(RectTransform), typeof(Text));
-        RectTransform trt = txtGo.GetComponent<RectTransform>();
-        trt.SetParent(closeGo.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.sizeDelta = Vector2.zero;
-
-        Text txt = txtGo.GetComponent<Text>();
-        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
-        txt.font = uiFont;
-        txt.fontSize = 18;
-        txt.fontStyle = FontStyle.Bold;
-        txt.alignment = TextAnchor.MiddleCenter;
-        txt.color = Color.white;
-        txt.text = "✕";
-        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
-        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        NoirUIStyle.CreateCornerCloseButton(parent, uiFont, Close);
     }
 
     /// <summary>
@@ -252,9 +223,9 @@ public class AutopsyReportModal : MonoBehaviour
             "Case Nº: <b>2026-MED-001</b>", TextAnchor.MiddleRight, 10, InkBlack);
 
         string headerCenter =
-            "<b><size=15>OFFICE OF THE COUNTY MEDICAL EXAMINER</size></b>\n" +
-            "<size=10>88 Washington Street, SALEM, MASSACHUSETTS // PHÒNG GIÁM ĐỊNH PHÁP Y QUỐC GIA</size>\n" +
-            "<b><size=16>REPORT OF INVESTIGATION BY COUNTY MEDICAL EXAMINER</size></b>";
+            "<b><size=15>PHÒNG GIÁM ĐỊNH PHÁP Y // HỒ SƠ ĐIỀU TRA Y PHÁP</size></b>\n" +
+            "<size=10>Đơn vị Pháp y Hình sự  |  Biên bản đo đạc thực địa (Henssge Nomogram)</size>\n" +
+            "<b><size=16>BIÊN BẢN KHÁM NGHIỆM TỬ THI & ƯỚC LƯỢNG GIỜ TỬ VONG</size></b>";
         CreateText(crt, new Vector2(0f, 0.88f), new Vector2(1f, 0.95f), headerCenter, TextAnchor.MiddleCenter, 11, InkBlack);
 
         CreateDivider(crt, 0.875f);
@@ -267,9 +238,9 @@ public class AutopsyReportModal : MonoBehaviour
         string victimJob = string.IsNullOrEmpty(v.occupation) ? "Chủ sở hữu trang viên & Doanh nhân" : v.occupation;
 
         string demoForm =
-            $"DECEDENT (TỬ THI): <b><size=13>{victimName}</size></b> ................... CHỦNG TỘC: Caucasian ..... GIỚI TÍNH: {v.gender} ..... TUỔI: {v.age}\n" +
-            $"ĐỊA CHỈ TÌM THẤY: {victimResidence} ..................................... NGHỀ NGHIỆP: {victimJob}\n" +
-            $"HÌNH THỨC TỬ VONG (TYPE OF DEATH):   Violent [X]     Casualty [ ]     Suicide [ ]     Suspicious, unusual [X]     Natural [ ]";
+            $"NẠN NHÂN: <b><size=13>{victimName}</size></b>     |   GIỚI TÍNH: {v.gender}   |   TUỔI: {v.age}\n" +
+            $"HIỆN TRƯỜNG: {victimResidence}     |   NGHỀ NGHIỆP: {victimJob}\n" +
+            $"PHÂN LOẠI TỬ VONG:   Bạo lực [X]     Tai nạn [ ]     Tự sát [ ]     Bất thường [X]     Tự nhiên [ ]";
         CreateText(crt, new Vector2(0f, 0.775f), new Vector2(1f, 0.865f), demoForm, TextAnchor.UpperLeft, 10, InkBlack);
 
         CreateDivider(crt, 0.765f);
@@ -306,11 +277,11 @@ public class AutopsyReportModal : MonoBehaviour
             $"<b><size=11>ĐỊNH LƯỢNG NHIỆT HỌC PHÁP Y HENSSGE</size></b>\n" +
             $"<size=9><color=#555555>(TWO-EXPONENTIAL COOLING ANALYSIS):</color></size>\n" +
             $"───────────────────────────────────────────────────\n" +
-            $"• Phương trình: <i>B(t) = 1.25·e^(-kt) - 0.25·e^(-5kt)</i>\n" +
-            $"• Hệ số thích nghi thể trọng C = 1.0 (76kg mặc ấm)\n" +
+            $"• Phương trình: <i>Q = 1,25·e^(-kt) - 0,25·e^(-5kt)</i>\n" +
+            $"• Hệ số hiệu chỉnh C = {f.cooling_factor:F2} (thể trọng {f.body_weight_kg:F0} kg)\n" +
             $"• <b>KHUNG GIỜ TỬ VONG XÁC LẬP (TOD WINDOW):</b>\n" +
             $"  <size=13><color=#8c1d1d><b>[{f.estimated_tod_start} - {f.estimated_tod_end}]</b></color></size>\n" +
-            $"  <size=9><i>(Biên độ sai số y học pháp chứng: ± 25 phút)</i></size>";
+            $"  <size=9><i>(Khoảng dung sai thiết kế ±1,5 giờ quanh điểm nghiệm Henssge)</i></size>";
 
         CreateText(leftCol.transform, new Vector2(0.04f, 0.03f), new Vector2(0.96f, 0.97f), leftText, TextAnchor.UpperLeft, 10, InkBlack);
 
@@ -335,21 +306,31 @@ public class AutopsyReportModal : MonoBehaviour
             rImg.texture = diagramTex;
             rImg.color = Color.white;
 
-            // Điểm chỉ dẫn vết đâm ngực trái màu đỏ trên sơ đồ
+            // Điểm chỉ dẫn vết thương màu đỏ bằng hình học sắc nét (không dùng emoji)
+            GameObject dotGo = new GameObject("WoundDot", typeof(RectTransform), typeof(Image));
+            RectTransform dotRt = dotGo.GetComponent<RectTransform>();
+            dotRt.SetParent(diagGo.transform, false);
+            dotRt.anchorMin = new Vector2(0.28f, 0.65f);
+            dotRt.anchorMax = new Vector2(0.28f, 0.65f);
+            dotRt.sizeDelta = new Vector2(10f, 10f);
+            dotGo.GetComponent<Image>().color = InkRed;
+
             GameObject woundMarker = new GameObject("WoundMarker", typeof(RectTransform), typeof(Text));
             RectTransform wmrt = woundMarker.GetComponent<RectTransform>();
             wmrt.SetParent(diagGo.transform, false);
-            wmrt.anchorMin = new Vector2(0.28f, 0.65f); // Vị trí khoang ngực trái mặt trước
-            wmrt.anchorMax = new Vector2(0.28f, 0.65f);
-            wmrt.sizeDelta = new Vector2(120f, 24f);
+            wmrt.anchorMin = new Vector2(0.32f, 0.65f);
+            wmrt.anchorMax = new Vector2(0.32f, 0.65f);
+            wmrt.pivot = new Vector2(0f, 0.5f);
+            wmrt.sizeDelta = new Vector2(130f, 22f);
 
             Text wmt = woundMarker.GetComponent<Text>();
             if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
             wmt.font = uiFont;
             wmt.fontSize = 11;
             wmt.fontStyle = FontStyle.Bold;
+            wmt.alignment = TextAnchor.MiddleLeft;
             wmt.color = InkRed;
-            wmt.text = "🔴 Vết đâm 8.5cm";
+            wmt.text = "Vị trí tổn thương";
             wmt.horizontalOverflow = HorizontalWrapMode.Overflow;
             wmt.verticalOverflow = VerticalWrapMode.Overflow;
         }

@@ -377,12 +377,12 @@ public class AudioManager : MonoBehaviour
     {
         switch (track)
         {
-            case BgmTrack.NoirJazz: return "🎷 Detective Noir Jazz (Ma mị)";
-            case BgmTrack.ConanMain: return "⚡ Conan Main Theme (Phá án)";
-            case BgmTrack.ConanRan: return "🌸 Ran's Theme (Nhẹ nhàng)";
-            case BgmTrack.ConanDream: return "🌙 Conan's Dream (Suy tư)";
-            case BgmTrack.ConanShowdown: return "⚔️ Showdown (Đối đầu)";
-            case BgmTrack.Mute: return "🔇 Tắt nhạc";
+            case BgmTrack.NoirJazz: return "Detective Noir Jazz (Ma mị)";
+            case BgmTrack.ConanMain: return "Conan Main Theme (Phá án)";
+            case BgmTrack.ConanRan: return "Ran's Theme (Nhẹ nhàng)";
+            case BgmTrack.ConanDream: return "Conan's Dream (Suy tư)";
+            case BgmTrack.ConanShowdown: return "Showdown (Đối đầu)";
+            case BgmTrack.Mute: return "Tắt nhạc";
             default: return track.ToString();
         }
     }

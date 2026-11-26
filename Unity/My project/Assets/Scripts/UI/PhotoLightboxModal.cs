@@ -54,6 +54,7 @@ public class PhotoLightboxModal : MonoBehaviour
         root.SetAsLastSibling();
         root.gameObject.SetActive(true);
         gameObject.SetActive(true);
+        NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("PolaroidFrame"));
 
         if (photoImage != null)
         {
@@ -121,19 +122,30 @@ public class PhotoLightboxModal : MonoBehaviour
         frame.pivot = new Vector2(0.5f, 0.5f);
         frame.sizeDelta = new Vector2(480f, 560f);
         frameGo.GetComponent<Image>().color = PolaroidPaper;
+        NoirUIStyle.ApplyPanelChrome(frameGo, NoirUIStyle.PaperBorder, false);
 
-        // Red Pushpin at top center
-        GameObject pinGo = new GameObject("Pin", typeof(RectTransform), typeof(Text));
-        RectTransform pinRt = pinGo.GetComponent<RectTransform>();
-        pinRt.SetParent(frame, false);
-        pinRt.anchoredPosition = new Vector2(0f, 268f);
-        pinRt.sizeDelta = new Vector2(36f, 36f);
-        Text pinTxt = pinGo.GetComponent<Text>();
-        pinTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
-        pinTxt.fontSize = 24;
-        pinTxt.alignment = TextAnchor.MiddleCenter;
-        pinTxt.color = new Color(0.85f, 0.15f, 0.15f);
-        pinTxt.text = "📌";
+        // Red Pushpin at top center (real NoirUI sprite or clean crimson pin)
+        Texture2D pinTex = DetectiveAssetBank.GetNoirTexture("pushpin_3d.png");
+        if (pinTex != null)
+        {
+            GameObject pinGo = new GameObject("Pin", typeof(RectTransform), typeof(RawImage));
+            RectTransform pinRt = pinGo.GetComponent<RectTransform>();
+            pinRt.SetParent(frame, false);
+            pinRt.anchoredPosition = new Vector2(0f, 266f);
+            pinRt.sizeDelta = new Vector2(36f, 36f);
+            RawImage pinImg = pinGo.GetComponent<RawImage>();
+            pinImg.texture = pinTex;
+            pinImg.raycastTarget = false;
+        }
+        else
+        {
+            GameObject pinGo = new GameObject("Pin", typeof(RectTransform), typeof(Image));
+            RectTransform pinRt = pinGo.GetComponent<RectTransform>();
+            pinRt.SetParent(frame, false);
+            pinRt.anchoredPosition = new Vector2(0f, 266f);
+            pinRt.sizeDelta = new Vector2(18f, 18f);
+            pinGo.GetComponent<Image>().color = new Color(0.80f, 0.16f, 0.16f, 1f);
+        }
 
         // Photo RawImage Slot (430 x 430)
         GameObject photoGo = new GameObject("Photo", typeof(RectTransform), typeof(RawImage));
@@ -157,29 +169,8 @@ public class PhotoLightboxModal : MonoBehaviour
         captionText.alignment = TextAnchor.MiddleCenter;
         captionText.color = TextDark;
 
-        // Close Button (Top right X)
-        GameObject closeGo = new GameObject("CloseBtn", typeof(RectTransform), typeof(Image), typeof(Button));
-        RectTransform closeRt = closeGo.GetComponent<RectTransform>();
-        closeRt.SetParent(frame, false);
-        closeRt.anchoredPosition = new Vector2(215f, 255f);
-        closeRt.sizeDelta = new Vector2(36f, 36f);
-        closeGo.GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.22f, 0.9f);
-        Button closeBtn = closeGo.GetComponent<Button>();
-        closeBtn.onClick.AddListener(Close);
-
-        GameObject closeTxtGo = new GameObject("X", typeof(RectTransform), typeof(Text));
-        RectTransform ctRt = closeTxtGo.GetComponent<RectTransform>();
-        ctRt.SetParent(closeGo.transform, false);
-        ctRt.anchorMin = Vector2.zero;
-        ctRt.anchorMax = Vector2.one;
-        ctRt.sizeDelta = Vector2.zero;
-        Text closeTxt = closeTxtGo.GetComponent<Text>();
-        closeTxt.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
-        closeTxt.fontSize = 20;
-        closeTxt.fontStyle = FontStyle.Bold;
-        closeTxt.alignment = TextAnchor.MiddleCenter;
-        closeTxt.color = Color.white;
-        closeTxt.text = "✕";
+        // Close Button (Top right [X])
+        NoirUIStyle.CreateCornerCloseButton(frame, font, Close);
 
         root.gameObject.SetActive(false);
     }

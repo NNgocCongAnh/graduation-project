@@ -69,18 +69,24 @@ public class AccusationModal : MonoBehaviour
         {
             submitButton.onClick.RemoveAllListeners();
             submitButton.onClick.AddListener(OnSubmitButtonClicked);
+            CenterButtonLabel(submitButton);
+            NoirUIStyle.AttachButtonFeel(submitButton, 0.97f, true);
         }
 
         if (closeButton != null)
         {
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(Close);
+            CenterButtonLabel(closeButton);
+            NoirUIStyle.AttachButtonFeel(closeButton, 0.96f, true);
         }
 
         if (closeVerdictButton != null)
         {
             closeVerdictButton.onClick.RemoveAllListeners();
             closeVerdictButton.onClick.AddListener(CloseVerdict);
+            CenterButtonLabel(closeVerdictButton);
+            NoirUIStyle.AttachButtonFeel(closeVerdictButton, 0.97f, true);
         }
 
         if (suspectDropdown != null)
@@ -121,6 +127,12 @@ public class AccusationModal : MonoBehaviour
         if (modalRoot == null) modalRoot = gameObject;
         modalRoot.SetActive(true);
         gameObject.SetActive(true);
+
+        foreach (Transform child in modalRoot.transform)
+        {
+            if (verdictPanel == null || child.gameObject != verdictPanel)
+                child.gameObject.SetActive(true);
+        }
 
         if (verdictPanel != null) verdictPanel.SetActive(false);
         transform.SetAsLastSibling();
@@ -166,6 +178,12 @@ public class AccusationModal : MonoBehaviour
             cRt.offsetMax = Vector2.zero;
         }
 
+        // Disable scene VerticalLayoutGroup so explicit anchorMin/anchorMax layout inside container is not squashed to height 0
+        VerticalLayoutGroup existingVlg = evidenceTogglesContainer.GetComponent<VerticalLayoutGroup>();
+        if (existingVlg != null) existingVlg.enabled = false;
+        ContentSizeFitter existingCsf = evidenceTogglesContainer.GetComponent<ContentSizeFitter>();
+        if (existingCsf != null) existingCsf.enabled = false;
+
         Font font = DetectiveAssetBank.GetDefaultUIFont();
         List<SuspectData> suspects = currentCase.suspects ?? new List<SuspectData>();
 
@@ -209,7 +227,7 @@ public class AccusationModal : MonoBehaviour
         stText.fontStyle = FontStyle.Bold;
         stText.alignment = TextAnchor.MiddleLeft;
         stText.color = new Color(0.96f, 0.82f, 0.38f);
-        stText.text = "🎯 BƯỚC 1: CHỌN HUNG THỦ CẦN BẮT GIỮ (BẮT BUỘC):";
+        stText.text = "BƯỚC 1: CHỌN HUNG THỦ CẦN BẮT GIỮ (BẮT BUỘC):";
 
         // Dropdown Selector Button
         GameObject dropBtnGo = new GameObject("DropdownSelectorBtn", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -252,7 +270,7 @@ public class AccusationModal : MonoBehaviour
         dropdownLabelText.fontStyle = FontStyle.Bold;
         dropdownLabelText.alignment = TextAnchor.MiddleLeft;
         dropdownLabelText.color = Color.white;
-        dropdownLabelText.text = $"👤 Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
+        dropdownLabelText.text = $"Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
 
         // =========================================================================
         // 3. PHẦN 2: TIÊU ĐỀ & KHUNG NHẬP DẪN CHỨNG LẬP LUẬN
@@ -269,7 +287,7 @@ public class AccusationModal : MonoBehaviour
         rtText.fontStyle = FontStyle.Bold;
         rtText.alignment = TextAnchor.MiddleLeft;
         rtText.color = new Color(0.65f, 0.88f, 1f);
-        rtText.text = "✍️ BƯỚC 2: DẪN CHỨNG & LẬP LUẬN SUY LUẬN (TÙY CHỌN):";
+        rtText.text = "BƯỚC 2: DẪN CHỨNG & LẬP LUẬN SUY LUẬN (TÙY CHỌN):";
 
         // InputField Container
         GameObject inputFieldGo = new GameObject("ReasoningInputField", typeof(RectTransform), typeof(Image), typeof(InputField));
@@ -319,7 +337,7 @@ public class AccusationModal : MonoBehaviour
         phText.fontStyle = FontStyle.Italic;
         phText.color = new Color(0.55f, 0.60f, 0.70f, 0.8f);
         phText.lineSpacing = 1.25f;
-        phText.text = "Nhập suy luận tóm tắt của bạn: mâu thuẫn ngoại phạm, hung khí thật sự, giờ tử vong (Henssge)...\n\n(💡 Gợi ý: Bạn có thể để trống ô này nếu chỉ muốn đối chiếu nhanh phán quyết của Tòa án!)";
+        phText.text = "Nhập suy luận tóm tắt: mâu thuẫn ngoại phạm, hung khí thật sự, giờ tử vong (Henssge)...\n\n(Gợi ý: Có thể để trống ô này nếu chỉ muốn đối chiếu nhanh phán quyết.)";
         reasoningInputField.placeholder = phText;
 
         // =========================================================================
@@ -337,7 +355,7 @@ public class AccusationModal : MonoBehaviour
         tipText.fontStyle = FontStyle.Normal;
         tipText.alignment = TextAnchor.MiddleLeft;
         tipText.color = new Color(0.65f, 0.70f, 0.78f);
-        tipText.text = "⚖️ Tòa án sẽ đối chiếu hung thủ bạn chọn và so khớp lập luận với Chân lý vụ án (Ground Truth).";
+        tipText.text = "Tòa án sẽ đối chiếu hung thủ bạn chọn và so khớp lập luận với Chân lý vụ án trên máy chủ.";
 
         // =========================================================================
         // 5. DROPDOWN LIST POPUP (DANH SÁCH THẢ XUỐNG KHI CLICK DROPDOWN)
@@ -383,7 +401,7 @@ public class AccusationModal : MonoBehaviour
 
                 if (dropdownLabelText != null)
                 {
-                    dropdownLabelText.text = $"👤 Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
+                    dropdownLabelText.text = $"Hung thủ chỉ định:  [ {selectedSuspectName} ({selectedSuspectOccupation}) ]  ▼";
                 }
 
                 if (warningText != null) warningText.text = "";
@@ -407,7 +425,7 @@ public class AccusationModal : MonoBehaviour
             itemTxt.fontStyle = FontStyle.Bold;
             itemTxt.alignment = TextAnchor.MiddleLeft;
             itemTxt.color = isCurrent ? new Color(1f, 0.95f, 0.4f) : Color.white;
-            itemTxt.text = $"{(isCurrent ? "🎯 [ĐÃ CHỌN] " : "   ")}{susp.name}  —  <color=#cccccc>{susp.occupation}</color>  <size=9><color=#88bb88>(Ngoại phạm tự nhận: {susp.alibi_start}-{susp.alibi_end})</color></size>";
+            itemTxt.text = $"{(isCurrent ? "[ĐÃ CHỌN] " : "   ")}{susp.name}  —  <color=#cccccc>{susp.occupation}</color>  <size=9><color=#88bb88>(Ngoại phạm tự nhận: {susp.alibi_start}-{susp.alibi_end})</color></size>";
         }
 
         dropdownListPopup.SetActive(false);
@@ -418,6 +436,22 @@ public class AccusationModal : MonoBehaviour
     /// Xử lý gửi lệnh bắt giữ: Gửi yêu cầu thẩm định tới Backend API (Server-Authoritative Evaluation).
     /// Loại bỏ hoàn toàn việc đọc Ground Truth hay cờ Cheat tại Client.
     /// </summary>
+    private static void CenterButtonLabel(Button btn)
+    {
+        if (btn == null) return;
+        Text txt = btn.GetComponentInChildren<Text>(true);
+        if (txt == null) return;
+        txt.alignment = TextAnchor.MiddleCenter;
+        RectTransform rt = txt.GetComponent<RectTransform>();
+        if (rt != null)
+        {
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(8f, 4f);
+            rt.offsetMax = new Vector2(-8f, -4f);
+        }
+    }
+
     private void OnSubmitButtonClicked()
     {
         CaseDossier currentCase = GameController.Instance != null ? GameController.Instance.currentCase : null;
@@ -427,7 +461,7 @@ public class AccusationModal : MonoBehaviour
         {
             if (warningText != null)
             {
-                warningText.text = "⚠️ Vui lòng chọn 1 nghi phạm trong danh sách trước khi gửi lệnh bắt!";
+                warningText.text = "Vui lòng chọn 1 nghi phạm trong danh sách trước khi gửi lệnh bắt.";
             }
             AudioManager.Instance?.PlayPinClick();
             return;
@@ -450,7 +484,7 @@ public class AccusationModal : MonoBehaviour
             if (warningText != null)
             {
                 warningText.color = new Color(0.7f, 0.9f, 1f);
-                warningText.text = "⏳ Đang trình Tòa án và Viện Kiểm sát thẩm định lệnh bắt giữ...";
+                warningText.text = "Đang trình Tòa án và Viện Kiểm sát thẩm định lệnh bắt giữ...";
             }
 
             DetectiveAPIManager.Instance.VerifyDeduction(req, (success, response) =>
@@ -462,7 +496,7 @@ public class AccusationModal : MonoBehaviour
                 else
                 {
                     ShowVerdict(
-                        title: "⚠️ LỖI KẾT NỐI TÒA ÁN // HỆ THỐNG NGOẠI TUYẾN",
+                        title: "LỖI KẾT NỐI TÒA ÁN // HỆ THỐNG NGOẠI TUYẾN",
                         titleColor: new Color(0.95f, 0.65f, 0.2f),
                         feedback: "Không thể kết nối tới Dịch vụ Thẩm định Tòa án (FastAPI Backend) để phê chuẩn lệnh bắt.\n\n" +
                                   "Vui lòng đảm bảo server 'detective-backend' đang chạy tại http://127.0.0.1:8000.",
@@ -475,7 +509,7 @@ public class AccusationModal : MonoBehaviour
         else
         {
             ShowVerdict(
-                title: "⚠️ CHƯA KHỞI ĐỘNG APIMANAGER",
+                title: "CHƯA KHỞI ĐỘNG APIMANAGER",
                 titleColor: new Color(0.95f, 0.65f, 0.2f),
                 feedback: "Hệ thống chưa tìm thấy DetectiveAPIManager để gửi yêu cầu xác thực kết án.",
                 contradiction: "",
@@ -491,7 +525,7 @@ public class AccusationModal : MonoBehaviour
     {
         if (response == null) return;
         Color color = response.is_correct ? new Color(0.2f, 0.82f, 0.45f) : new Color(0.92f, 0.25f, 0.25f);
-        string title = response.is_correct ? "⚖️ PHÁN QUYẾT: CHÍNH XÁC // BẮT GIỮ ĐÚNG HUNG THỦ" : "❌ LỆNH BẮT GIỮ BỊ BÁC BỎ // BẮT OAN";
+        string title = response.is_correct ? "PHÁN QUYẾT: CHÍNH XÁC // BẮT GIỮ ĐÚNG HUNG THỦ" : "LỆNH BẮT GIỮ BỊ BÁC BỎ // BẮT OAN";
         ShowVerdict(title, color, response.feedback, response.core_contradiction, Mathf.RoundToInt(response.score));
     }
 
@@ -500,11 +534,28 @@ public class AccusationModal : MonoBehaviour
     /// </summary>
     public void ShowVerdict(string title, Color titleColor, string feedback, string contradiction, int score)
     {
-        if (modalRoot != null) modalRoot.SetActive(false);
-
         if (verdictPanel != null)
         {
+            bool verdictInsideModalRoot = modalRoot != null &&
+                (verdictPanel == modalRoot || verdictPanel.transform.IsChildOf(modalRoot.transform));
+
+            if (verdictInsideModalRoot)
+            {
+                modalRoot.SetActive(true);
+                gameObject.SetActive(true);
+                foreach (Transform child in modalRoot.transform)
+                {
+                    if (child.gameObject != verdictPanel)
+                        child.gameObject.SetActive(false);
+                }
+            }
+            else if (modalRoot != null)
+            {
+                modalRoot.SetActive(false);
+            }
+
             verdictPanel.SetActive(true);
+            verdictPanel.transform.SetAsLastSibling();
             transform.SetAsLastSibling();
 
             if (verdictTitleText != null)

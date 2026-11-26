@@ -15,12 +15,12 @@ public class LanLobbyModal : MonoBehaviour
     private const float DiscoverySeconds = 1.5f;
     private const int MaxListedHosts = 4;
 
-    private static readonly Color PanelColor = new Color(0.09f, 0.08f, 0.07f, 0.98f);
-    private static readonly Color FieldColor = new Color(0.16f, 0.15f, 0.14f, 1f);
-    private static readonly Color TextColor = new Color(0.92f, 0.88f, 0.80f);
-    private static readonly Color MutedColor = new Color(0.62f, 0.60f, 0.56f);
-    private static readonly Color PrimaryColor = new Color(0.12f, 0.48f, 0.32f);
-    private static readonly Color SecondaryColor = new Color(0.24f, 0.24f, 0.27f);
+    private static readonly Color PanelColor = NoirUIStyle.ModalSurface;
+    private static readonly Color FieldColor = NoirUIStyle.FieldSurface;
+    private static readonly Color TextColor = NoirUIStyle.CreamText;
+    private static readonly Color MutedColor = NoirUIStyle.MutedText;
+    private static readonly Color PrimaryColor = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color SecondaryColor = NoirUIStyle.SlateSecondary;
 
     private Font font;
     private RectTransform root;
@@ -65,6 +65,7 @@ public class LanLobbyModal : MonoBehaviour
         gameObject.SetActive(true);
         root.gameObject.SetActive(true);
         RefreshStatus();
+        NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("Panel"));
     }
 
     public void Close()
@@ -170,12 +171,13 @@ public class LanLobbyModal : MonoBehaviour
         root = NewRect("Lan_Lobby_Modal", transform);
         Stretch(root);
         Image backdrop = root.gameObject.AddComponent<Image>();
-        backdrop.color = new Color(0, 0, 0, 0.6f);
+        backdrop.color = NoirUIStyle.BackdropScrim;
 
         RectTransform panel = NewRect("Panel", root);
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(580, 500);
         panel.gameObject.AddComponent<Image>().color = PanelColor;
+        NoirUIStyle.ApplyPanelChrome(panel.gameObject, NoirUIStyle.BrassBorder, true);
         VerticalLayoutGroup layout = panel.gameObject.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(24, 24, 20, 20);
         layout.spacing = 8;

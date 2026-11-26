@@ -43,20 +43,20 @@ public class GenerateCaseModal : MonoBehaviour
     private Dropdown mysteryDropdown;
     private Text feedbackText;
 
-    private static readonly Color BgOverlay = new Color(0.04f, 0.04f, 0.05f, 0.94f);
-    private static readonly Color CardColor = new Color(0.10f, 0.10f, 0.12f, 0.98f);
-    private static readonly Color FieldColor = new Color(0.15f, 0.16f, 0.19f, 1f);
-    private static readonly Color BorderColor = new Color(0.24f, 0.25f, 0.28f, 1f);
-    private static readonly Color TitleGold = new Color(0.96f, 0.82f, 0.38f);
-    private static readonly Color TextWhite = new Color(0.93f, 0.93f, 0.90f);
-    private static readonly Color TextMuted = new Color(0.65f, 0.65f, 0.60f);
+    private static readonly Color BgOverlay = NoirUIStyle.BackdropScrim;
+    private static readonly Color CardColor = NoirUIStyle.ModalSurface;
+    private static readonly Color FieldColor = NoirUIStyle.FieldSurface;
+    private static readonly Color BorderColor = NoirUIStyle.SubtleBorder;
+    private static readonly Color TitleGold = NoirUIStyle.BrassGold;
+    private static readonly Color TextWhite = NoirUIStyle.CreamText;
+    private static readonly Color TextMuted = NoirUIStyle.MutedText;
 
-    private static readonly Color BtnGreen = new Color(0.14f, 0.55f, 0.32f);
-    private static readonly Color BtnBlue = new Color(0.20f, 0.28f, 0.38f);
-    private static readonly Color BtnRed = new Color(0.40f, 0.18f, 0.18f);
+    private static readonly Color BtnGreen = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color BtnBlue = NoirUIStyle.SlateBlue;
+    private static readonly Color BtnRed = NoirUIStyle.CrimsonDanger;
 
-    private static readonly Color ChipSelected = new Color(0.14f, 0.50f, 0.32f);
-    private static readonly Color ChipNormal = new Color(0.18f, 0.20f, 0.24f);
+    private static readonly Color ChipSelected = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color ChipNormal = NoirUIStyle.SlateSecondary;
 
     public bool IsOpen => root != null && root.gameObject.activeSelf;
 
@@ -119,6 +119,7 @@ public class GenerateCaseModal : MonoBehaviour
 
             root.SetAsLastSibling();
             root.gameObject.SetActive(true);
+            NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("CenterPanel"));
         }
 
         RefreshModelDisplay();
@@ -163,7 +164,7 @@ public class GenerateCaseModal : MonoBehaviour
 
         if (modelDisplayTxt != null)
         {
-            modelDisplayTxt.text = $"⚡ Mô hình đang kích hoạt: <color=#f5d061><b>{currentModel}</b></color>";
+            modelDisplayTxt.text = $"Mô hình AI đang dùng: <color=#EBBE61><b>{currentModel}</b></color>";
         }
 
         // Highlight selected model button
@@ -237,7 +238,7 @@ public class GenerateCaseModal : MonoBehaviour
                 Open();
                 if (feedbackText != null)
                 {
-                    feedbackText.text = $"⚠️ Không thể kết nối Backend tại {ServerConfig.HttpBaseUrl}.\nHãy kiểm tra Backend đang chạy hoặc bấm 'VỤ ÁN MẪU (CHƠI NGAY)' bên dưới để chơi ngay!";
+                    feedbackText.text = $"Không thể kết nối Backend tại {ServerConfig.HttpBaseUrl}. Vui lòng bật Backend hoặc bấm 'VỤ ÁN MẪU (CHƠI NGAY)'.";
                 }
             }
         });
@@ -271,7 +272,7 @@ public class GenerateCaseModal : MonoBehaviour
                 Open();
                 if (feedbackText != null)
                 {
-                    feedbackText.text = "⚠️ Không thể tải hồ sơ vụ án mẫu!";
+                    feedbackText.text = "Không thể tải hồ sơ vụ án mẫu.";
                 }
             }
         });
@@ -304,16 +305,18 @@ public class GenerateCaseModal : MonoBehaviour
         panel.pivot = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(700f, 640f);
         panelGo.GetComponent<Image>().color = CardColor;
+        NoirUIStyle.ApplyPanelChrome(panelGo, NoirUIStyle.BrassBorder, true);
+        NoirUIStyle.CreateCornerCloseButton(panel, font, Close);
 
         // Header Title & Subtitle
-        CreateText(panel, "TÙY BIẾN VỤ ÁN MỚI BẰNG AI", 20, TitleGold, FontStyle.Bold, new Vector2(0f, 285f), new Vector2(640f, 30f), TextAnchor.MiddleCenter);
-        CreateText(panel, "Hệ thống trinh thám tích hợp mô hình ngôn ngữ lớn (LLM) & Y pháp nhiệt học Henssge", 11, TextMuted, FontStyle.Normal, new Vector2(0f, 258f), new Vector2(640f, 20f), TextAnchor.MiddleCenter);
+        CreateText(panel, "TẠO HỒ SƠ VỤ ÁN MỚI BẰNG AI", 20, TitleGold, FontStyle.Bold, new Vector2(0f, 285f), new Vector2(640f, 30f), TextAnchor.MiddleCenter);
+        CreateText(panel, "Tùy chỉnh bối cảnh, thời kỳ và phong cách — các quy luật logic được kiểm định tự động", 11, TextMuted, FontStyle.Normal, new Vector2(0f, 258f), new Vector2(640f, 20f), TextAnchor.MiddleCenter);
         CreateDivider(panel, new Vector2(0f, 242f), 640f);
 
         // =========================================================================
-        // SECTION 1: MÔ HÌNH AI ĐANG DÙNG & TÙY CHỌN
+        // SECTION 1: CHẾ ĐỘ SINH VỤ ÁN (THU GỌN CHO NGƯỜI MỚI)
         // =========================================================================
-        CreateText(panel, "MÔ HÌNH AI ĐANG DÙNG & TÙY CHỌN:", 12, TitleGold, FontStyle.Bold, new Vector2(0f, 222f), new Vector2(640f, 20f), TextAnchor.MiddleLeft);
+        CreateText(panel, "CHẾ ĐỘ ĐỘNG CƠ AI:", 12, TitleGold, FontStyle.Bold, new Vector2(0f, 222f), new Vector2(640f, 20f), TextAnchor.MiddleLeft);
 
         // Model Display Badge Box
         GameObject modelBadge = new GameObject("ModelBadgeBox", typeof(RectTransform), typeof(Image));
@@ -322,11 +325,12 @@ public class GenerateCaseModal : MonoBehaviour
         mbrt.anchoredPosition = new Vector2(0f, 198f);
         mbrt.sizeDelta = new Vector2(640f, 26f);
         modelBadge.GetComponent<Image>().color = FieldColor;
+        NoirUIStyle.StyleInputChrome(modelBadge);
 
-        modelDisplayTxt = CreateText(mbrt, "⚡ Mô hình đang kích hoạt: " + ServerConfig.SelectedModel, 11, TextWhite, FontStyle.Normal, Vector2.zero, new Vector2(620f, 24f), TextAnchor.MiddleLeft);
+        modelDisplayTxt = CreateText(mbrt, "Mô hình AI đang dùng: " + ServerConfig.SelectedModel, 11, TextWhite, FontStyle.Normal, Vector2.zero, new Vector2(620f, 24f), TextAnchor.MiddleLeft);
         modelDisplayTxt.supportRichText = true;
 
-        // Row of 4 Popular Model Chips
+        // Row of Friendly Presets + Settings Link
         GameObject modelChipGroup = new GameObject("ModelChips", typeof(RectTransform), typeof(HorizontalLayoutGroup));
         RectTransform mcgrt = modelChipGroup.GetComponent<RectTransform>();
         mcgrt.SetParent(panel, false);
@@ -339,10 +343,14 @@ public class GenerateCaseModal : MonoBehaviour
 
         modelBtnImages.Clear();
         modelBtnKeys.Clear();
-        RegisterModelChip(modelChipGroup.transform, "⚡ Gemini 2.0 Flash", "google/gemini-2.0-flash-exp:free");
-        RegisterModelChip(modelChipGroup.transform, "⭐ Llama 3.3 (70B)", "meta-llama/llama-3.3-70b-instruct:free");
-        RegisterModelChip(modelChipGroup.transform, "🧠 GPT-4o-mini", "openai/gpt-4o-mini");
-        RegisterModelChip(modelChipGroup.transform, "💻 Ollama Offline", "llama3.2:latest");
+        RegisterModelChip(modelChipGroup.transform, "Mặc định Nhanh (4o-mini)", "gh/gpt-4o-mini");
+        RegisterModelChip(modelChipGroup.transform, "Chi tiết Cao (GPT-4o)", "gh/gpt-4o");
+        RegisterModelChip(modelChipGroup.transform, "Chạy Cục bộ (Gemma 4)", "gemma4:e4b-it-qat");
+        CreateChip(modelChipGroup.transform, "Cài đặt nâng cao...", () =>
+        {
+            DismissModal();
+            FindObjectOfType<SettingsModal>()?.Open();
+        });
 
         CreateDivider(panel, new Vector2(0f, 145f), 640f);
 
@@ -374,10 +382,10 @@ public class GenerateCaseModal : MonoBehaviour
         echlg.childControlWidth = true;
         echlg.childControlHeight = true;
 
-        CreateChip(eraChipGroup.transform, "📱 2026 (Hiện đại)", () => { yearInput.text = "2026"; selectedEra = "Hiện đại (2020s)"; });
-        CreateChip(eraChipGroup.transform, "📼 1996 (Thập niên 90)", () => { yearInput.text = "1996"; selectedEra = "Thập niên 1990"; });
-        CreateChip(eraChipGroup.transform, "🕰️ 1930 (Cổ điển)", () => { yearInput.text = "1930"; selectedEra = "Đông Dương / Cổ điển (1930s)"; });
-        CreateChip(eraChipGroup.transform, "📜 1895 (Victoria)", () => { yearInput.text = "1895"; selectedEra = "Thời đại Victoria (Cuối TK 19)"; });
+        CreateChip(eraChipGroup.transform, "2026 (Hiện đại)", () => { yearInput.text = "2026"; selectedEra = "Hiện đại (2020s)"; });
+        CreateChip(eraChipGroup.transform, "1996 (Thập niên 90)", () => { yearInput.text = "1996"; selectedEra = "Thập niên 1990"; });
+        CreateChip(eraChipGroup.transform, "1930 (Cổ điển)", () => { yearInput.text = "1930"; selectedEra = "Đông Dương / Cổ điển (1930s)"; });
+        CreateChip(eraChipGroup.transform, "1895 (Victoria)", () => { yearInput.text = "1895"; selectedEra = "Thời đại Victoria (Cuối TK 19)"; });
 
         // Row 3: Setting / Location Input
         CreateText(panel, "Bối cảnh & Vị trí địa điểm:", 12, TextWhite, FontStyle.Bold, new Vector2(-195f, 48f), new Vector2(250f, 22f), TextAnchor.MiddleLeft);
@@ -394,12 +402,12 @@ public class GenerateCaseModal : MonoBehaviour
         lchlg.childControlWidth = true;
         lchlg.childControlHeight = true;
 
-        CreateChip(locChipGroup.transform, "🏰 Biệt thự Blackwood", () => settingInput.text = "Biệt thự cổ Blackwood ven đồi");
-        CreateChip(locChipGroup.transform, "🚂 Tàu đêm Bắc-Nam", () => settingInput.text = "Chuyến tàu đêm Thống Nhất Bắc - Nam");
-        CreateChip(locChipGroup.transform, "🏥 Bệnh viện cũ", () => settingInput.text = "Bệnh viện đa khoa cũ bỏ hoang");
-        CreateChip(locChipGroup.transform, "🔬 Viện nghiên cứu AI", () => settingInput.text = "Phòng thí nghiệm AI tối mật");
-        CreateChip(locChipGroup.transform, "🎭 Nhà hát Đà Lạt", () => settingInput.text = "Nhà hát Opera Đà Lạt trong đêm mưa");
-        CreateChip(locChipGroup.transform, "🏢 Tập đoàn công nghệ", () => settingInput.text = "Trụ sở tập đoàn công nghệ cao");
+        CreateChip(locChipGroup.transform, "Biệt thự Blackwood", () => settingInput.text = "Biệt thự cổ Blackwood ven đồi");
+        CreateChip(locChipGroup.transform, "Tàu đêm Thống Nhất", () => settingInput.text = "Chuyến tàu đêm Thống Nhất Bắc - Nam");
+        CreateChip(locChipGroup.transform, "Bệnh viện cũ", () => settingInput.text = "Bệnh viện đa khoa cũ bỏ hoang");
+        CreateChip(locChipGroup.transform, "Phòng lab CyberTech", () => settingInput.text = "Phòng thí nghiệm AI CyberTech");
+        CreateChip(locChipGroup.transform, "Nhà hát Đà Lạt", () => settingInput.text = "Nhà hát Opera Đà Lạt trong đêm mưa");
+        CreateChip(locChipGroup.transform, "Tập đoàn công nghệ", () => settingInput.text = "Trụ sở tập đoàn công nghệ cao");
 
         CreateDivider(panel, new Vector2(0f, -42f), 640f);
 
@@ -436,14 +444,14 @@ public class GenerateCaseModal : MonoBehaviour
         // =========================================================================
         // SECTION 5: CÁC NÚT HÀNH ĐỘNG
         // =========================================================================
-        // [✕ HỦY & QUAY LẠI]
-        CreateActionButton(panel, "✕  HỦY & QUAY LẠI", BtnRed, new Vector2(-220f, -215f), new Vector2(185f, 44f), Close);
+        // [HỦY & QUAY LẠI]
+        CreateActionButton(panel, "HỦY & QUAY LẠI", BtnRed, new Vector2(-220f, -215f), new Vector2(185f, 44f), Close);
 
-        // [📜 VỤ ÁN MẪU (CHƠI NGAY)]
-        CreateActionButton(panel, "📜  VỤ ÁN MẪU (CHƠI NGAY)", BtnBlue, new Vector2(0f, -215f), new Vector2(215f, 44f), OnLoadSampleClicked);
+        // [VỤ ÁN MẪU (CHƠI NGAY)]
+        CreateActionButton(panel, "VỤ ÁN MẪU (CHƠI NGAY)", BtnBlue, new Vector2(0f, -215f), new Vector2(215f, 44f), OnLoadSampleClicked);
 
-        // [✨ BẮT ĐẦU SINH VỤ ÁN]
-        CreateActionButton(panel, "✨  SINH VỤ ÁN BẰNG AI", BtnGreen, new Vector2(220f, -215f), new Vector2(195f, 44f), OnStartGenerateClicked);
+        // [SINH VỤ ÁN BẰNG AI]
+        CreateActionButton(panel, "SINH VỤ ÁN BẰNG AI", BtnGreen, new Vector2(220f, -215f), new Vector2(195f, 44f), OnStartGenerateClicked);
     }
 
     private void RegisterModelChip(Transform parent, string label, string modelKey)
@@ -457,6 +465,7 @@ public class GenerateCaseModal : MonoBehaviour
 
         Button btn = go.GetComponent<Button>();
         btn.onClick.AddListener(() => SelectModel(modelKey));
+        NoirUIStyle.AttachButtonFeel(btn, 0.96f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();
@@ -592,6 +601,7 @@ public class GenerateCaseModal : MonoBehaviour
         rt.anchoredPosition = pos;
         rt.sizeDelta = sizeDelta;
         go.GetComponent<Image>().color = FieldColor;
+        NoirUIStyle.StyleInputChrome(go);
 
         InputField input = go.GetComponent<InputField>();
 
@@ -645,6 +655,7 @@ public class GenerateCaseModal : MonoBehaviour
             AudioManager.Instance?.PlayPinClick();
             onClick?.Invoke();
         });
+        NoirUIStyle.AttachButtonFeel(btn, 0.96f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();
@@ -676,6 +687,7 @@ public class GenerateCaseModal : MonoBehaviour
             AudioManager.Instance?.PlayPinClick();
             onClick?.Invoke();
         });
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform trt = textGo.GetComponent<RectTransform>();

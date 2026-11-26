@@ -14,13 +14,13 @@ using UnityEngine.UI;
 /// </summary>
 public class SettingsModal : MonoBehaviour
 {
-    private static readonly Color PanelColor = new Color(0.08f, 0.08f, 0.09f, 0.98f);
-    private static readonly Color TabActiveColor = new Color(0.18f, 0.48f, 0.35f);
-    private static readonly Color TabInactiveColor = new Color(0.14f, 0.15f, 0.17f);
-    private static readonly Color FieldColor = new Color(0.14f, 0.14f, 0.15f);
-    private static readonly Color TextColor = new Color(0.92f, 0.90f, 0.84f);
-    private static readonly Color TitleGold = new Color(0.96f, 0.82f, 0.38f);
-    private static readonly Color MutedColor = new Color(0.65f, 0.65f, 0.60f);
+    private static readonly Color PanelColor = NoirUIStyle.ModalSurface;
+    private static readonly Color TabActiveColor = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color TabInactiveColor = NoirUIStyle.SlateSecondary;
+    private static readonly Color FieldColor = NoirUIStyle.FieldSurface;
+    private static readonly Color TextColor = NoirUIStyle.CreamText;
+    private static readonly Color TitleGold = NoirUIStyle.BrassGold;
+    private static readonly Color MutedColor = NoirUIStyle.MutedText;
 
     private Font font;
     private RectTransform root;
@@ -79,6 +79,7 @@ public class SettingsModal : MonoBehaviour
         gameObject.SetActive(true);
         root.gameObject.SetActive(true);
         SwitchTab(TabIndex.Graphics);
+        NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("CenterPanel"));
     }
 
     public void Close()
@@ -116,8 +117,8 @@ public class SettingsModal : MonoBehaviour
     {
         if (currentTrackText == null || AudioManager.Instance == null) return;
         string tName = AudioManager.Instance.GetTrackDisplayName(AudioManager.Instance.CurrentTrack);
-        string modeStr = AudioManager.Instance.CurrentPlayMode == AudioManager.PlaybackMode.Shuffle ? "🔀 Ngẫu nhiên" :
-                         AudioManager.Instance.CurrentPlayMode == AudioManager.PlaybackMode.Sequential ? "🔁 Tuần tự" : "🔂 Lặp 1 bài";
+        string modeStr = AudioManager.Instance.CurrentPlayMode == AudioManager.PlaybackMode.Shuffle ? "Ngẫu nhiên" :
+                         AudioManager.Instance.CurrentPlayMode == AudioManager.PlaybackMode.Sequential ? "Tuần tự" : "Lặp 1 bài";
         currentTrackText.text = $"Đang phát: <b>{tName}</b>\nChế độ: <b>{modeStr}</b> · <i>(Bấm phím <b>N</b> để đổi bài ngay lập tức)</i>";
     }
 
@@ -137,7 +138,7 @@ public class SettingsModal : MonoBehaviour
         root.anchorMin = Vector2.zero;
         root.anchorMax = Vector2.one;
         root.sizeDelta = Vector2.zero;
-        rootGo.GetComponent<Image>().color = new Color(0.04f, 0.04f, 0.05f, 0.95f);
+        rootGo.GetComponent<Image>().color = NoirUIStyle.BackdropScrim;
 
         // Center Panel (680 x 580)
         GameObject panelGo = new GameObject("CenterPanel", typeof(RectTransform), typeof(Image));
@@ -148,6 +149,8 @@ public class SettingsModal : MonoBehaviour
         panel.pivot = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(680f, 580f);
         panelGo.GetComponent<Image>().color = PanelColor;
+        NoirUIStyle.ApplyPanelChrome(panelGo, NoirUIStyle.BrassBorder, true);
+        NoirUIStyle.CreateCornerCloseButton(panel, font, Close);
 
         // Header Title
         CreateText(panel, "CÀI ĐẶT HỆ THỐNG", 22, TitleGold, FontStyle.Bold, new Vector2(0f, 255f), new Vector2(500f, 30f));
@@ -165,11 +168,11 @@ public class SettingsModal : MonoBehaviour
         hlg.childControlWidth = true;
         hlg.childControlHeight = true;
 
-        tabButtons[0] = CreateTabButton(tabBarGo.transform, "🎨 Giao diện", () => SwitchTab(TabIndex.Graphics));
-        tabButtons[1] = CreateTabButton(tabBarGo.transform, "🔊 Âm thanh", () => SwitchTab(TabIndex.Audio));
-        tabButtons[2] = CreateTabButton(tabBarGo.transform, "🎮 Điều khiển", () => SwitchTab(TabIndex.Controls));
-        tabButtons[3] = CreateTabButton(tabBarGo.transform, "📖 Hướng dẫn", () => SwitchTab(TabIndex.Tutorial));
-        tabButtons[4] = CreateTabButton(tabBarGo.transform, "🧠 Mô hình AI", () => SwitchTab(TabIndex.AI));
+        tabButtons[0] = CreateTabButton(tabBarGo.transform, "Giao diện", () => SwitchTab(TabIndex.Graphics));
+        tabButtons[1] = CreateTabButton(tabBarGo.transform, "Âm thanh", () => SwitchTab(TabIndex.Audio));
+        tabButtons[2] = CreateTabButton(tabBarGo.transform, "Điều khiển", () => SwitchTab(TabIndex.Controls));
+        tabButtons[3] = CreateTabButton(tabBarGo.transform, "Hướng dẫn", () => SwitchTab(TabIndex.Tutorial));
+        tabButtons[4] = CreateTabButton(tabBarGo.transform, "Mô hình AI", () => SwitchTab(TabIndex.AI));
 
         // Tab Content Area (0.04 to 0.96, 0.12 to 0.80)
         RectTransform contentArea = CreateContainer(panel, "ContentArea", new Vector2(0.04f, 0.12f), new Vector2(0.96f, 0.80f));
@@ -190,10 +193,10 @@ public class SettingsModal : MonoBehaviour
         bbrt.sizeDelta = Vector2.zero;
 
         // Apply Button
-        CreateActionButton(bottomBar.transform, "💾  ÁP DỤNG", new Color(0.14f, 0.50f, 0.32f), new Vector2(0.68f, 0f), new Vector2(0.98f, 1f), ApplyAllSettings);
+        CreateActionButton(bottomBar.transform, "ÁP DỤNG", NoirUIStyle.EmeraldPrimary, new Vector2(0.68f, 0f), new Vector2(0.98f, 1f), ApplyAllSettings);
 
         // Close Button
-        CreateActionButton(bottomBar.transform, "✕  ĐÓNG", new Color(0.38f, 0.20f, 0.20f), new Vector2(0.35f, 0f), new Vector2(0.65f, 1f), Close);
+        CreateActionButton(bottomBar.transform, "ĐÓNG", NoirUIStyle.CrimsonDanger, new Vector2(0.35f, 0f), new Vector2(0.65f, 1f), Close);
     }
 
     private void SwitchTab(TabIndex tab)
@@ -239,26 +242,26 @@ public class SettingsModal : MonoBehaviour
         rhlg.childControlWidth = true;
         rhlg.childControlHeight = true;
 
-        CreateSmallButton(resRow.transform, "🖥️ Toàn màn hình", () =>
+        CreateSmallButton(resRow.transform, "Toàn màn hình", () =>
         {
             if (fullscreenToggle != null) fullscreenToggle.isOn = true;
             Resolution native = Screen.currentResolution;
             selectedWidth = native.width > 0 ? native.width : 1920;
             selectedHeight = native.height > 0 ? native.height : 1080;
         });
-        CreateSmallButton(resRow.transform, "🪟 1920 x 1080", () =>
+        CreateSmallButton(resRow.transform, "1920 x 1080", () =>
         {
             if (fullscreenToggle != null) fullscreenToggle.isOn = false;
             selectedWidth = 1920;
             selectedHeight = 1080;
         });
-        CreateSmallButton(resRow.transform, "🪟 1600 x 900", () =>
+        CreateSmallButton(resRow.transform, "1600 x 900", () =>
         {
             if (fullscreenToggle != null) fullscreenToggle.isOn = false;
             selectedWidth = 1600;
             selectedHeight = 900;
         });
-        CreateSmallButton(resRow.transform, "🪟 1280 x 720 (Chuẩn)", () =>
+        CreateSmallButton(resRow.transform, "1280 x 720 (Chuẩn)", () =>
         {
             if (fullscreenToggle != null) fullscreenToggle.isOn = false;
             selectedWidth = 1280;
@@ -272,7 +275,7 @@ public class SettingsModal : MonoBehaviour
         });
 
         // Visual Style Note
-        CreateText(go.transform, "💡 Chế độ Toàn màn hình không viền tự động tối ưu hóa theo màn hình của bạn.\nBấm 'ÁP DỤNG' để lưu cấu hình và đóng bảng cài đặt mượt mà.", 11, MutedColor, FontStyle.Italic, new Vector2(0f, -80f), new Vector2(560f, 40f));
+        CreateText(go.transform, "Chế độ Toàn màn hình không viền tự động tối ưu hóa theo màn hình của bạn.\nBấm 'ÁP DỤNG' để lưu cấu hình và đóng bảng cài đặt.", 11, MutedColor, FontStyle.Italic, new Vector2(0f, -80f), new Vector2(560f, 40f));
 
         return go;
     }
@@ -312,22 +315,22 @@ public class SettingsModal : MonoBehaviour
         mhlg.childControlWidth = true;
         mhlg.childControlHeight = true;
 
-        CreateSmallButton(modeRow.transform, "🔀 Ngẫu nhiên (Shuffle)", () =>
+        CreateSmallButton(modeRow.transform, "Ngẫu nhiên (Shuffle)", () =>
         {
             AudioManager.Instance?.SetPlaybackMode(AudioManager.PlaybackMode.Shuffle);
             UpdateTrackText();
         });
-        CreateSmallButton(modeRow.transform, "🔁 Tuần tự (Playlist)", () =>
+        CreateSmallButton(modeRow.transform, "Tuần tự (Playlist)", () =>
         {
             AudioManager.Instance?.SetPlaybackMode(AudioManager.PlaybackMode.Sequential);
             UpdateTrackText();
         });
-        CreateSmallButton(modeRow.transform, "🔂 Lặp 1 bài", () =>
+        CreateSmallButton(modeRow.transform, "Lặp 1 bài", () =>
         {
             AudioManager.Instance?.SetPlaybackMode(AudioManager.PlaybackMode.SingleLoop);
             UpdateTrackText();
         });
-        CreateSmallButton(modeRow.transform, "⏭️ Đổi bài (N)", () =>
+        CreateSmallButton(modeRow.transform, "Đổi bài [N]", () =>
         {
             AudioManager.Instance?.PlayNextTrack();
             UpdateTrackText();
@@ -346,17 +349,17 @@ public class SettingsModal : MonoBehaviour
         thlg1.childControlWidth = true;
         thlg1.childControlHeight = true;
 
-        CreateSmallButton(trackRow1.transform, "🌸 Ran's Theme (Nhẹ)", () =>
+        CreateSmallButton(trackRow1.transform, "Ran's Theme (Nhẹ)", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.ConanRan);
             UpdateTrackText();
         });
-        CreateSmallButton(trackRow1.transform, "🌙 Conan's Dream (Êm dịu)", () =>
+        CreateSmallButton(trackRow1.transform, "Conan's Dream (Êm dịu)", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.ConanDream);
             UpdateTrackText();
         });
-        CreateSmallButton(trackRow1.transform, "⚡ Conan Main Theme", () =>
+        CreateSmallButton(trackRow1.transform, "Conan Main Theme", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.ConanMain);
             UpdateTrackText();
@@ -372,17 +375,17 @@ public class SettingsModal : MonoBehaviour
         thlg2.childControlWidth = true;
         thlg2.childControlHeight = true;
 
-        CreateSmallButton(trackRow2.transform, "⚔️ Showdown (Gay cấn)", () =>
+        CreateSmallButton(trackRow2.transform, "Showdown (Gay cấn)", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.ConanShowdown);
             UpdateTrackText();
         });
-        CreateSmallButton(trackRow2.transform, "🎷 Noir Jazz", () =>
+        CreateSmallButton(trackRow2.transform, "Noir Jazz", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.NoirJazz);
             UpdateTrackText();
         });
-        CreateSmallButton(trackRow2.transform, "🔇 Tắt Nhạc", () =>
+        CreateSmallButton(trackRow2.transform, "Tắt Nhạc", () =>
         {
             AudioManager.Instance?.SwitchTrack(AudioManager.BgmTrack.Mute);
             UpdateTrackText();
@@ -452,11 +455,11 @@ public class SettingsModal : MonoBehaviour
             "1. <b>BƯỚC 1: KHÁM NGHIỆM TỬ THI HENSSGE</b>\n" +
             "   Đọc kỹ nhiệt độ trực tràng, nhiệt độ môi trường và cân nặng của nạn nhân. Dùng đồ thị 2 số mũ Henssge để xác định cửa sổ tử vong chính xác (Time of Death Window).\n\n" +
             "2. <b>BƯỚC 2: RÀ SOÁT CHỨNG CỨ NGOẠI PHẠM (ALIBI)</b>\n" +
-            "   Kiểm tra thẻ nghi phạm và các mốc thời gian. Nghi phạm nào không có bằng chứng ngoại phàm khớp với cửa sổ tử vong sẽ bị đưa vào diện tình nghi hàng đầu.\n\n" +
+            "   Kiểm tra thẻ nghi phạm và các mốc thời gian. Nghi phạm nào không có bằng chứng ngoại phạm khớp với cửa sổ tử vong sẽ thuộc diện tình nghi hàng đầu.\n\n" +
             "3. <b>BƯỚC 3: DÂY CHỈ ĐỎ LIÊN KẾT MANH MỐI</b>\n" +
-            "   Kéo thẻ lại gần nhau để nối dây chỉ đỏ giữa: Động cơ $\\leftrightarrow$ Vật chứng $\\leftrightarrow$ Hiện trường.\n\n" +
+            "   Kéo và nối dây chỉ đỏ giữa các thẻ để ghi chú chuỗi: Động cơ <-> Vật chứng <-> Hiện trường.\n\n" +
             "4. <b>BƯỚC 4: KẾT TỘI HUNG THỦ</b>\n" +
-            "   Chọn đúng nghi phạm và đính kèm ít nhất 2 chứng cứ quyết định để đóng hồ sơ vụ án!";
+            "   Chọn đúng thủ phạm, nêu lập luận đối chứng và gửi lệnh bắt giữ tới máy chủ xác thực.";
 
         CreateText(go.transform, guide, 12, TextColor, FontStyle.Normal, new Vector2(0f, -10f), new Vector2(560f, 260f), TextAnchor.MiddleLeft);
 
@@ -490,11 +493,11 @@ public class SettingsModal : MonoBehaviour
         phlg.childControlWidth = true;
         phlg.childControlHeight = true;
 
-        CreateSmallButton(provGroup.transform, "OpenAI (ChatGPT)", () => SetModelPreset("gpt-4o-mini", "https://api.openai.com/v1", ""));
-        CreateSmallButton(provGroup.transform, "Google Gemini", () => SetModelPreset("gemini-2.0-flash", "https://generativelanguage.googleapis.com/v1beta/openai/", ""));
-        CreateSmallButton(provGroup.transform, "Ollama (Offline)", () => SetModelPreset("qwen2.5:7b", "http://localhost:11434/v1", "ollama"));
-        CreateSmallButton(provGroup.transform, "OpenRouter (Free)", () => SetModelPreset("meta-llama/llama-3.3-70b-instruct:free", "https://openrouter.ai/api/v1", ""));
-        CreateSmallButton(provGroup.transform, "9Router (Đồ án)", () => SetModelPreset("gh/gpt-4o-mini", "http://localhost:20128/v1", ""));
+        CreateSmallButton(provGroup.transform, "Gateway (Mặc định)", () => SetModelPreset("gh/gpt-4o-mini", "http://localhost:20128/v1", ""));
+        CreateSmallButton(provGroup.transform, "GPT-4o (Chất lượng cao)", () => SetModelPreset("gh/gpt-4o", "http://localhost:20128/v1", ""));
+        CreateSmallButton(provGroup.transform, "OpenAI Trực tiếp", () => SetModelPreset("gpt-4o-mini", "https://api.openai.com/v1", ""));
+        CreateSmallButton(provGroup.transform, "Ollama (Cục bộ)", () => SetModelPreset("gemma4:e4b-it-qat", "http://localhost:11434/v1", "ollama"));
+        CreateSmallButton(provGroup.transform, "OpenRouter", () => SetModelPreset("meta-llama/llama-3.3-70b-instruct:free", "https://openrouter.ai/api/v1", ""));
 
         // 2. Base URL
         CreateText(go.transform, "Đường dẫn API (Base URL):", 12, TextColor, FontStyle.Bold, new Vector2(-190f, 30f), new Vector2(180f, 24f));
@@ -518,8 +521,8 @@ public class SettingsModal : MonoBehaviour
         aiStatusText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         aiStatusText.fontSize = 12;
         aiStatusText.alignment = TextAnchor.MiddleCenter;
-        aiStatusText.color = new Color(0.4f, 0.9f, 0.5f);
-        aiStatusText.text = "✓ Chọn Provider ở trên, điền Base URL & API Key rồi bấm ÁP DỤNG.";
+        aiStatusText.color = NoirUIStyle.MintFeedback;
+        aiStatusText.text = "Chọn cấu hình ở trên, kiểm tra Base URL & API Key rồi bấm ÁP DỤNG.";
 
         return go;
     }
@@ -529,7 +532,7 @@ public class SettingsModal : MonoBehaviour
         if (modelField != null) modelField.text = model;
         if (apiBaseField != null) apiBaseField.text = apiBase;
         if (apiKeyField != null && !string.IsNullOrEmpty(apiKey)) apiKeyField.text = apiKey;
-        if (aiStatusText != null) aiStatusText.text = $"✓ Đã chọn cấu hình {model}. Hãy bấm ÁP DỤNG.";
+        if (aiStatusText != null) aiStatusText.text = $"Đã chọn cấu hình {model}. Hãy bấm ÁP DỤNG.";
     }
 
     private void ApplyAllSettings()
@@ -594,6 +597,7 @@ public class SettingsModal : MonoBehaviour
 
         Button btn = go.GetComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();
@@ -621,6 +625,7 @@ public class SettingsModal : MonoBehaviour
         go.GetComponent<Image>().color = new Color(0.20f, 0.22f, 0.26f);
         Button btn = go.GetComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();
@@ -649,6 +654,7 @@ public class SettingsModal : MonoBehaviour
         go.GetComponent<Image>().color = color;
         Button btn = go.GetComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform trt = textGo.GetComponent<RectTransform>();
@@ -686,6 +692,7 @@ public class SettingsModal : MonoBehaviour
         rt.sizeDelta = sizeDelta;
 
         go.GetComponent<Image>().color = FieldColor;
+        NoirUIStyle.StyleInputChrome(go);
         InputField input = go.GetComponent<InputField>();
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));

@@ -8,15 +8,15 @@ using UnityEngine.UI;
 /// </summary>
 public class InGamePauseModal : MonoBehaviour
 {
-    private static readonly Color OverlayColor = new Color(0.04f, 0.04f, 0.05f, 0.88f);
-    private static readonly Color CardColor = new Color(0.11f, 0.11f, 0.13f, 0.98f);
-    private static readonly Color TitleGold = new Color(0.96f, 0.82f, 0.38f);
-    private static readonly Color TextWhite = new Color(0.93f, 0.93f, 0.90f);
-    private static readonly Color TextMuted = new Color(0.65f, 0.65f, 0.60f);
+    private static readonly Color OverlayColor = NoirUIStyle.BackdropScrim;
+    private static readonly Color CardColor = NoirUIStyle.ModalSurface;
+    private static readonly Color TitleGold = NoirUIStyle.BrassGold;
+    private static readonly Color TextWhite = NoirUIStyle.CreamText;
+    private static readonly Color TextMuted = NoirUIStyle.MutedText;
 
-    private static readonly Color BtnPrimary = new Color(0.14f, 0.50f, 0.32f);
-    private static readonly Color BtnSecondary = new Color(0.20f, 0.22f, 0.26f);
-    private static readonly Color BtnDanger = new Color(0.50f, 0.18f, 0.18f);
+    private static readonly Color BtnPrimary = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color BtnSecondary = NoirUIStyle.SlateSecondary;
+    private static readonly Color BtnDanger = NoirUIStyle.CrimsonDanger;
 
     private Font font;
     private RectTransform root;
@@ -46,6 +46,7 @@ public class InGamePauseModal : MonoBehaviour
         if (toastText != null) toastText.text = "";
         gameObject.SetActive(true);
         root.gameObject.SetActive(true);
+        NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("CenterPanel"));
     }
 
     public void Close()
@@ -81,6 +82,8 @@ public class InGamePauseModal : MonoBehaviour
         panel.pivot = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(460f, 480f);
         panelGo.GetComponent<Image>().color = CardColor;
+        NoirUIStyle.ApplyPanelChrome(panelGo, NoirUIStyle.BrassBorder, true);
+        NoirUIStyle.CreateCornerCloseButton(panel, font, Close);
 
         // Title
         CreateText(panel, "TẠM DỪNG ĐIỀU TRA", 22, TitleGold, FontStyle.Bold, new Vector2(0f, 185f), new Vector2(400f, 32f));
@@ -96,7 +99,7 @@ public class InGamePauseModal : MonoBehaviour
         toastText.font = font ?? DetectiveAssetBank.GetDefaultUIFont();
         toastText.fontSize = 13;
         toastText.alignment = TextAnchor.MiddleCenter;
-        toastText.color = new Color(0.4f, 0.9f, 0.5f);
+        toastText.color = NoirUIStyle.MintFeedback;
         toastText.text = "";
 
         // Buttons Group
@@ -114,20 +117,20 @@ public class InGamePauseModal : MonoBehaviour
         vlg.childForceExpandHeight = false;
 
         // 1. Resume
-        CreateButton(btnGroup.transform, "▶️  TIẾP TỤC ĐIỀU TRA", BtnPrimary, Close);
+        CreateButton(btnGroup.transform, "TIẾP TỤC ĐIỀU TRA", BtnPrimary, Close);
 
         // 2. Save Game
-        CreateButton(btnGroup.transform, "💾  LƯU TIẾN ĐỘ VỤ ÁN", BtnSecondary, HandleSaveGame);
+        CreateButton(btnGroup.transform, "LƯU TIẾN ĐỘ VỤ ÁN", BtnSecondary, HandleSaveGame);
 
         // 3. Settings (Opens 5-tab SettingsModal, hides this Pause menu)
-        CreateButton(btnGroup.transform, "⚙️  CÀI ĐẶT (ÂM THANH, MÔ HÌNH)", BtnSecondary, () =>
+        CreateButton(btnGroup.transform, "CÀI ĐẶT HỆ THỐNG", BtnSecondary, () =>
         {
             Close();
             FindObjectOfType<SettingsModal>()?.Open();
         });
 
         // 4. Return to Main Menu
-        CreateButton(btnGroup.transform, "🏠  VỀ MÀN HÌNH CHÍNH", BtnDanger, () =>
+        CreateButton(btnGroup.transform, "VỀ MÀN HÌNH CHÍNH", BtnDanger, () =>
         {
             if (confirmDialog != null) confirmDialog.SetActive(true);
         });
@@ -144,7 +147,7 @@ public class InGamePauseModal : MonoBehaviour
         crt.anchorMin = Vector2.zero;
         crt.anchorMax = Vector2.one;
         crt.sizeDelta = Vector2.zero;
-        confirmDialog.GetComponent<Image>().color = new Color(0.06f, 0.06f, 0.07f, 0.98f);
+        confirmDialog.GetComponent<Image>().color = new Color(0.06f, 0.055f, 0.05f, 0.98f);
 
         CreateText(confirmDialog.transform, "XÁC NHẬN RỜI PHÒNG ĐIỀU TRA", 18, TitleGold, FontStyle.Bold, new Vector2(0f, 130f), new Vector2(400f, 30f));
         CreateText(confirmDialog.transform, "Bạn có muốn lưu lại tiến độ hiện tại\ntrước khi trở về màn hình chính không?", 13, TextWhite, FontStyle.Normal, new Vector2(0f, 70f), new Vector2(380f, 50f));
@@ -163,17 +166,17 @@ public class InGamePauseModal : MonoBehaviour
         vlg.childForceExpandHeight = false;
 
         // [Lưu & Thoát]
-        CreateButton(group.transform, "💾  LƯU VÀ THOÁT VỀ MENU", BtnPrimary, () =>
+        CreateButton(group.transform, "LƯU VÀ THOÁT VỀ MENU", BtnPrimary, () =>
         {
             HandleSaveGame();
             ExitToMainMenu();
         });
 
         // [Chỉ Thoát]
-        CreateButton(group.transform, "🚪  CHỈ THOÁT (KHÔNG LƯU)", BtnDanger, ExitToMainMenu);
+        CreateButton(group.transform, "CHỈ THOÁT (KHÔNG LƯU)", BtnDanger, ExitToMainMenu);
 
         // [Hủy]
-        CreateButton(group.transform, "❌  HỦY (TIẾP TỤC PHÁ ÁN)", BtnSecondary, () =>
+        CreateButton(group.transform, "HỦY (TIẾP TỤC PHÁ ÁN)", BtnSecondary, () =>
         {
             if (confirmDialog != null) confirmDialog.SetActive(false);
         });
@@ -195,7 +198,7 @@ public class InGamePauseModal : MonoBehaviour
 
             if (toastText != null)
             {
-                toastText.text = $"✓ Đã lưu hồ sơ '{current.title}' thành công!";
+                toastText.text = $"Đã lưu hồ sơ '{current.title}' thành công.";
             }
         }
         else
@@ -233,6 +236,7 @@ public class InGamePauseModal : MonoBehaviour
         btnGo.GetComponent<Image>().color = bgColor;
         Button btn = btnGo.GetComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();

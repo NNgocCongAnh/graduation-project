@@ -60,7 +60,7 @@ public class DetectiveChatUI : MonoBehaviour
         }
 
         UpdateRoomStatus();
-        AddMessage("SYSTEM", "Radio Link established. Ready for transmission.");
+        AddMessage("HỆ THỐNG", "Kênh liên lạc nội bộ đã sẵn sàng.");
     }
 
     public void ToggleChatPanel()
@@ -120,7 +120,7 @@ public class DetectiveChatUI : MonoBehaviour
     {
         if (roomStatusText != null && DetectiveNetworkManager.Instance != null)
         {
-            roomStatusText.text = $"POLICE RADIO // ROOM: {DetectiveNetworkManager.Instance.roomId}";
+            roomStatusText.text = $"ĐÀI LIÊN LẠC // PHÒNG: {DetectiveNetworkManager.Instance.roomId}";
         }
     }
 }

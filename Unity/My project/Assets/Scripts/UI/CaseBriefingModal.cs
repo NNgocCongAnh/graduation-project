@@ -66,6 +66,7 @@ public class CaseBriefingModal : MonoBehaviour
         paperRootGo.SetActive(true);
         transform.SetAsLastSibling();
         paperRootGo.transform.SetAsLastSibling();
+        NoirUIStyle.AnimateModalOpen(this, paperRootGo, paperSheetRt);
         Debug.Log("[CaseBriefingModal] Opened Case Briefing Dossier Sheet.");
     }
 
@@ -122,35 +123,7 @@ public class CaseBriefingModal : MonoBehaviour
 
     private void CreateCloseButton(RectTransform parent)
     {
-        GameObject closeGo = new GameObject("Btn_Close_Paper", typeof(RectTransform), typeof(Image), typeof(Button));
-        RectTransform crt = closeGo.GetComponent<RectTransform>();
-        crt.SetParent(parent, false);
-        crt.anchorMin = new Vector2(1f, 1f);
-        crt.anchorMax = new Vector2(1f, 1f);
-        crt.sizeDelta = new Vector2(36f, 36f);
-        crt.anchoredPosition = new Vector2(-16f, -16f);
-
-        Image cImg = closeGo.GetComponent<Image>();
-        cImg.color = new Color(0.25f, 0.24f, 0.22f, 0.9f);
-
-        Button cBtn = closeGo.GetComponent<Button>();
-        cBtn.onClick.AddListener(Close);
-
-        GameObject txtGo = new GameObject("X_Label", typeof(RectTransform), typeof(Text));
-        RectTransform trt = txtGo.GetComponent<RectTransform>();
-        trt.SetParent(closeGo.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.sizeDelta = Vector2.zero;
-
-        Text txt = txtGo.GetComponent<Text>();
-        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
-        txt.font = uiFont;
-        txt.fontSize = 18;
-        txt.fontStyle = FontStyle.Bold;
-        txt.alignment = TextAnchor.MiddleCenter;
-        txt.color = Color.white;
-        txt.text = "✕";
+        NoirUIStyle.CreateCornerCloseButton(parent, uiFont, Close);
     }
 
     private void ClearPaperContents()
@@ -240,8 +213,8 @@ public class CaseBriefingModal : MonoBehaviour
             $"<b><size=13>II. BIÊN BẢN CỦA SĨ QUAN ĐẦU TIÊN TIẾP CẬN HIỆN TRƯỜNG (FIRST RESPONDER LOG):</size></b>\n" +
             $"<color=#555555>───────────────────────────────────────────────────────────────────────────────────────────</color>\n" +
             $"<color=#1a1a24><i>\"{summaryText}\"</i></color>\n\n" +
-            $"• <b>Ghi nhận hiện trường:</b> Thư phòng trên tầng 2 ở trạng thái đóng kín. Chìa khóa duy nhất cắm ở ổ khóa phía trong phòng. Bên ngoài đêm mưa bão kéo dài, đường sá dẫn vào trang viên bị cô lập hoàn toàn từ 20:00 tối qua.\n" +
-            $"• <b>Đối tượng hiện diện:</b> Tất cả các nghi phạm có tên trong hồ sơ đều có mặt trong trang viên suốt khoảng thời gian xảy ra án mạng. Mỗi người đều đưa ra các lý do và lịch trình ngoại phạm (Alibi) riêng biệt.";
+            $"• <b>Ghi nhận hiện trường:</b> Hiện trường vụ án được phong tỏa nguyên trạng theo biên bản tiếp cận ban đầu; toàn bộ dấu vết vật lý và vật chứng thu giữ được ghim trực tiếp trên bảng.\n" +
+            $"• <b>Đối tượng hiện diện:</b> Tất cả các nghi phạm có tên trong hồ sơ đều khai báo lịch trình ngoại phạm (Alibi) riêng biệt trong khoảng thời gian xảy ra án mạng.";
 
         CreateText(sec2Box.transform, new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.96f), sec2Text, TextAnchor.UpperLeft, 11, InkBlack);
 
@@ -253,12 +226,12 @@ public class CaseBriefingModal : MonoBehaviour
         GameObject sec3Box = CreateBox(crt, new Vector2(0f, sec3YMin), new Vector2(1.0f, sec3YMax), TableBg, PaperBorder);
 
         string sec3Text =
-            $"<b><size=13>III. CHỈ THỊ ĐIỀU TRA THEO QUY TRÌNH 3 PHONG BÌ MỤC TIÊU (INVESTIGATION DIRECTIVE):</size></b>\n" +
+            $"<b><size=13>III. CHỈ THỊ ĐIỀU TRA THEO QUY TRÌNH 3 MỤC TIÊU:</size></b>\n" +
             $"<color=#555555>───────────────────────────────────────────────────────────────────────────────────────────</color>\n" +
-            $"Để đảm bảo tính nghiêm minh và tránh cáo buộc oan sai, Viện kiểm sát yêu cầu Ban chuyên án tiến hành bóc tách vụ án theo đúng <b>3 CHẶNG MỤC TIÊU (THREE OBJECTIVES)</b> được niêm phong trong Tập hồ sơ bìa da đỏ trên bàn:\n\n" +
-            $"<b>1. ✉️ PHONG BÌ MỤC TIÊU 1:</b> <b>Minh oan cho người vô tội</b> — Dựa vào lời khai và lịch trình ngoại phạm để loại trừ ít nhất 1 đối tượng có bằng chứng ngoại phạm vững chắc.\n" +
-            $"<b>2. ✉️ PHONG BÌ MỤC TIÊU 2:</b> <b>Bẻ gãy hiện trường giả & Hung khí</b> — Đối chiếu Báo cáo nhiệt học tử thi Henssge để lật tẩy mốc thời gian tử vong giả và xác định hung khí thực sự.\n" +
-            $"<b>3. ✉️ PHONG BÌ MỤC TIÊU 3:</b> <b>Lệnh bắt giữ chính thức</b> — Chỉ định đích danh kẻ thủ ác và nộp vật chứng then chốt để Tòa án phê chuẩn phán quyết!";
+            $"Để bảo đảm kết luận khách quan và tránh kết tội oan sai, điều tra viên tiến hành bóc tách vụ án theo <b>3 CHẶNG MỤC TIÊU</b> trước khi mở Lệnh bắt giữ:\n\n" +
+            $"<b>[MỤC TIÊU 1]</b> <b>Minh oan cho người vô tội:</b> Dựa vào lời khai và lịch trình ngoại phạm để loại trừ các đối tượng có bằng chứng ngoại phạm vững chắc.\n" +
+            $"<b>[MỤC TIÊU 2]</b> <b>Đối chứng Pháp y & Vật chứng:</b> So khớp Báo cáo nhiệt học Henssge với lời khai để phát hiện mâu thuẫn thời gian và xác định hung khí.\n" +
+            $"<b>[MỤC TIÊU 3]</b> <b>Nộp lệnh bắt giữ chính thức:</b> Chỉ định đích danh thủ phạm và trình bày lập luận để máy chủ thẩm định kết quả.";
 
         CreateText(sec3Box.transform, new Vector2(0.03f, 0.04f), new Vector2(0.97f, 0.96f), sec3Text, TextAnchor.UpperLeft, 11, InkBlack);
 
@@ -277,6 +250,7 @@ public class CaseBriefingModal : MonoBehaviour
 
         Button btn = btnGo.GetComponent<Button>();
         btn.onClick.AddListener(Close);
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject btxtGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
         RectTransform btrt = btxtGo.GetComponent<RectTransform>();

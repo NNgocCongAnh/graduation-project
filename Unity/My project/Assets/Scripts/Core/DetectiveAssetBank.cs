@@ -96,12 +96,13 @@ public static class DetectiveAssetBank
         if (!string.IsNullOrEmpty(imageUrlOrPath))
         {
             string cleanName = Path.GetFileName(imageUrlOrPath.Trim());
-            // Nếu nghi phạm là Nữ nhưng đường dẫn chứa 'male' (do bug cũ/mô hình gán nhầm), chuyển hướng sang ảnh Nữ
-            if (isSuspect && isFemale && cleanName.ToLowerInvariant().Contains("male"))
+            string cleanLower = cleanName.ToLowerInvariant();
+            // Avoid substring trap: "female" contains "male"!
+            if (isSuspect && isFemale && cleanLower.Contains("male") && !cleanLower.Contains("female"))
             {
                 cleanName = "female_20s.png";
             }
-            else if (isSuspect && !isFemale && cleanName.ToLowerInvariant().Contains("female"))
+            else if (isSuspect && !isFemale && cleanLower.Contains("female"))
             {
                 cleanName = "young_male_20s.png";
             }

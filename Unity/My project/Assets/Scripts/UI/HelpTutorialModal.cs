@@ -9,12 +9,12 @@ using UnityEngine.UI;
 /// </summary>
 public class HelpTutorialModal : MonoBehaviour
 {
-    private static readonly Color PanelColor = new Color(0.08f, 0.08f, 0.09f, 0.98f);
-    private static readonly Color StepCardColor = new Color(0.13f, 0.13f, 0.15f, 1f);
-    private static readonly Color TextColor = new Color(0.92f, 0.90f, 0.84f);
-    private static readonly Color HighlightColor = new Color(0.95f, 0.82f, 0.40f);
-    private static readonly Color MutedColor = new Color(0.65f, 0.65f, 0.60f);
-    private static readonly Color CloseColor = new Color(0.45f, 0.18f, 0.18f);
+    private static readonly Color PanelColor = NoirUIStyle.ModalSurface;
+    private static readonly Color StepCardColor = NoirUIStyle.CardSurface;
+    private static readonly Color TextColor = NoirUIStyle.CreamText;
+    private static readonly Color HighlightColor = NoirUIStyle.BrassGold;
+    private static readonly Color MutedColor = NoirUIStyle.MutedText;
+    private static readonly Color CloseColor = NoirUIStyle.CrimsonDanger;
 
     private Font font;
     private RectTransform root;
@@ -40,6 +40,7 @@ public class HelpTutorialModal : MonoBehaviour
         if (root == null) BuildUI();
         transform.SetAsLastSibling();
         root.gameObject.SetActive(true);
+        NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("Panel"));
     }
 
     public void Close()
@@ -63,6 +64,7 @@ public class HelpTutorialModal : MonoBehaviour
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(760, 580);
         panel.gameObject.AddComponent<Image>().color = PanelColor;
+        NoirUIStyle.ApplyPanelChrome(panel.gameObject, NoirUIStyle.BrassBorder, true);
 
         VerticalLayoutGroup layout = panel.gameObject.AddComponent<VerticalLayoutGroup>();
         layout.padding = new RectOffset(26, 26, 20, 20);
@@ -73,8 +75,8 @@ public class HelpTutorialModal : MonoBehaviour
         layout.childForceExpandHeight = false;
 
         // Title
-        CreateLabel(panel, "🕵️ SỔ TAY THÁM TỬ - HƯỚNG DẪN ĐIỀU TRA & PHÁ ÁN", 19, HighlightColor, FontStyle.Bold, 26);
-        CreateLabel(panel, "Chào mừng Thám tử! Hãy làm theo quy trình phá án khoa học 4 bước để vạch trần hung thủ thật sự:", 12, TextColor, FontStyle.Normal, 18);
+        CreateLabel(panel, "SỔ TAY THÁM TỬ — HƯỚNG DẪN ĐIỀU TRA & PHÁ ÁN", 19, HighlightColor, FontStyle.Bold, 26);
+        CreateLabel(panel, "Thực hiện theo quy trình 4 bước để loại trừ nghi phạm và đưa ra cáo trạng chính xác:", 12, TextColor, FontStyle.Normal, 18);
 
         // --- STEP 1 & 2 ROW ---
         RectTransform row1 = NewRect("Row1", panel);
@@ -107,7 +109,7 @@ public class HelpTutorialModal : MonoBehaviour
             "• Mở Lệnh bắt giữ (bìa da đỏ đô bên dưới).\n• Hoàn thành 3 phong bì mục tiêu (Minh oan -> Bẻ Alibi -> Bắt giữ) rồi nộp Tòa án!");
 
         // --- SPECIAL PROPS & HOTKEYS ---
-        CreateLabel(panel, "💡 TƯƠNG TÁC ĐẠO CỤ & BẢNG PHÍM TẮT NHANH (HOTKEYS)", 13, HighlightColor, FontStyle.Bold, 20);
+        CreateLabel(panel, "TƯƠNG TÁC ĐẠO CỤ & PHÍM TẮT NHANH", 13, HighlightColor, FontStyle.Bold, 20);
 
         RectTransform infoBox = NewRect("InfoBox", panel);
         infoBox.gameObject.AddComponent<LayoutElement>().preferredHeight = 110;
@@ -185,12 +187,7 @@ public class HelpTutorialModal : MonoBehaviour
         if (height > 0) rt.gameObject.AddComponent<LayoutElement>().preferredHeight = height;
         rt.gameObject.AddComponent<Image>().color = bg;
         Button b = rt.gameObject.AddComponent<Button>();
-
-        ColorBlock cb = b.colors;
-        cb.normalColor = Color.white;
-        cb.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
-        cb.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
-        b.colors = cb;
+        NoirUIStyle.AttachButtonFeel(b, 0.97f, true);
 
         RectTransform labelRt = NewRect("Text", rt);
         Stretch(labelRt);

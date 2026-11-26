@@ -14,15 +14,15 @@ using UnityEngine.UI;
 /// </summary>
 public class TitleMenuModal : MonoBehaviour
 {
-    private static readonly Color OverlayColor = new Color(0.04f, 0.04f, 0.05f, 0.96f);
-    private static readonly Color CardColor = new Color(0.10f, 0.10f, 0.12f, 0.98f);
-    private static readonly Color TitleGold = new Color(0.96f, 0.82f, 0.38f);
-    private static readonly Color TextWhite = new Color(0.93f, 0.93f, 0.90f);
-    private static readonly Color TextMuted = new Color(0.65f, 0.65f, 0.60f);
+    private static readonly Color OverlayColor = NoirUIStyle.BackdropScrim;
+    private static readonly Color CardColor = NoirUIStyle.ModalSurface;
+    private static readonly Color TitleGold = NoirUIStyle.BrassGold;
+    private static readonly Color TextWhite = NoirUIStyle.CreamText;
+    private static readonly Color TextMuted = NoirUIStyle.MutedText;
 
-    private static readonly Color BtnPrimary = new Color(0.14f, 0.50f, 0.32f);
-    private static readonly Color BtnSecondary = new Color(0.20f, 0.22f, 0.26f);
-    private static readonly Color BtnDanger = new Color(0.48f, 0.16f, 0.16f);
+    private static readonly Color BtnPrimary = NoirUIStyle.EmeraldPrimary;
+    private static readonly Color BtnSecondary = NoirUIStyle.SlateSecondary;
+    private static readonly Color BtnDanger = NoirUIStyle.CrimsonDanger;
 
     private Font font;
     private RectTransform root;
@@ -140,7 +140,12 @@ public class TitleMenuModal : MonoBehaviour
         HotkeyTaskbar.Instance?.SetTaskbarVisuals(false);
 
         ShowMainMenuButtons();
-        if (root != null) root.gameObject.SetActive(true);
+        if (root != null)
+        {
+            gameObject.SetActive(true);
+            root.gameObject.SetActive(true);
+            NoirUIStyle.AnimateModalOpen(this, root.gameObject, root.Find("CenterPanel"));
+        }
     }
 
     public void Close()
@@ -214,6 +219,7 @@ public class TitleMenuModal : MonoBehaviour
         panel.pivot = new Vector2(0.5f, 0.5f);
         panel.sizeDelta = new Vector2(580f, 620f);
         panelGo.GetComponent<Image>().color = CardColor;
+        NoirUIStyle.ApplyPanelChrome(panelGo, NoirUIStyle.BrassBorder, true);
 
         // Header / Game Title
         GameObject headerGo = new GameObject("Header", typeof(RectTransform));
@@ -226,8 +232,8 @@ public class TitleMenuModal : MonoBehaviour
         header.sizeDelta = new Vector2(0f, 140f);
 
         CreateText(headerGo.transform, "HỒ SƠ ÁN CHƯA CÓ LỜI GIẢI", 26, TitleGold, FontStyle.Bold, new Vector2(0f, 40f));
-        CreateText(headerGo.transform, "UNSOLVED CASE FILES AI — HỆ THỐNG TRINH THÁM TỰ ĐỘNG", 13, TextWhite, FontStyle.Normal, new Vector2(0f, 12f));
-        CreateText(headerGo.transform, "Đồ án Tốt nghiệp CNTT — Phenikaa University | Dr. Tánh Nguyễn & SV. Nguyễn Ngọc Công Anh", 11, TextMuted, FontStyle.Italic, new Vector2(0f, -14f));
+        CreateText(headerGo.transform, "UNSOLVED CASE FILES AI  |  TRÒ CHƠI TRINH THÁM LOGIC", 12, TextWhite, FontStyle.Normal, new Vector2(0f, 12f));
+        CreateText(headerGo.transform, "Đồ án Tốt nghiệp — Trường Công nghệ thông tin, Đại học Phenikaa", 11, TextMuted, FontStyle.Italic, new Vector2(0f, -14f));
 
         // 1. MAIN BUTTON GROUP (5 CORE BUTTONS)
         mainButtonGroup = new GameObject("MainButtonGroup", typeof(RectTransform), typeof(VerticalLayoutGroup));
@@ -244,14 +250,14 @@ public class TitleMenuModal : MonoBehaviour
         vlg.childForceExpandHeight = false;
 
         // Button 1: Chơi Mới
-        CreateMenuButton(mainButtonGroup.transform, "▶️  CHƠI MỚI", "Bắt đầu vụ án mẫu hoặc tạo mới bằng AI", BtnPrimary, () =>
+        CreateMenuButton(mainButtonGroup.transform, "CHƠI MỚI", "Bắt đầu với hồ sơ mẫu hoặc sinh vụ án mới bằng AI", BtnPrimary, () =>
         {
             mainButtonGroup.SetActive(false);
             if (newGameSubPanel != null) newGameSubPanel.SetActive(true);
         });
 
         // Button 2: Mở File Save
-        CreateMenuButton(mainButtonGroup.transform, "📂  MỞ FILE SAVE (TIẾP TỤC)", "Xem danh sách hồ sơ vụ án đã lưu trên máy", BtnSecondary, () =>
+        CreateMenuButton(mainButtonGroup.transform, "MỞ HỒ SƠ ĐÃ LƯU", "Tiếp tục phá các vụ án đã lưu trên máy", BtnSecondary, () =>
         {
             mainButtonGroup.SetActive(false);
             if (loadSaveSubPanel != null)
@@ -262,14 +268,14 @@ public class TitleMenuModal : MonoBehaviour
         });
 
         // Button 3: Chơi Coop (LAN)
-        CreateMenuButton(mainButtonGroup.transform, "👥  CHƠI CO-OP (LAN / ONLINE)", "Tạo phòng mới hoặc tham gia phòng đồng đội", BtnSecondary, () =>
+        CreateMenuButton(mainButtonGroup.transform, "CHƠI CO-OP (LAN)", "Tạo phòng mới hoặc tham gia phòng đồng đội tối đa 3 người", BtnSecondary, () =>
         {
             mainButtonGroup.SetActive(false);
             if (coopSubPanel != null) coopSubPanel.SetActive(true);
         });
 
         // Button 4: Cài Đặt (5 Tab)
-        CreateMenuButton(mainButtonGroup.transform, "⚙️  CÀI ĐẶT", "Giao diện, âm thanh, điều khiển, hướng dẫn, mô hình AI", BtnSecondary, () =>
+        CreateMenuButton(mainButtonGroup.transform, "CÀI ĐẶT HỆ THỐNG", "Giao diện, âm thanh, điều khiển, hướng dẫn và mô hình AI", BtnSecondary, () =>
         {
             // Hide main menu while in settings to eliminate overlapping
             Close();
@@ -277,7 +283,7 @@ public class TitleMenuModal : MonoBehaviour
         });
 
         // Button 5: Thoát
-        CreateMenuButton(mainButtonGroup.transform, "❌  THOÁT GAME", "Đóng trò chơi", BtnDanger, () =>
+        CreateMenuButton(mainButtonGroup.transform, "THOÁT TRÒ CHƠI", "Đóng ứng dụng", BtnDanger, () =>
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -310,7 +316,7 @@ public class TitleMenuModal : MonoBehaviour
         vlg.childControlHeight = true;
         vlg.childForceExpandHeight = false;
 
-        CreateMenuButton(newGameSubPanel.transform, "📜  VỤ ÁN MẪU (CHƠI NGAY)", "Hồ sơ mẫu Nam Định / Đà Lạt đã xác thực logic y pháp", BtnPrimary, () =>
+        CreateMenuButton(newGameSubPanel.transform, "VỤ ÁN MẪU (CHƠI NGAY)", "Hồ sơ chuẩn bị sẵn đã kiểm định y pháp, không cần chờ", BtnPrimary, () =>
         {
             Close();
             EnsureLoadingScreen();
@@ -318,7 +324,7 @@ public class TitleMenuModal : MonoBehaviour
             StartCoroutine(LoadSampleRoutine());
         });
 
-        CreateMenuButton(newGameSubPanel.transform, "✨  SINH VỤ ÁN MỚI BẰNG AI", "Tùy biến bối cảnh Việt Nam / Nhật Bản / Phòng kín", BtnSecondary, () =>
+        CreateMenuButton(newGameSubPanel.transform, "SINH VỤ ÁN MỚI BẰNG AI", "Tùy biến bối cảnh, địa điểm và thời kỳ theo ý muốn", BtnSecondary, () =>
         {
             EnsureGenerateCaseModal();
             GenerateCaseModal modal = GenerateCaseModal.Instance ?? FindObjectOfType<GenerateCaseModal>(true);
@@ -333,7 +339,7 @@ public class TitleMenuModal : MonoBehaviour
             }
         });
 
-        CreateMenuButton(newGameSubPanel.transform, "↩️  QUAY LẠI MENU CHÍNH", "Quay lại danh mục trước", BtnDanger, ShowMainMenuButtons);
+        CreateMenuButton(newGameSubPanel.transform, "QUAY LẠI MENU CHÍNH", "Quay lại danh mục trước", BtnDanger, ShowMainMenuButtons);
 
         newGameSubPanel.SetActive(false);
     }
@@ -484,8 +490,9 @@ public class TitleMenuModal : MonoBehaviour
         txt.fontSize = 13;
         txt.color = TextWhite;
         txt.alignment = TextAnchor.MiddleLeft;
-        txt.text = $"📁 <b>{title}</b>\n<size=10><color=#999999>Mã vụ án: {dossier.case_id}</color></size>";
+        txt.text = $"[HỒ SƠ] <b>{title}</b>\n<size=10><color=#a8a298>Mã vụ án: {dossier.case_id}</color></size>";
         txt.supportRichText = true;
+        NoirUIStyle.AttachButtonFeel(btn, 0.98f, true);
     }
 
     // -------------------------------------------------------------------------
@@ -506,19 +513,19 @@ public class TitleMenuModal : MonoBehaviour
         vlg.childControlHeight = true;
         vlg.childForceExpandHeight = false;
 
-        CreateMenuButton(coopSubPanel.transform, "🏠  TẠO PHÒNG MỚI (LÀM HOST)", "Mở phòng điều tra để đồng đội tham gia (Voice Chat)", BtnPrimary, () =>
+        CreateMenuButton(coopSubPanel.transform, "TẠO PHÒNG MỚI (HOST)", "Mở phòng điều tra để đồng đội tham gia", BtnPrimary, () =>
         {
             Close();
             FindObjectOfType<LanLobbyModal>()?.Open();
         });
 
-        CreateMenuButton(coopSubPanel.transform, "🔍  VÀO PHÒNG CÓ SẴN (GUEST)", "Quét mạng LAN tự động hoặc nhập mã phòng", BtnSecondary, () =>
+        CreateMenuButton(coopSubPanel.transform, "THAM GIA PHÒNG CÓ SẴN", "Quét mạng LAN tự động hoặc nhập mã phòng", BtnSecondary, () =>
         {
             Close();
             FindObjectOfType<LanLobbyModal>()?.Open();
         });
 
-        CreateMenuButton(coopSubPanel.transform, "↩️  QUAY LẠI MENU CHÍNH", "Quay lại danh mục trước", BtnDanger, ShowMainMenuButtons);
+        CreateMenuButton(coopSubPanel.transform, "QUAY LẠI MENU CHÍNH", "Quay lại danh mục trước", BtnDanger, ShowMainMenuButtons);
 
         coopSubPanel.SetActive(false);
     }
@@ -529,12 +536,13 @@ public class TitleMenuModal : MonoBehaviour
         btnGo.transform.SetParent(parent, false);
 
         LayoutElement le = btnGo.AddComponent<LayoutElement>();
-        le.minHeight = 50f;
-        le.preferredHeight = 50f;
+        le.minHeight = 52f;
+        le.preferredHeight = 52f;
 
         btnGo.GetComponent<Image>().color = bgColor;
         Button btn = btnGo.GetComponent<Button>();
         btn.onClick.AddListener(() => onClick?.Invoke());
+        NoirUIStyle.AttachButtonFeel(btn, 0.97f, true);
 
         GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
         RectTransform rt = textGo.GetComponent<RectTransform>();

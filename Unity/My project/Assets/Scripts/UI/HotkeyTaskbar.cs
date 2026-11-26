@@ -60,50 +60,22 @@ public class HotkeyTaskbar : MonoBehaviour
 
     private void Start()
     {
-        if (chatChipButton != null) chatChipButton.onClick.AddListener(ToggleChat);
+        if (chatChipButton != null)
+        {
+            chatChipButton.onClick.AddListener(ToggleChat);
+            NoirUIStyle.AttachButtonFeel(chatChipButton, 0.96f, false);
+        }
         if (lobbyChipButton != null)
         {
             lobbyChipButton.onClick.AddListener(ToggleLobby);
+            NoirUIStyle.AttachButtonFeel(lobbyChipButton, 0.96f, false);
 
-            // Clone chip button for Pause & Settings
+            // Clone chip button for Pause, Settings & Briefing (update BOTH KeyBadge & Label texts!)
             try
             {
-                // Pause button
-                pauseBtnGo = Instantiate(lobbyChipButton.gameObject, lobbyChipButton.transform.parent);
-                pauseBtnGo.name = "PauseChipButton";
-                pauseBtnGo.transform.SetAsFirstSibling();
-                Text pauseText = pauseBtnGo.GetComponentInChildren<Text>();
-                if (pauseText != null) pauseText.text = "⏸️ Menu (ESC)";
-                Button pauseBtn = pauseBtnGo.GetComponent<Button>();
-                if (pauseBtn != null)
-                {
-                    pauseBtn.onClick.RemoveAllListeners();
-                    pauseBtn.onClick.AddListener(TogglePause);
-                }
-
-                // Settings button
-                settingsBtnGo = Instantiate(lobbyChipButton.gameObject, lobbyChipButton.transform.parent);
-                settingsBtnGo.name = "SettingsChipButton";
-                Text btnText = settingsBtnGo.GetComponentInChildren<Text>();
-                if (btnText != null) btnText.text = "⚙️ Cài đặt (O)";
-                Button btn = settingsBtnGo.GetComponent<Button>();
-                if (btn != null)
-                {
-                    btn.onClick.RemoveAllListeners();
-                    btn.onClick.AddListener(ToggleSettings);
-                }
-
-                // Briefing button (Case Intro & Initial Report)
-                briefingBtnGo = Instantiate(lobbyChipButton.gameObject, lobbyChipButton.transform.parent);
-                briefingBtnGo.name = "BriefingChipButton";
-                Text bText = briefingBtnGo.GetComponentInChildren<Text>();
-                if (bText != null) bText.text = "📁 Bàn giao án (B)";
-                Button bBtn = briefingBtnGo.GetComponent<Button>();
-                if (bBtn != null)
-                {
-                    bBtn.onClick.RemoveAllListeners();
-                    bBtn.onClick.AddListener(ToggleBriefing);
-                }
+                pauseBtnGo = CloneTaskbarChip(lobbyChipButton.gameObject, "PauseChipButton", "ESC", "Menu", TogglePause, true);
+                settingsBtnGo = CloneTaskbarChip(lobbyChipButton.gameObject, "SettingsChipButton", "O", "Cài đặt", ToggleSettings, false);
+                briefingBtnGo = CloneTaskbarChip(lobbyChipButton.gameObject, "BriefingChipButton", "B", "Hồ sơ án", ToggleBriefing, false);
             }
             catch (System.Exception e)
             {
@@ -135,6 +107,33 @@ public class HotkeyTaskbar : MonoBehaviour
             titleMenuModal.Open();
             SetTaskbarVisuals(false);
         }
+    }
+
+    private GameObject CloneTaskbarChip(GameObject template, string objName, string keyCap, string labelText, UnityEngine.Events.UnityAction action, bool firstSibling)
+    {
+        GameObject go = Instantiate(template, template.transform.parent);
+        go.name = objName;
+        if (firstSibling) go.transform.SetAsFirstSibling();
+
+        Text[] texts = go.GetComponentsInChildren<Text>(true);
+        if (texts.Length >= 2)
+        {
+            texts[0].text = keyCap;
+            texts[1].text = labelText;
+        }
+        else if (texts.Length == 1)
+        {
+            texts[0].text = $"{labelText} [{keyCap}]";
+        }
+
+        Button btn = go.GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(action);
+            NoirUIStyle.AttachButtonFeel(btn, 0.96f, false);
+        }
+        return go;
     }
 
     /// <summary>
@@ -361,40 +360,19 @@ public class HotkeyTaskbar : MonoBehaviour
             return;
         }
 
-        // 3. If any in-game modal or lightbox is open:
-        bool anyOpen = (PhotoLightboxModal.Instance != null && PhotoLightboxModal.Instance.IsOpen) ||
-                       (CaseBriefingModal.Instance != null && CaseBriefingModal.Instance.IsOpen) ||
-                       (AccusationModal.Instance != null && AccusationModal.Instance.IsOpen) ||
-                       (AutopsyReportModal.Instance != null && AutopsyReportModal.Instance.IsOpen) ||
-                       (EvidenceDetailModal.Instance != null && EvidenceDetailModal.Instance.IsOpen) ||
-                       (chatUI != null && chatUI.IsChatPanelOpen) ||
-                       (lobby != null && lobby.IsOpen) ||
-                       (settingsModal != null && settingsModal.IsOpen) ||
-                       (helpModal != null && helpModal.IsOpen) ||
-                       (pauseModal != null && pauseModal.IsOpen);
+        // 3. Close topmost open modal one step at a time (proper UI stack):
+        if (PhotoLightboxModal.Instance != null && PhotoLightboxModal.Instance.IsOpen) { PhotoLightboxModal.Instance.Close(); return; }
+        if (settingsModal != null && settingsModal.IsOpen) { settingsModal.Close(); return; }
+        if (AccusationModal.Instance != null && AccusationModal.Instance.IsOpen) { AccusationModal.Instance.Close(); return; }
+        if (AutopsyReportModal.Instance != null && AutopsyReportModal.Instance.IsOpen) { AutopsyReportModal.Instance.Close(); return; }
+        if (EvidenceDetailModal.Instance != null && EvidenceDetailModal.Instance.IsOpen) { EvidenceDetailModal.Instance.Close(); return; }
+        if (CaseBriefingModal.Instance != null && CaseBriefingModal.Instance.IsOpen) { CaseBriefingModal.Instance.Close(); return; }
+        if (helpModal != null && helpModal.IsOpen) { helpModal.Close(); return; }
+        if (lobby != null && lobby.IsOpen) { lobby.Close(); return; }
+        if (chatUI != null && chatUI.IsChatPanelOpen) { chatUI.SetChatPanelOpen(false); return; }
+        if (pauseModal != null && pauseModal.IsOpen) { pauseModal.Close(); return; }
 
-        if (anyOpen)
-        {
-            CloseAll();
-        }
-        else
-        {
-            TogglePause();
-        }
-    }
-
-    private void CloseAll()
-    {
-        if (PhotoLightboxModal.Instance != null && PhotoLightboxModal.Instance.IsOpen) PhotoLightboxModal.Instance.Close();
-        if (CaseBriefingModal.Instance != null && CaseBriefingModal.Instance.IsOpen) CaseBriefingModal.Instance.Close();
-        if (AccusationModal.Instance != null && AccusationModal.Instance.IsOpen) AccusationModal.Instance.Close();
-        if (AutopsyReportModal.Instance != null && AutopsyReportModal.Instance.IsOpen) AutopsyReportModal.Instance.Close();
-        if (EvidenceDetailModal.Instance != null && EvidenceDetailModal.Instance.IsOpen) EvidenceDetailModal.Instance.Close();
-        if (chatUI != null) chatUI.SetChatPanelOpen(false);
-        if (lobby != null) lobby.Close();
-        if (settingsModal != null) settingsModal.Close();
-        if (helpModal != null) helpModal.Close();
-        if (pauseModal != null) pauseModal.Close();
+        TogglePause();
     }
 
     private static string DescribeVoice()
@@ -403,8 +381,8 @@ public class HotkeyTaskbar : MonoBehaviour
         if (voice == null) return "";
 
         string text = "";
-        if (voice.IsTransmitting) text += "<color=#FF6B6B>◉ ĐANG NÓI</color>   ";
-        if (voice.RemoteSpeakers.Count > 0) text += $"<color=#E3C76B>♪ {string.Join(", ", voice.RemoteSpeakers)}</color>   ";
+        if (voice.IsTransmitting) text += "<color=#FF6B6B>[MIC] ĐANG NÓI</color>   ";
+        if (voice.RemoteSpeakers.Count > 0) text += $"<color=#E3C76B>[LOA] {string.Join(", ", voice.RemoteSpeakers)}</color>   ";
         return text;
     }
 

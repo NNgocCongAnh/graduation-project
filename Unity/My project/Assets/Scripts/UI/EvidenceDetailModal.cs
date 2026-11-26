@@ -103,6 +103,7 @@ public class EvidenceDetailModal : MonoBehaviour
 
         paperRootGo.SetActive(true);
         transform.SetAsLastSibling();
+        NoirUIStyle.AnimateModalOpen(this, paperRootGo, paperSheetRt);
         Debug.Log($"[EvidenceDetailModal] Opened Paper Case File for: {suspect.name}");
     }
 
@@ -120,6 +121,7 @@ public class EvidenceDetailModal : MonoBehaviour
 
         paperRootGo.SetActive(true);
         transform.SetAsLastSibling();
+        NoirUIStyle.AnimateModalOpen(this, paperRootGo, paperSheetRt);
         Debug.Log($"[EvidenceDetailModal] Opened Paper Evidence Report for: {evidence.title}");
     }
 
@@ -182,37 +184,7 @@ public class EvidenceDetailModal : MonoBehaviour
 
     private void CreateCloseButton(RectTransform parent)
     {
-        GameObject closeGo = new GameObject("Btn_Close_Paper", typeof(RectTransform), typeof(Image), typeof(Button));
-        RectTransform crt = closeGo.GetComponent<RectTransform>();
-        crt.SetParent(parent, false);
-        crt.anchorMin = new Vector2(1f, 1f);
-        crt.anchorMax = new Vector2(1f, 1f);
-        crt.sizeDelta = new Vector2(36f, 36f);
-        crt.anchoredPosition = new Vector2(-16f, -16f);
-
-        Image cImg = closeGo.GetComponent<Image>();
-        cImg.color = new Color(0.25f, 0.24f, 0.22f, 0.9f);
-
-        Button cBtn = closeGo.GetComponent<Button>();
-        cBtn.onClick.AddListener(Close);
-
-        GameObject txtGo = new GameObject("X_Label", typeof(RectTransform), typeof(Text));
-        RectTransform trt = txtGo.GetComponent<RectTransform>();
-        trt.SetParent(closeGo.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.sizeDelta = Vector2.zero;
-
-        Text txt = txtGo.GetComponent<Text>();
-        if (uiFont == null) uiFont = DetectiveAssetBank.GetDefaultUIFont();
-        txt.font = uiFont;
-        txt.fontSize = 18;
-        txt.fontStyle = FontStyle.Bold;
-        txt.alignment = TextAnchor.MiddleCenter;
-        txt.color = Color.white;
-        txt.text = "✕";
-        txt.horizontalOverflow = HorizontalWrapMode.Overflow;
-        txt.verticalOverflow = VerticalWrapMode.Overflow;
+        NoirUIStyle.CreateCornerCloseButton(parent, uiFont, Close);
     }
 
     /// <summary>
@@ -459,7 +431,7 @@ public class EvidenceDetailModal : MonoBehaviour
         // Bảng thuộc tính vật chứng bên phải
         GameObject infoBox = CreateBox(crt, new Vector2(0.37f, topSecYMin), new Vector2(1.0f, topSecYMax), TableBg, PaperBorder);
         // Phân loại vật chứng trung tính chuẩn hồ sơ giám định hiện trường (không để lộ trước hung khí)
-        string categoryTag = "<color=#1b4d8c><b>🔵 VẬT CHỨNG THU GIỮ HIỆN TRƯỜNG (CRIME SCENE EXHIBIT)</b></color>";
+        string categoryTag = "<color=#1b4d8c><b>VẬT CHỨNG THU GIỮ HIỆN TRƯỜNG (CRIME SCENE EXHIBIT)</b></color>";
 
         string demoText =
             $"<size=11>TÊN VẬT MẪU:</size>   <b><size=16>{(string.IsNullOrEmpty(evidence.title) ? "VẬT CHỨNG" : evidence.title.ToUpper())}</size></b>\n" +
