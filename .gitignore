@@ -154,6 +154,7 @@ detective-backend/benchmark_results*.json
 *_v2.json
 RA_SOAT_TRUOC_KHI_NOP.md
 _ban_cu/
+benchmarks/*.log
 detective-backend/run_gemma4_overnight.ps1
 *.ps1
 

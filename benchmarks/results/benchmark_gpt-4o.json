@@ -1630,5 +1630,413 @@
     "error": "None",
     "model": "gh/gpt-4o",
     "trial": 24
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "raw_culprit_id": "SUSP-01",
+    "weapon_id": "EV-01",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 52.21,
+    "title": "Vụ Án Bí Ẩn Trong Phòng Server Lạnh",
+    "summary": "Nạn nhân là giám đốc kỹ thuật của một phòng thí nghiệm công nghệ cao được phát hiện tử vong trong phòng server lạnh – nơi nhiệt độ luôn duy trì ở mức 20.0°C. Hiện trường không có dấu hiệu xâm nhập, nhưng dữ liệu truy cập hệ thống cho thấy một nghi phạm có ngoại phạm hoàn hảo.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-01",
+      "gen_prompt_tokens": 15344,
+      "gen_completion_tokens": 3416,
+      "gen_total_tokens": 18760,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 18760,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 3524,
+          "completion_tokens": 596,
+          "total_tokens": 4120
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4196,
+          "completion_tokens": 1095,
+          "total_tokens": 5291
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4281,
+          "completion_tokens": 1155,
+          "total_tokens": 5436
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3343,
+          "completion_tokens": 570,
+          "total_tokens": 3913
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 25
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-03",
+    "raw_culprit_id": "SUSP-03",
+    "weapon_id": "EV-03",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 48.87,
+    "title": "Bí Ẩn Trong Phòng Server Lạnh",
+    "summary": "Nạn nhân, giám đốc kỹ thuật của phòng thí nghiệm CyberTech, được phát hiện tử vong trong phòng server lạnh. Hiện trường không có dấu hiệu đột nhập, nhưng các dữ liệu số và thiết bị an ninh cho thấy những mâu thuẫn khó hiểu.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-03",
+      "gen_prompt_tokens": 15380,
+      "gen_completion_tokens": 3500,
+      "gen_total_tokens": 18880,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 18880,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 3524,
+          "completion_tokens": 604,
+          "total_tokens": 4128
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4212,
+          "completion_tokens": 1113,
+          "total_tokens": 5325
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4278,
+          "completion_tokens": 1161,
+          "total_tokens": 5439
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3366,
+          "completion_tokens": 622,
+          "total_tokens": 3988
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 26
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "raw_culprit_id": "SUSP-02",
+    "weapon_id": "EV-05",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:43-22:43",
+    "crime_time": "22:08",
+    "patch_retries": 2,
+    "latency_sec": 52.34,
+    "title": "Vụ Án Mạng Trong Phòng Server Lạnh",
+    "summary": "Ông Lê Minh Hùng, giám đốc điều hành của CyberTech, được phát hiện tử vong trong phòng server lạnh của công ty lúc 08:00 sáng. Phòng server được khóa chặt từ bên trong, không có dấu hiệu bị đột nhập, tạo nên một vụ án mạng phòng kín đầy bí ẩn.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-02",
+      "gen_prompt_tokens": 14450,
+      "gen_completion_tokens": 3356,
+      "gen_total_tokens": 17806,
+      "patch_prompt_tokens": 4987,
+      "patch_completion_tokens": 579,
+      "patch_total_tokens": 5566,
+      "patch_payload_tokens": 519,
+      "avg_patch_payload_tokens": 259.5,
+      "total_tokens": 23372,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 2508,
+          "completion_tokens": 313,
+          "total_tokens": 2821
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4221,
+          "completion_tokens": 1123,
+          "total_tokens": 5344
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4308,
+          "completion_tokens": 1186,
+          "total_tokens": 5494
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3413,
+          "completion_tokens": 734,
+          "total_tokens": 4147
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 27
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-03",
+    "raw_culprit_id": "SUSP-03",
+    "weapon_id": "EV-03",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:45-21:45",
+    "crime_time": "21:10",
+    "patch_retries": 0,
+    "latency_sec": 50.88,
+    "title": "Tội Ác Trong Phòng Server Lạnh",
+    "summary": "Nạn nhân, một chuyên gia an ninh mạng, được phát hiện tử vong trong phòng server lạnh của phòng thí nghiệm CyberTech. Căn phòng hoàn toàn khép kín, với hệ thống an ninh cao cấp và không có dấu hiệu bị đột nhập.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-03",
+      "gen_prompt_tokens": 15448,
+      "gen_completion_tokens": 3478,
+      "gen_total_tokens": 18926,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 18926,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 3524,
+          "completion_tokens": 601,
+          "total_tokens": 4125
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4215,
+          "completion_tokens": 1085,
+          "total_tokens": 5300
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4302,
+          "completion_tokens": 1255,
+          "total_tokens": 5557
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3407,
+          "completion_tokens": 537,
+          "total_tokens": 3944
+        }
+      }
+    },
+    "c2_latency_ms": 0.009,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 28
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-01",
+    "raw_culprit_id": "SUSP-01",
+    "weapon_id": "EV-03",
+    "unique_culprit": true,
+    "culprit_alibi_window": "21:50-22:50",
+    "crime_time": "22:15",
+    "patch_retries": 0,
+    "latency_sec": 47.81,
+    "title": "Bí Ẩn Cái Chết Trong Phòng Server Lạnh",
+    "summary": "Nạn nhân, một nhà nghiên cứu công nghệ cao, được phát hiện tử vong trong phòng server lạnh tại khuôn viên phòng thí nghiệm CyberTech. Hiện trường không có dấu hiệu đột nhập, và hệ thống an ninh chỉ ghi nhận hoạt động của thẻ từ của nạn nhân vào đêm trước.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-01",
+      "gen_prompt_tokens": 15343,
+      "gen_completion_tokens": 3391,
+      "gen_total_tokens": 18734,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 18734,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 3524,
+          "completion_tokens": 599,
+          "total_tokens": 4123
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4205,
+          "completion_tokens": 1112,
+          "total_tokens": 5317
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4273,
+          "completion_tokens": 1157,
+          "total_tokens": 5430
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3341,
+          "completion_tokens": 523,
+          "total_tokens": 3864
+        }
+      }
+    },
+    "c2_latency_ms": 0.017,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 29
+  },
+  {
+    "success": true,
+    "json_valid": true,
+    "logic_valid": true,
+    "violations_count": 0,
+    "violation_types": [],
+    "crucial_clues_count": 3,
+    "red_herrings_count": 2,
+    "culprit_id": "SUSP-02",
+    "raw_culprit_id": "SUSP-02",
+    "weapon_id": "EV-02",
+    "unique_culprit": true,
+    "culprit_alibi_window": "20:50-21:50",
+    "crime_time": "21:15",
+    "patch_retries": 0,
+    "latency_sec": 50.44,
+    "title": "Án mạng trong phòng lạnh CyberTech",
+    "summary": "Nạn nhân được phát hiện trong phòng server kín tại khu thí nghiệm công nghệ cao CyberTech. Hiện trường không có dấu hiệu đột nhập, nhưng dữ liệu truy cập hệ thống lại cho thấy thời gian không khớp với kết quả pháp y.",
+    "theme": "Phòng Thí nghiệm Công nghệ cao CyberTech",
+    "config_mode": "full_pipeline",
+    "used_fallback_sample": false,
+    "reasoning_steps": 4,
+    "agent_models": {
+      "OutlineAgent": "gh/gpt-4o",
+      "CharacterAgent": "gh/gpt-4o",
+      "ClueAgent": "gh/gpt-4o",
+      "DeductionAgent": "gh/gpt-4o"
+    },
+    "fallback_triggered": false,
+    "token_usage": {
+      "raw_culprit_id": "SUSP-02",
+      "gen_prompt_tokens": 15302,
+      "gen_completion_tokens": 3429,
+      "gen_total_tokens": 18731,
+      "patch_prompt_tokens": 0,
+      "patch_completion_tokens": 0,
+      "patch_total_tokens": 0,
+      "patch_payload_tokens": 0,
+      "avg_patch_payload_tokens": 0.0,
+      "total_tokens": 18731,
+      "per_agent": {
+        "OutlineAgent": {
+          "prompt_tokens": 3524,
+          "completion_tokens": 567,
+          "total_tokens": 4091
+        },
+        "CharacterAgent": {
+          "prompt_tokens": 4196,
+          "completion_tokens": 1108,
+          "total_tokens": 5304
+        },
+        "ClueAgent": {
+          "prompt_tokens": 4254,
+          "completion_tokens": 1238,
+          "total_tokens": 5492
+        },
+        "DeductionAgent": {
+          "prompt_tokens": 3328,
+          "completion_tokens": 516,
+          "total_tokens": 3844
+        }
+      }
+    },
+    "c2_latency_ms": 0.016,
+    "error": "None",
+    "model": "gh/gpt-4o",
+    "trial": 30
   }
 ]

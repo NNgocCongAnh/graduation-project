@@ -82,7 +82,8 @@ def build_benchmark_summary(benchmarks_dir: str = BENCHMARKS_DIR) -> Dict[str, A
         if not isinstance(runs, list) or not runs:
             continue
 
-        model_name = runs[0].get("model", fname.replace("benchmark_", "").replace(".json", ""))
+        base_model = runs[0].get("model", fname.replace("benchmark_", "").replace(".json", ""))
+        model_name = f"{base_model} (hybrid)" if "hybrid" in fname else base_model
         n = len(runs)
         k_json = sum(1 for r in runs if r.get("json_valid") and not r.get("used_fallback_sample"))
         k_logic = sum(1 for r in runs if r.get("logic_valid") and not r.get("used_fallback_sample"))

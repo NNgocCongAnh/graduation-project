@@ -84,19 +84,19 @@ python benchmarks/scripts/verify_results.py
 
 | Thực nghiệm | Tệp kết quả (`benchmarks/results/`) | Cỡ mẫu | Kết quả chính |
 | :--- | :--- | :---: | :--- |
-| Benchmark `gh/gpt-4o-mini` (bản sạch không neo) | `benchmark_gpt-4o-mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 22,34 s, P95 28,05 s |
-| Benchmark `gh/gpt-4o` (sau `id_shuffle`, tạm dừng tại 25 do 429) | `benchmark_gpt-4o.json` | 24 (3 chủ đề) | 24/24 vượt kiểm định (Wilson 95%: [86,2%; 100%]); P50 45,51 s, P95 54,78 s |
-| Khảo sát cục bộ `gemma4:e4b-it-qat` (hệ lai) | `benchmark_gemma4_hybrid.json` | 23 | 23/23; ~20 phút/hồ sơ trên RTX 3050 Laptop 4 GB (CharacterAgent và ClueAgent fallback mây ở 23/23 lượt) |
-| Khảo sát thuần ngoại tuyến `gemma4:e4b-it-qat` (`--no-fallback`) | `benchmark_gemma4.json` | 3 | 0/3 LLM tự sinh đạt (CharacterAgent lỗi JSON ở Q4_0; P50 540,39 s) |
+| Benchmark `gh/gpt-4o-mini` (bản hợp nhất, `id_shuffle`) | `benchmark_gpt-4o-mini.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 22,34 s, P95 28,05 s |
+| Benchmark `gh/gpt-4o` (bản hợp nhất, `id_shuffle`) | `benchmark_gpt-4o.json` | 30 (3 chủ đề) | 30/30 vượt kiểm định (Wilson 95%: [88,6%; 100%]); P50 47,82 s, P95 53,97 s |
+| Khảo sát cục bộ `gemma4:e4b-it-qat` (hệ lai) | `benchmark_gemma4_hybrid.json` | 23 | 23/23; P50 1.180,47 s trên RTX 3050 Laptop 4 GB (CharacterAgent và ClueAgent fallback mây ở 23/23 lượt) |
+| Khảo sát thuần ngoại tuyến `gemma4:e4b-it-qat` (`--no-fallback`) | `benchmark_gemma4.json` | 30 (3 chủ đề) | 0/30 LLM tự sinh đạt (Wilson 95%: [0,0%; 11,4%]; lỗi cú pháp JSON ở lượng tử hóa Q4\_0; P50 694,30 s) |
 | Nghiên cứu loại trừ (4 cấu hình) | `ablation_results.json` | 3/cấu hình | Prompt nguyên khối 0/3 hợp lệ; các cấu hình đa tác tử 3/3 |
 | Đối chứng một lần gọi `E2E-plan` (Agents' Room, ICLR 2025) | `e2e_plan_baseline_results.json` | 9 | Cùng chỉ dẫn 4 tác tử + lược đồ JSON trong 1 lần gọi: hợp lệ cú pháp 5/9, vượt kiểm định 1/9 |
 | Tiêm lỗi (vá cục bộ) | `fault_injection_results.json` | 80 | Vá thành công 63,8%; 4.227,6 token/lượt vá, P50 7,21 s |
-| Tác tử phá án độc lập (bộ chuẩn `gh/gpt-4o-mini`) | `solver_benchmark_baseline.json` | 20 | Xác định đúng thủ phạm 19/20 |
-| Tác tử phá án độc lập (bộ đề mới không neo, `gemini-3-flash-preview`) | `solver_benchmark.json` | 3 | 3/3 đạt 100/100 điểm (tạm dừng ở ca 4 do giới hạn 20 RPD Free Tier) |
+| Tác tử phá án độc lập (bộ chuẩn `gh/gpt-4o-mini`) | `solver_benchmark_baseline.json` | 20 | Xác định đúng thủ phạm 19/20 (95,0%) |
+| Tác tử phá án độc lập (bộ đề mới không neo, `gemini-3-flash-preview`) | `solver_benchmark.json` | 20 | Xác định đúng thủ phạm 17/20 (85,0%); chứng cứ then chốt 20/20 (100%); bẫy 0%; P50 12,64 s |
 
 ## Hạn chế đã biết
 
 - Bộ kiểm định chỉ kiểm tra bất biến cấu trúc (một thủ phạm, toàn vẹn tham chiếu, vật chứng then chốt, cửa sổ TOD), chưa kiểm định ngữ nghĩa lời khai.
-- Độ trễ P50 (23,23 s) và chi phí vá (4.227,6 token) chưa đạt ngưỡng thiết kế (≤ 20 s, ≤ 500 token).
-- LLM thiên lệch khi chọn thủ phạm ở đầu ra thô (`SUSP-02` ở 28/30 lượt `mini` và 5/6 lượt `gpt-4o` trước hoán vị). Khi tích hợp bước hoán vị kép mã nghi phạm và vật chứng (`id_shuffle.py`), 24 lượt cuối của `gpt-4o` phân bố đều (`9/8/7`) và người chơi gặp thủ phạm/hung khí phân bố đồng đều; đây là phép đổi tên, nội dung vụ án chưa đa dạng hơn.
+- Độ trễ P50 của mô hình đám mây mặc định (22,34 s) và chi phí vá (4.227,6 token) chưa đạt ngưỡng thiết kế ($\le 20$ s, $\le 500$ token).
+- LLM thiên lệch khi chọn thủ phạm và giờ gây án ở đầu ra thô (`21:15` ở 24/60 lượt đám mây); bước hoán vị kép mã nghi phạm và vật chứng (`id_shuffle.py`) giúp cân bằng phân bố thủ phạm ở bản phát hành (`11/8/11` trên `gpt-4o-mini`, `11/10/9` trên `gpt-4o`), nhưng đây là phép đổi tên và nội dung vụ án chưa đa dạng hơn.
 - Chưa có thử nghiệm người chơi có quy trình; WebSocket phòng chơi chưa có xác thực phiên (chỉ dùng trong LAN tin cậy).

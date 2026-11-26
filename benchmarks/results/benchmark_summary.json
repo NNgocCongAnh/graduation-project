@@ -1,31 +1,79 @@
 {
-  "generated_at": "2026-11-25 14:11:56",
+  "generated_at": "2026-11-26 15:15:25",
   "models": {
     "gemma4:e4b-it-qat": {
       "file": "benchmark_gemma4.json",
-      "n": 3,
+      "n": 30,
       "schema_valid": 0,
       "schema_rate_pct": 0.0,
       "schema_wilson_ci_95": [
         0.0,
-        56.15
+        11.35
       ],
       "logic_valid": 0,
       "logic_rate_pct": 0.0,
       "logic_wilson_ci_95": [
         0.0,
-        56.15
+        11.35
       ],
       "avg_patch_retries": 0.0,
-      "latency_p50_sec": 540.39,
-      "latency_p95_sec": 598.78,
+      "latency_p50_sec": 694.3,
+      "latency_p95_sec": 1053.75,
       "mean_tokens": 0.0,
-      "fallback_runs": 3,
-      "fallback_sample_runs": 3,
+      "fallback_runs": 30,
+      "fallback_sample_runs": 30,
       "agent_models_observed": [
         []
       ],
       "diversity": {}
+    },
+    "gemma4:e4b-it-qat (hybrid)": {
+      "file": "benchmark_gemma4_hybrid.json",
+      "n": 23,
+      "schema_valid": 23,
+      "schema_rate_pct": 100.0,
+      "schema_wilson_ci_95": [
+        85.69,
+        100.0
+      ],
+      "logic_valid": 23,
+      "logic_rate_pct": 100.0,
+      "logic_wilson_ci_95": [
+        85.69,
+        100.0
+      ],
+      "avg_patch_retries": 0.09,
+      "latency_p50_sec": 1180.47,
+      "latency_p95_sec": 1489.89,
+      "mean_tokens": 17034.3,
+      "fallback_runs": 23,
+      "fallback_sample_runs": 0,
+      "agent_models_observed": [
+        [
+          "gemma4:e4b-it-qat",
+          "gh/gpt-3.5-turbo-0613"
+        ],
+        [
+          "gemma4:e4b-it-qat",
+          "gh/gpt-4o-mini"
+        ]
+      ],
+      "diversity": {
+        "time_distribution": {
+          "mean_crime_time": "21:23",
+          "min_crime_time": "20:33",
+          "max_crime_time": "22:45",
+          "range_minutes": 132,
+          "std_dev_minutes": 33.34
+        },
+        "culprit_distribution": {
+          "SUSP-02": 78.3,
+          "SUSP-01": 17.4,
+          "SUSP-03": 4.3
+        },
+        "average_lexical_jaccard": 0.186,
+        "valid_evaluated_cases": 23
+      }
     },
     "gh/gpt-4o-mini": {
       "file": "benchmark_gpt-4o-mini.json",
@@ -72,23 +120,23 @@
     },
     "gh/gpt-4o": {
       "file": "benchmark_gpt-4o.json",
-      "n": 24,
-      "schema_valid": 24,
+      "n": 30,
+      "schema_valid": 30,
       "schema_rate_pct": 100.0,
       "schema_wilson_ci_95": [
-        86.2,
+        88.65,
         100.0
       ],
-      "logic_valid": 24,
+      "logic_valid": 30,
       "logic_rate_pct": 100.0,
       "logic_wilson_ci_95": [
-        86.2,
+        88.65,
         100.0
       ],
-      "avg_patch_retries": 0.5,
-      "latency_p50_sec": 45.51,
-      "latency_p95_sec": 54.78,
-      "mean_tokens": 20106.6,
+      "avg_patch_retries": 0.47,
+      "latency_p50_sec": 47.82,
+      "latency_p95_sec": 53.97,
+      "mean_tokens": 19998.7,
       "fallback_runs": 0,
       "fallback_sample_runs": 0,
       "agent_models_observed": [
@@ -98,31 +146,31 @@
       ],
       "diversity": {
         "time_distribution": {
-          "mean_crime_time": "21:41",
-          "min_crime_time": "21:15",
+          "mean_crime_time": "21:39",
+          "min_crime_time": "21:10",
           "max_crime_time": "22:45",
-          "range_minutes": 90,
-          "std_dev_minutes": 29.29
+          "range_minutes": 95,
+          "std_dev_minutes": 29.1
         },
         "culprit_distribution": {
           "SUSP-02": 33.3,
-          "SUSP-01": 37.5,
-          "SUSP-03": 29.2
+          "SUSP-01": 36.7,
+          "SUSP-03": 30.0
         },
-        "average_lexical_jaccard": 0.22,
-        "valid_evaluated_cases": 24
+        "average_lexical_jaccard": 0.217,
+        "valid_evaluated_cases": 30
       }
     }
   },
   "cloud_combined": {
-    "n": 54,
-    "logic_valid": 54,
+    "n": 60,
+    "logic_valid": 60,
     "logic_wilson_ci_95": [
-      93.36,
+      93.98,
       100.0
     ],
-    "avg_patch_retries": 0.48,
-    "latency_p50_sec": 27.63,
-    "latency_p95_sec": 51.53
+    "avg_patch_retries": 0.47,
+    "latency_p50_sec": 34.55,
+    "latency_p95_sec": 52.22
   }
 }

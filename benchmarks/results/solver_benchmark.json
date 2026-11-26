@@ -1,25 +1,25 @@
 {
-  "timestamp": "2026-11-25 15:21:28",
+  "timestamp": "2026-11-26 15:11:48",
   "solver_model": "gemini/gemini-3-flash-preview",
   "api_base": "http://localhost:20128/v1",
-  "total_cases_evaluated": 3,
-  "culprit_identification_rate_pct": 100.0,
+  "total_cases_evaluated": 20,
+  "culprit_identification_rate_pct": 85.0,
   "culprit_identification_wilson_ci_95": [
-    43.85,
-    100.0
+    63.96,
+    94.76
   ],
   "crucial_evidence_identification_rate_pct": 100.0,
   "crucial_evidence_wilson_ci_95": [
-    43.85,
+    83.89,
     100.0
   ],
   "red_herring_avoidance_rate_pct": 100.0,
   "red_herring_trap_rate_pct": 0.0,
-  "perfect_verdict_rate_pct": 100.0,
-  "mean_score": 100.0,
-  "latency_p50_sec": 12.69,
-  "latency_p95_sec": 13.36,
-  "mean_tokens": 7485.7,
+  "perfect_verdict_rate_pct": 85.0,
+  "mean_score": 85.0,
+  "latency_p50_sec": 12.64,
+  "latency_p95_sec": 24.39,
+  "mean_tokens": 7130.6,
   "cases": [
     {
       "trial": 1,
@@ -122,6 +122,584 @@
       "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp: Nhiệt độ tử thi đo được lúc 08:00 là 31.5°C trong môi trường ổn định 20.0°C. Theo định luật làm lạnh Henssge, với hệ số C=1.0 và thể trọng 75kg, nạn nhân đã giảm 5.5°C so với nhiệt độ cơ thể bình thường (37°C). Tốc độ mất nhiệt này xác định thời điểm tử vong cách lúc phát hiện khoảng 10-11 giờ, tức là vào khoảng [21:00 - 22:00]. Tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi cố định cũng ủng hộ khung giờ này, bác bỏ hoàn toàn khả năng nạn nhân còn sống đến 23:45 như nhật ký hệ thống ghi lại.",
       "solver_reasoning": "Đặng Minh Quân (SUSP-01) là hung thủ duy nhất có khả năng và phương tiện thực hiện vụ án. Thứ nhất, hung khí (EV-02) là thanh lấy mẫu tản nhiệt có kích thước vết thương trùng khớp hoàn toàn (8.5cm) và dính mỡ tản nhiệt đặc chủng (Thermal Grease) chỉ dùng cho cụm GPU mà Quân quản lý. Thứ hai, Quân đã sử dụng thiết bị Keystroke Injector (EV-03) cắm vào máy tính nạn nhân để lập trình lệnh gửi email tự động lúc 23:45, nhằm tạo ra một 'ngoại phạm kỹ thuật' giả, khiến điều tra viên tin rằng nạn nhân vẫn còn sống khi Quân đã rời khỏi công ty. Tuy nhiên, phân tích nhiệt độ tử thi (EV-01) đã vạch trần sự thật rằng nạn nhân đã chết trước đó ít nhất 2 tiếng, biến bằng chứng ngoại phạm của Quân thành bằng chứng buộc tội đanh thép nhất.",
       "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Bản Giao Hưởng Chết Chóc Tại CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Đặng Minh Quân' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 4,
+      "case_id": "CASE-4A7A04",
+      "title": "Bí Ẩn Vụ Án Tại Biệt Thự Cổ Blackwood",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-02",
+      "culprit_identified": false,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-04"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-04"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "wrong_suspect",
+      "score": 0.0,
+      "latency_sec": 21.26,
+      "tokens": {
+        "prompt_tokens": 6833,
+        "completion_tokens": 765,
+        "total_tokens": 7598
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng của nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng hoen tử thi cố định và co cứng toàn phần (Full Rigor Mortis), khung giờ tử vong được xác định chính xác từ 20:38 đến 23:38. Đây là khoảng thời gian then chốt để đối chiếu ngoại phạm của các nghi phạm.",
+      "solver_reasoning": "Hung thủ được xác định là Quản gia Nguyễn Văn Hải (SUSP-02) dựa trên các mâu thuẫn vật lý không thể chối cãi: \n1. Mâu thuẫn lời khai và hiện trạng vật lý: SUSP-02 khẳng định có mặt tại phòng làm việc từ 20:55 đến 22:00 (nằm trong khung giờ tử vong) để sắp xếp tài liệu. Tuy nhiên, vật chứng EV-01 (Tài liệu ghi chép sự kiện) tại hiện trường cho thấy không có bất kỳ hoạt động nào diễn ra từ 21:20 đến 22:20, với dấu vết bụi bám tự nhiên không bị xáo trộn. Điều này chứng tỏ SUSP-02 đã nói dối về hành động của mình để tạo ngoại phạm giả trong khi thực tế đang thực hiện hành vi sát hại nạn nhân.\n2. Hung khí: Vật chứng EV-04 (Dao găm) có kích thước hoàn toàn trùng khớp với vết thương thấu tim của nạn nhân và dính máu của ông Đức. Con dao này được tìm thấy trong ngăn chứa bí mật của bàn làm việc - khu vực thuộc quyền quản lý và bảo trì của quản gia. \n3. Loại trừ: Gói thuốc an thần (EV-05) chỉ là sai phạm cá nhân của SUSP-02 không liên quan đến án mạng, nhằm đánh lạc hướng điều tra (Red Herring). Việc SUSP-02 ở ngay tại hiện trường trong khung giờ tử vong mà không có hoạt động làm việc thực tế như đã khai chính là bằng chứng đanh thép nhất.",
+      "verifier_feedback": "LẬP LUẬN SAI: Đối tượng bạn cáo buộc 'Nguyễn Văn Hải' (SUSP-02) không phải là hung thủ thực sự. Hãy rà soát kỹ lại lời khai Alibi và thời điểm tử vong xác định trong báo cáo pháp y."
+    },
+    {
+      "trial": 5,
+      "case_id": "CASE-06537D",
+      "title": "Án mạng trên chuyến tàu đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-02",
+        "EV-04",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-03"
+      ],
+      "selected_evidence_ids": [
+        "EV-04",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 11.69,
+      "tokens": {
+        "prompt_tokens": 6091,
+        "completion_tokens": 651,
+        "total_tokens": 6742
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng hoen tử thi cố định và co cứng toàn phần, khung giờ tử vong được xác định chính xác từ 20:38 đến 23:38. Thời điểm này trùng khớp với giai đoạn đoàn tàu bắt đầu tiến vào khu vực hầm núi và mất hoàn toàn liên lạc vô tuyến.",
+      "solver_reasoning": "Hung thủ thực sự là Nguyễn Văn Tuấn (SUSP-03). Lập luận như sau: Thứ nhất, Tuấn đưa ra bằng chứng ngoại phạm giả bằng cách khẳng định mình đang gọi điện thoại cho đối tác trong khoảng thời gian từ 19:50 đến 20:50. Tuy nhiên, vật chứng EV-05 (Nhật ký điều độ chạy tàu) xác nhận đoàn tàu đi qua hầm núi từ 20:10 đến 20:50, thời điểm mà mọi liên lạc vô tuyến và sóng điện thoại bị cắt đứt hoàn toàn. Do đó, việc thực hiện cuộc gọi là bất khả thi. Thứ hai, khung giờ Tuấn 'tạo ra' cuộc gọi giả này bao phủ thời điểm bắt đầu của khung giờ tử vong thực tế (20:38). Thứ ba, hung khí EV-04 (con dao) được tìm thấy trong toa hành lý có vết dầu mỡ bảo dưỡng cơ khí, cho thấy hung thủ đã lợi dụng các vật dụng trên tàu để gây án. Việc Tuấn né tránh ánh mắt khi nhắc đến mốc giờ gây án càng củng cố hành vi che giấu tội ác trong khoang VIP.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trên chuyến tàu đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Văn Tuấn' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 6,
+      "case_id": "CASE-90CE92",
+      "title": "Án Mạng Trong Phòng Thí Nghiệm CyberTech",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-02",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-04",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-03"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 12.29,
+      "tokens": {
+        "prompt_tokens": 5830,
+        "completion_tokens": 665,
+        "total_tokens": 6495
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng hoen tử thi đã cố định và co cứng toàn phần (Full Rigor Mortis) tại thời điểm phát hiện (08:00), khung giờ tử vong được xác định chính xác là [20:38 - 23:38] đêm hôm trước. Khoảng thời gian này khớp với tiến trình phân hủy tự nhiên của thi thể trong môi trường lạnh (phòng server).",
+      "solver_reasoning": "Hung thủ là Trần Hoàng Nam (SUSP-02). Lập luận như sau: Thứ nhất, Nam đưa ra lời khai chi tiết về việc nghe thấy âm thanh máy lạnh hoạt động trong suốt khung giờ ngoại phạm (21:05 - 22:05) để tạo bằng chứng giả về sự hiện diện của mình tại phòng nghỉ. Tuy nhiên, vật chứng EV-01 (Bảng điều khiển nhiệt độ) xác nhận thiết bị này không hề được vận hành hay có bất kỳ biến động nào trong khung giờ đó, chứng tỏ Nam đã nói dối về vị trí của mình. Thứ hai, EV-04 (Đồng hồ bị can thiệp chỉ 21:15) là nỗ lực của hung thủ nhằm đóng băng thời gian vụ án vào đúng khung giờ hắn đã chuẩn bị sẵn ngoại phạm gọi video giả. Cuối cùng, hung khí EV-05 (dao phẫu thuật) có kích thước lưỡi 10cm hoàn toàn tương thích với vết đâm sâu 8.5cm thấu tim nạn nhân, và vết dầu mỡ bảo dưỡng trên dao cho thấy nó được lấy từ khu vực kỹ thuật mà Quản lý dự án như Nam có quyền tiếp cận.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án Mạng Trong Phòng Thí Nghiệm CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Hoàng Nam' (SUSP-02)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 7,
+      "case_id": "CASE-4B8068",
+      "title": "Bí Ẩn Cái Chết Của Ông Trần",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-03"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-04",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-03",
+        "EV-01"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 14.52,
+      "tokens": {
+        "prompt_tokens": 6723,
+        "completion_tokens": 516,
+        "total_tokens": 7239
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng của nạn nhân giảm xuống còn 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi đã cố định, khung giờ tử vong thực tế được xác định nằm trong khoảng [20:38 - 23:38]. Điều này cho thấy nạn nhân đã chết ít nhất 8-11 tiếng trước khi được phát hiện lúc 08:00 sáng.",
+      "solver_reasoning": "Hung thủ là Trần Hữu Phúc (SUSP-03). Lời khai ngoại phạm của Phúc về việc thương thảo và ký kết hợp đồng trong khung giờ từ 21:05 đến sau 22:00 bị vạch trần là giả mạo bởi vật chứng EV-03 (Tài liệu nhật ký); giám định cho thấy tài liệu này không hề được vận hành hay ghi chép trong khung giờ gây án. Để củng cố ngoại phạm giả, Phúc đã can thiệp vào đồng hồ tại hiện trường (EV-01), khiến nó dừng lại ở mốc 22:15 nhằm đánh lạc hướng điều tra về thời điểm tử vong thực tế. Sự mâu thuẫn giữa lời khai về hoạt động kinh doanh và tình trạng tĩnh của vật chứng EV-03 là bằng chứng đanh thép nhất kết tội SUSP-03.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Bí Ẩn Cái Chết Của Ông Trần'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Hữu Phúc' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 8,
+      "case_id": "CASE-F60A7F",
+      "title": "Án mạng trên chuyến tàu đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-02",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-03"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-04",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 10.39,
+      "tokens": {
+        "prompt_tokens": 5706,
+        "completion_tokens": 619,
+        "total_tokens": 6325
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng của nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi cố định, khung giờ tử vong được xác định chính xác trong khoảng [20:38 - 23:38]. Đây là khoảng thời gian then chốt để đối chiếu với lời khai của các nghi phạm.",
+      "solver_reasoning": "Hung thủ chính là Trần Minh Quân (SUSP-02). Lập luận như sau: Thứ nhất, Quân đưa ra bằng chứng ngoại phạm giả bằng cách khẳng định mình đang gọi điện thoại từ 20:50 đến 21:50. Tuy nhiên, Nhật ký điều độ chạy tàu (EV-01) xác nhận tàu đi qua hầm núi từ 20:50 đến 21:30, khoảng thời gian mà sóng điện thoại hoàn toàn bị triệt tiêu. Việc Quân khẳng định thực hiện cuộc gọi trong hầm là một sự dối trá nhằm che đậy việc rời buồng lái để gây án. Thứ hai, hung khí (EV-03) là con dao gọt trái cây có kích thước lưỡi 8.5cm hoàn toàn khớp với vết đâm thấu tim của nạn nhân. Quan trọng hơn, trên dao có vết dầu mỡ bảo dưỡng cơ khí chuyên dụng - loại vật liệu đặc thù mà một kỹ sư đầu máy như Quân tiếp xúc hàng ngày. Quân đã lợi dụng kiến thức kỹ thuật để can thiệp đồng hồ (EV-02) nhằm làm nhiễu loạn mốc thời gian, nhưng không thể vượt qua được nhật ký hành trình của con tàu.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trên chuyến tàu đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Minh Quân' (SUSP-02)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 9,
+      "case_id": "CASE-7FCF0B",
+      "title": "Án Mạng Trong Phòng Thí Nghiệm CyberTech",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-04"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 12.59,
+      "tokens": {
+        "prompt_tokens": 6321,
+        "completion_tokens": 570,
+        "total_tokens": 6891
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nạn nhân tử vong trong khung giờ từ 20:38 đến 23:38. Tại thời điểm phát hiện thi thể (08:00), tình trạng hoen tử thi đã cố định và co cứng toàn phần (Full Rigor Mortis), điều này xác nhận cái chết đã xảy ra ít nhất từ 8 đến 12 tiếng trước đó, hoàn toàn khớp với khung giờ ước tính của Henssge.",
+      "solver_reasoning": "Hung thủ là Nguyễn Minh Tuấn (SUSP-03). Lập luận như sau: Thứ nhất, SUSP-03 khẳng định đang kiểm tra hệ thống an ninh vào lúc 22:00 (nằm giữa khung giờ tử vong thực tế), nhưng vật chứng EV-03 (Biên bản nhật ký) bị lật tẩy là giả mạo vì không có dấu vết vận hành thực tế (bám bụi tự nhiên, không có dấu tay mới). Thứ hai, hung khí EV-01 (dao găm) có chứa 'vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng', đây là loại dầu mỡ đặc thù mà một Quản lý hệ thống an ninh thường xuyên tiếp xúc khi bảo trì các thiết bị phần cứng và camera. Việc SUSP-03 né tránh ánh mắt khi nhắc đến mốc giờ gây án và động cơ bị nạn nhân từ chối thăng chức càng củng cố thêm kết luận này.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án Mạng Trong Phòng Thí Nghiệm CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Minh Tuấn' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 10,
+      "case_id": "CASE-181AD0",
+      "title": "Bí Ẩn Cái Chết Trong Biệt Thự Cổ Blackwood",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-03",
+      "culprit_identified": false,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-03"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-04",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-02"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "wrong_suspect",
+      "score": 0.0,
+      "latency_sec": 30.12,
+      "tokens": {
+        "prompt_tokens": 9329,
+        "completion_tokens": 802,
+        "total_tokens": 10131
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp: Nhiệt độ tử thi đo được lúc 08:00 là 31.5°C trong môi trường 20.0°C (giảm 5.5°C so với bình thường). Với hệ số làm lạnh C=1.0 và thể trọng 70kg, kết hợp với tình trạng hoen tử thi cố định và co cứng toàn phần, khung giờ tử vong ước tính là [20:38 - 23:38]. Đặc biệt, vật chứng EV-03 (đồng hồ vỡ) dù bị can thiệp chỉ 21:30 nhưng kết quả khám nghiệm hiện trường xác định thời điểm tử vong thực tế là khoảng 21:00, nằm chính xác trong khung giờ pháp y.",
+      "solver_reasoning": "Hung thủ được xác định là Quản gia Trần Minh Tâm (SUSP-03) dựa trên các lập luận đanh thép sau: Thứ nhất, khung giờ tử vong thực tế được xác định là 21:00. SUSP-03 khai rằng mình có mặt tại phòng làm việc (hiện trường) vào lúc đó để sắp xếp tài liệu, nhưng vật chứng EV-02 (Nhật ký công việc) đã vạch trần sự dối trá này khi ghi nhận ông ta không thực hiện hoạt động đó, cho thấy ông ta đang cố tạo ra một 'vỏ bọc' làm việc bình thường để che giấu hành vi giết người. Thứ hai, vật chứng then chốt EV-01 (hung khí) có chứa 'vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng' - đây là dấu vết kỹ thuật đặc thù gắn liền với công việc bảo trì thiết bị của một quản gia trong biệt thự cổ. Cuối cùng, việc đồng hồ (EV-03) bị can thiệp chỉ 21:30 (muộn hơn 30 phút so với giờ chết thật) là thủ đoạn của SUSP-03 nhằm làm lệch hướng điều tra về thời gian, nhưng dấu vân tay mờ của nạn nhân trên mặt kính cho thấy sự phản kháng hoặc nỗ lực tố cáo cuối cùng của ông Hòa.",
+      "verifier_feedback": "LẬP LUẬN SAI: Đối tượng bạn cáo buộc 'Trần Minh Tâm' (SUSP-03) không phải là hung thủ thực sự. Hãy rà soát kỹ lại lời khai Alibi và thời điểm tử vong xác định trong báo cáo pháp y."
+    },
+    {
+      "trial": 11,
+      "case_id": "CASE-64941C",
+      "title": "Án mạng trên chuyến tàu đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 24.09,
+      "tokens": {
+        "prompt_tokens": 5832,
+        "completion_tokens": 638,
+        "total_tokens": 6470
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, khung giờ tử vong được xác định từ 20:38 đến 23:38. Tại thời điểm phát hiện (08:00), thi thể đã trải qua khoảng 8.5 đến 11.5 tiếng kể từ khi tử vong. Tình trạng hoen tử thi cố định và co cứng toàn phần (Full Rigor Mortis) hoàn toàn khớp với khoảng thời gian này, vì co cứng toàn phần thường đạt đỉnh sau 10-12 giờ và hoen tử thi bắt đầu cố định sau 8 giờ.",
+      "solver_reasoning": "Hung thủ là Trần Minh Tâm (SUSP-01). Lập luận như sau: Thứ nhất, lời khai ngoại phạm của Tâm bị bác bỏ bởi dữ liệu kỹ thuật khách quan; hắn khẳng định gọi điện cho bạn từ 21:05 đến 22:05, nhưng thực tế tàu nằm trong hầm mất sóng suốt 30 phút (21:15-21:45), khiến việc duy trì cuộc gọi là bất khả thi. Thứ hai, hung khí gây án (EV-05) là một con dao bếp dính máu nạn nhân được tìm thấy giấu kỹ trong lưới thông gió tại chính nơi ở/làm việc của Tâm (toa hành lý). Trên hung khí có vết dầu mỡ bảo dưỡng cơ khí, phù hợp với môi trường làm việc của một nhân viên đường sắt. Tâm đã lợi dụng việc tàu đi qua hầm (không gian kín, tiếng ồn lớn, mất liên lạc) để thực hiện hành vi sát hại nạn nhân rồi quay lại toa hành lý tạo dựng bằng chứng ngoại phạm giả.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trên chuyến tàu đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Minh Tâm' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 12,
+      "case_id": "CASE-26250F",
+      "title": "Án mạng trong Phòng Thí nghiệm CyberTech",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-04"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-03",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-02",
+        "EV-04"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 15.91,
+      "tokens": {
+        "prompt_tokens": 6632,
+        "completion_tokens": 655,
+        "total_tokens": 7287
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng nạn nhân là 31.5°C trong môi trường 20.0°C, cùng với tình trạng hoen tử thi cố định và co cứng toàn phần (Full Rigor Mortis) tại thời điểm phát hiện (08:00), khung giờ tử vong được xác định chính xác là từ [20:38 - 23:38] tối hôm trước. Khoảng thời gian này hoàn toàn khớp với tiến trình phân hủy tự nhiên của thi thể trong môi trường phòng lạnh (20°C).",
+      "solver_reasoning": "Nguyễn Huy Hoàng (SUSP-01) là hung thủ dựa trên các lập luận sau: Thứ nhất, khung giờ ngoại phạm của hắn (20:50 - 21:50) trùng khớp hoàn toàn với thời điểm nạn nhân bị sát hại. Thứ hai, hung khí (EV-02 - Dao phẫu thuật) dính máu nạn nhân có chứa 'vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng' - đây là đặc điểm kỹ thuật gắn liền với công việc của một chuyên viên an ninh mạng thường xuyên tiếp xúc với phần cứng và thiết bị server. Thứ ba, vật chứng EV-04 (Đồng hồ bị can thiệp dừng ở 21:30) là một hiện trường giả do hung thủ dàn dựng nhằm cố định thời điểm tử vong giả tạo, hòng khớp với khung giờ mà hắn đã chuẩn bị sẵn lời khai ngoại phạm. Sự mâu thuẫn giữa lời khai 'êm ái' của hắn và báo cáo hệ thống (EV-01) cho thấy hắn không hề ở phòng làm việc như đã tuyên bố.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trong Phòng Thí nghiệm CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Huy Hoàng' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 13,
+      "case_id": "CASE-9A23C6",
+      "title": "Bí Ẩn Cái Chết Trong Biệt Thự Blackwood",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-02",
+      "culprit_identified": false,
+      "ground_truth_crucial_clues": [
+        "EV-02",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-02",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "wrong_suspect",
+      "score": 0.0,
+      "latency_sec": 12.38,
+      "tokens": {
+        "prompt_tokens": 6115,
+        "completion_tokens": 694,
+        "total_tokens": 6809
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, khung giờ tử vong được xác định từ 20:38 đến 23:38. Các dấu hiệu lâm sàng ủng hộ điều này: Nhiệt độ cơ thể giảm xuống 31.5°C trong môi trường 20.0°C (phù hợp với khoảng 9-11 tiếng sau tử vong tính từ lúc phát hiện 08:00), tình trạng hoen tử thi cố định và co cứng toàn phần cho thấy nạn nhân đã chết ít nhất 8-10 tiếng trước đó.",
+      "solver_reasoning": "Hung thủ là Quản gia Trần Minh Tuấn (SUSP-02). Lập luận như sau: 1. Mâu thuẫn lời khai: SUSP-02 khẳng định mình ở phòng làm việc đến 21:30 và nghe thấy tiếng đồng hồ điểm 21 lần (lúc 21:00) để chứng minh mình đang làm việc bình thường. Tuy nhiên, vật chứng EV-03 xác định đồng hồ quả treo đã bị hỏng và không hoạt động từ trước thời điểm tử vong, nghĩa là không thể có tiếng chuông điểm giờ. Điều này chứng tỏ SUSP-02 đã nói dối để tạo bằng chứng ngoại phạm giả về sự hiện diện vô tội của mình tại hiện trường. 2. Hung khí: Vật chứng EV-02 (Dao găm) được tìm thấy ngay trong ngăn tủ dưới bàn làm việc nơi SUSP-02 quản lý. Kích thước lưỡi dao (10cm) và hình dáng hoàn toàn tương thích với vết đâm thấu tim sâu 8.5cm của nạn nhân. 3. Động cơ: SUSP-02 lo sợ các quyết định pháp lý của ông Bảo ảnh hưởng đến quyền lợi hoặc đang che giấu sai phạm tài chính (hợp đồng bị cháy EV-01). Lợi dụng việc dọn dẹp, SUSP-02 đã ra tay sát hại nạn nhân trong khoảng từ 20:38 đến 21:30 rồi dàn dựng hiện trường giả với chiếc đồng hồ vỡ.",
+      "verifier_feedback": "LẬP LUẬN SAI: Đối tượng bạn cáo buộc 'Trần Minh Tuấn' (SUSP-02) không phải là hung thủ thực sự. Hãy rà soát kỹ lại lời khai Alibi và thời điểm tử vong xác định trong báo cáo pháp y."
+    },
+    {
+      "trial": 14,
+      "case_id": "CASE-DB4072",
+      "title": "Án Mạng Trên Chuyến Tàu Đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-03",
+        "EV-04",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-02"
+      ],
+      "selected_evidence_ids": [
+        "EV-04",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 12.89,
+      "tokens": {
+        "prompt_tokens": 6281,
+        "completion_tokens": 617,
+        "total_tokens": 6898
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nạn nhân được phát hiện lúc 08:00 với nhiệt độ trực tràng 31.5°C (giảm đáng kể so với bình thường trong môi trường 20°C). Tình trạng hoen tử thi đã cố định và co cứng toàn phần (Full Rigor Mortis) cho thấy cái chết đã xảy ra từ 8 đến 12 tiếng trước đó. Khung giờ tử vong được xác định chính xác là [20:38 - 23:38].",
+      "solver_reasoning": "Hung thủ là Nguyễn Minh Tuấn (SUSP-03) dựa trên sự mâu thuẫn giữa lời khai và hiện trạng khách quan của lộ trình tàu. Tuấn khai rằng từ 20:05 đến 21:05 anh ta đang gọi điện thoại cho bạn và 'không biết tàu đang đi qua hầm núi'. Tuy nhiên, vật chứng EV-04 (Sổ kiểm vé/lịch trình) xác nhận tàu đi vào hầm núi lúc 20:50. Về mặt vật lý, việc thực hiện một cuộc gọi điện thoại thông suốt trong hầm núi sâu là bất khả thi do mất sóng hoàn toàn. Lời khai 'không biết tàu qua hầm' trong khi đang cầm điện thoại là một sự ngụy tạo ngoại phạm vụng về. Hung khí EV-03 (dao thái thực phẩm) được tìm thấy với vết dầu mỡ bảo dưỡng cơ khí - thứ mà một nhân viên soát vé thường xuyên tiếp xúc khi di chuyển qua các toa kỹ thuật. SUSP-03 đã lợi dụng lúc tàu vào hầm (gây nhiễu tiếng động và bóng tối) để ra tay sát hại nạn nhân trong khoang VIP gần đó rồi tạo ra ngoại phạm giả.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án Mạng Trên Chuyến Tàu Đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Minh Tuấn' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 15,
+      "case_id": "CASE-C4F696",
+      "title": "Vụ Án Giết Người Trong Phòng Thí Nghiệm Công Nghệ Cao",
+      "ground_truth_culprit_id": "SUSP-03",
+      "accused_id": "SUSP-03",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-04"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-03",
+        "EV-04"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 10.03,
+      "tokens": {
+        "prompt_tokens": 5678,
+        "completion_tokens": 649,
+        "total_tokens": 6327
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, khung giờ tử vong được xác định từ 20:38 đến 23:38. Tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi cố định tại thời điểm 08:00 sáng hôm sau hoàn toàn khớp với khung giờ này (khoảng 8.5 - 11.5 tiếng trước khi phát hiện). Nhiệt độ môi trường phòng máy chủ thấp (20.0°C) cũng là yếu tố duy trì tình trạng thi thể phù hợp với tính toán Henssge.",
+      "solver_reasoning": "Hung thủ là Trần Minh Đức (SUSP-03) dựa trên các lập luận sau: Thứ nhất, Đức khai rằng mình đang làm việc và điều chỉnh hệ thống tại phòng server từ 20:50 đến 21:50, nhưng Sổ nhật ký phòng thí nghiệm (EV-04) lại ghi nhận 'không có bất kỳ hoạt động nào' trong khoảng thời gian này. Điều này chứng tỏ lời khai về việc làm việc chuyên môn của Đức là giả mạo nhằm tạo ngoại phạm tại chỗ. Thứ hai, hung khí là dao phẫu thuật (EV-03) dính máu nạn nhân có chứa vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng - loại dầu thường được các chuyên gia hệ thống như Đức sử dụng cho quạt làm mát và thiết bị server. Thứ ba, việc đồng hồ điện tử (EV-01) bị can thiệp dừng ở 20:45 là một nỗ lực vụng về nhằm đánh lạc hướng điều tra, khiến cảnh sát tin rằng án mạng xảy ra trước khi khung giờ ngoại phạm của Đức bắt đầu (20:50), nhưng thực tế nạn nhân chết trong khoảng [20:38 - 23:38]. Sự điềm tĩnh và né tránh ánh mắt của Đức khi nhắc đến mốc giờ gây án càng củng cố hành vi phạm tội.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Vụ Án Giết Người Trong Phòng Thí Nghiệm Công Nghệ Cao'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Minh Đức' (SUSP-03)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 16,
+      "case_id": "CASE-C2D0D6",
+      "title": "Bí ẩn cái chết của ông Trần Văn Tài",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-02",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-02",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-02",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 23.04,
+      "tokens": {
+        "prompt_tokens": 7621,
+        "completion_tokens": 688,
+        "total_tokens": 8309
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng của nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng hoen tử thi cố định và co cứng toàn phần (Full Rigor Mortis) tại thời điểm 08:00, khung giờ tử vong được xác định chính xác là từ [20:38 - 23:38]. Điều này cho thấy nạn nhân đã tử vong vào khoảng đêm hôm trước, trùng với thời điểm các nghi phạm có mặt tại biệt thự.",
+      "solver_reasoning": "Hung thủ là Trần Quốc Huy (SUSP-02) dựa trên các lập luận đanh thép sau: \nThứ nhất, Huy cố tình tạo ra một mốc thời gian ngoại phạm giả bằng cách khai rằng nạn nhân ký di chúc lúc 22:30 (thời điểm Huy khẳng định mình đã rời đi). Để củng cố điều này, hắn đã can thiệp vào đồng hồ treo tường (EV-03), khiến nó vỡ và dừng lại đúng mốc 22:30. Tuy nhiên, giám định vật chứng EV-03 cho thấy đồng hồ bị cố tình can thiệp thủ công, vạch trần thủ đoạn tạo hiện trường giả. \nThứ hai, hung khí (EV-02) được tìm thấy trong tủ sách có vết dầu mỡ bảo dưỡng cơ khí, cho thấy hung thủ đã lấy nó từ một nơi cất giữ chuyên dụng trong nhà mà hắn có quyền tiếp cận khi ở trong phòng làm việc. \nThứ ba, thái độ né tránh ánh mắt khi nhắc đến mốc giờ gây án và động cơ chiếm đoạt tài sản từ di chúc (thứ mà hắn đang xem xét lúc gây án) hoàn thiện chân dung hung thủ. Việc EV-05 (tách trà sạch) cho thấy các hoạt động sinh hoạt bình thường mà hung thủ có thể đã khai để làm dày thêm bằng chứng ngoại phạm là hoàn toàn dối trá.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Bí ẩn cái chết của ông Trần Văn Tài'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Trần Quốc Huy' (SUSP-02)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 17,
+      "case_id": "CASE-6FCF1B",
+      "title": "Án mạng trên chuyến tàu đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-02",
+        "EV-04"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-03",
+        "EV-05"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-02"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 9.84,
+      "tokens": {
+        "prompt_tokens": 5839,
+        "completion_tokens": 616,
+        "total_tokens": 6455
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng nạn nhân là 31.5°C trong môi trường 20.0°C, kết hợp với tình trạng hoen tử thi cố định và co cứng toàn phần, khung giờ tử vong được xác định chính xác trong khoảng [20:38 - 23:38]. Thời điểm này trùng khớp với lúc tàu bắt đầu đi vào khu vực hầm núi, tạo điều kiện thuận lợi để hung thủ ra tay mà không bị phát hiện bởi tiếng động.",
+      "solver_reasoning": "Hung thủ là Nguyễn Minh Khôi (SUSP-01). Lập luận như sau: Thứ nhất, Khôi đã tạo ra một ngoại phạm giả bằng cách can thiệp vào đồng hồ tại hiện trường (EV-04) để nó dừng lại đúng lúc 20:50 - thời điểm Khôi bắt đầu khai báo mình đang ở buồng lái. Thứ hai, lời khai về việc 'điều chỉnh hệ thống' của Khôi bị bác bỏ bởi Nhật ký điều độ (EV-01), vật chứng này cho thấy không có hoạt động vận hành máy móc nào thực tế diễn ra, chứng tỏ Khôi đã rời vị trí để gây án. Cuối cùng, vật chứng quyết định là con dao hung khí (EV-02) dính máu nạn nhân nhưng lại mang 'vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng'. Đây là loại dầu mỡ đặc thù mà chỉ kỹ sư đầu máy như Khôi mới tiếp xúc và để lại dấu vết trong quá trình sử dụng hung khí.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trên chuyến tàu đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Minh Khôi' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 18,
+      "case_id": "CASE-D255E9",
+      "title": "Án Mạng Trong Phòng Thí Nghiệm CyberTech",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-02",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-02",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-02",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 14.85,
+      "tokens": {
+        "prompt_tokens": 6837,
+        "completion_tokens": 560,
+        "total_tokens": 7397
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng của nạn nhân là 31.5°C trong môi trường 20.0°C với hệ số làm lạnh C=1.0, kết hợp với tình trạng co cứng toàn phần (Full Rigor Mortis) và hoen tử thi cố định, khung giờ tử vong được xác định chính xác từ 20:38 đến 23:38 đêm hôm trước.",
+      "solver_reasoning": "Hung thủ là Nguyễn Hoàng Nam (SUSP-02). Lời khai của Nam chứa đựng mâu thuẫn chí mạng với hiện trạng vật lý khách quan: Nam khẳng định nghe thấy tiếng máy in hoạt động liên tục từ 20:50 - 21:50 để tạo bằng chứng ngoại phạm đang làm việc, nhưng vật chứng EV-02 (Nhật ký truy cập an ninh và vận hành) khẳng định không có bất kỳ dấu vết vận hành máy móc nào trong khung giờ gây án. Điều này chứng tỏ Nam đã nói dối để che đậy việc mình rời phòng nghỉ đi sát hại ông Hòa. Ngoài ra, hung khí EV-03 (dao phẫu thuật) có kích thước hoàn toàn khớp với vết thương thấu tim và mang vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng - loại vật liệu mà một Giám đốc kỹ thuật như Nam thường xuyên tiếp xúc. Việc Nam né tránh ánh mắt khi nhắc đến giờ gây án và việc anh ta ở sẵn trong khu vực phòng thí nghiệm (không cần quẹt thẻ mới theo EV-02) càng khẳng định tội danh.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án Mạng Trong Phòng Thí Nghiệm CyberTech'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Hoàng Nam' (SUSP-02)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 19,
+      "case_id": "CASE-8EDD9E",
+      "title": "Án mạng bí ẩn tại Biệt thự Cổ Blackwood",
+      "ground_truth_culprit_id": "SUSP-01",
+      "accused_id": "SUSP-01",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-01",
+        "EV-03",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-02",
+        "EV-04"
+      ],
+      "selected_evidence_ids": [
+        "EV-01",
+        "EV-03"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 10.32,
+      "tokens": {
+        "prompt_tokens": 5846,
+        "completion_tokens": 608,
+        "total_tokens": 6454
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, nhiệt độ trực tràng 31.5°C trong môi trường 20.0°C cùng tình trạng hoen tử thi cố định và co cứng toàn phần (Full Rigor Mortis) tại thời điểm 08:00 sáng cho thấy nạn nhân đã tử vong khoảng 8.5 đến 11.5 tiếng trước đó. Khung giờ tử vong thực tế được xác định chính xác là [20:38 - 23:38].",
+      "solver_reasoning": "Lê Minh Tuấn (SUSP-01) là hung thủ dựa trên hai mâu thuẫn chí mạng: 1. Mâu thuẫn lời khai và hiện trạng vật lý: SUSP-01 khẳng định soạn thảo và ký hợp đồng từ 20:50 - 21:50, nhưng vật chứng EV-01 (Sổ ghi chép) chứng minh sổ không hề được sử dụng trong khung giờ này, cho thấy alibi của hắn là giả mạo để che đậy hành vi gây án. 2. Vật chứng trực tiếp: Con dao EV-03 được tìm thấy giấu kín dưới cầu thang có kích thước lưỡi 10cm hoàn toàn tương thích với vết đâm sâu 8.5cm thấu tim nạn nhân. Trên hung khí này vẫn còn dấu vết máu của nạn nhân và dấu vân tay của SUSP-01 dù đã bị lau chùi cẩn thận. Việc đồng hồ (EV-05) bị can thiệp dừng ở 21:45 chỉ là nỗ lực tuyệt vọng của hung thủ nhằm củng cố cho khung giờ ngoại phạm giả tạo của mình.",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng bí ẩn tại Biệt thự Cổ Blackwood'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Lê Minh Tuấn' (SUSP-01)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Phân tích chuẩn xác khung giờ tử vong & nhiệt học tử thi Henssge (+10đ)\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
+    },
+    {
+      "trial": 20,
+      "case_id": "CASE-5F327B",
+      "title": "Án mạng trên chuyến tàu đêm Thống Nhất",
+      "ground_truth_culprit_id": "SUSP-02",
+      "accused_id": "SUSP-02",
+      "culprit_identified": true,
+      "ground_truth_crucial_clues": [
+        "EV-02",
+        "EV-04",
+        "EV-05"
+      ],
+      "ground_truth_red_herrings": [
+        "EV-01",
+        "EV-03"
+      ],
+      "selected_evidence_ids": [
+        "EV-04",
+        "EV-05"
+      ],
+      "crucial_evidences_identified": true,
+      "red_herrings_selected_count": 0,
+      "verdict": "solved_perfect",
+      "score": 100.0,
+      "latency_sec": 11.07,
+      "tokens": {
+        "prompt_tokens": 5734,
+        "completion_tokens": 593,
+        "total_tokens": 6327
+      },
+      "solver_tod_analysis": "Dựa trên Báo cáo Giám định Y pháp, khung giờ tử vong được xác định từ 20:38 đến 23:38. Các dấu hiệu lâm sàng tại thời điểm phát hiện (08:00) như hoen tử thi đã cố định và tình trạng co cứng toàn phần (Full Rigor Mortis) hoàn toàn khớp với khung giờ này, cho thấy nạn nhân đã chết khoảng 8-12 tiếng trước đó.",
+      "solver_reasoning": "Hung thủ là Nguyễn Văn Sơn (SUSP-02) dựa trên hai mâu thuẫn chí mạng: 1. Mâu thuẫn lời khai và thực tế khách quan: Sơn khai rằng mình gọi điện thoại trong khoảng 21:05 - 22:05, nhưng Nhật ký điều độ chạy tàu (EV-05) xác nhận tàu đi qua hầm núi từ 21:15 đến 21:45, thời điểm hoàn toàn không có sóng viễn thông. Điều này chứng minh Sơn đã nói dối về vị trí và hành động của mình để tạo bằng chứng ngoại phạm giả. 2. Vật chứng hung khí: Con dao (EV-04) tìm thấy trong toa hành lý có kích thước hoàn toàn tương thích với vết đâm thấu tim của nạn nhân. Đặc biệt, vi vết dầu mỡ bảo dưỡng cơ khí chuyên dụng trên dao là dấu vết đặc thù của nhân viên vận hành tàu như Sơn. Kết hợp với động cơ nợ nần, có đủ cơ sở kết luận SUSP-02 đã lợi dụng lúc tàu đi qua hầm (tiếng ồn lớn và mất liên lạc) để sát hại nạn nhân và dàn dựng hiện trường giả với chiếc đồng hồ (EV-02).",
+      "verifier_feedback": "XUẤT SẮC TUYỆT ĐỐI: Bạn đã phá giải vụ án 'Án mạng trên chuyến tàu đêm Thống Nhất'. Lập luận logic chặt chẽ, vạch trần hoàn toàn sơ hở Alibi của hung thủ 'Nguyễn Văn Sơn' (SUSP-02)!\n\n<b>ĐỐI SOÁT LẬP LUẬN BỔ SUNG:</b>\n• Chỉ ra chính xác mâu thuẫn bác bỏ ngoại phạm của hung thủ (+10đ)\n• Chỉ định đúng vật chứng & cơ chế hung khí kết tội (+10đ)"
     }
   ]
 }

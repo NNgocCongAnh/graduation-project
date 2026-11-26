@@ -192,18 +192,21 @@ async def run_solver_benchmark(
     target_cases_count: int = 20,
     output_path: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", "solver_benchmark.json"),
     use_db: bool = False,
-    delay: float = 4.0
+    delay: float = 4.0,
+    generator_model: Optional[str] = None,
+    raise_on_rate_limit: bool = False,
 ):
     os.environ["DISABLE_AGENT_FALLBACK"] = "1"
+    gen_model = generator_model or model
     print("=" * 80)
     print("INDEPENDENT SOLVER AGENT BENCHMARK (Mục III.A4: Solvability Evaluation)")
-    print(f"Solver Model: {model} | API Base: {api_base} | Fresh Generation: {not use_db} | Delay: {delay}s")
+    print(f"Solver Model: {model} | Generator Model: {gen_model} | API Base: {api_base} | Fresh Generation: {not use_db} | Delay: {delay}s")
     print(f"Target test cases: {target_cases_count}")
     print("=" * 80)
 
     client = AsyncOpenAI(base_url=api_base, api_key=api_key or "dummy")
     solver = IndependentSolverAgent(client, model)
-    case_gen = CaseGeneratorService(api_base=api_base, api_key=api_key or "dummy", model=model)
+    case_gen = CaseGeneratorService(api_base=api_base, api_key=api_key or "dummy", model=gen_model)
 
     # Load existing incremental progress if output_path already exists
     results: List[Dict[str, Any]] = []
@@ -219,7 +222,7 @@ async def run_solver_benchmark(
             results = []
 
     db_cases: List[CaseDossier] = []
-    db_path = os.path.join(os.path.dirname(__file__), "detective.db")
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "detective-backend", "detective.db")
     if use_db and os.path.exists(db_path):
         con = sqlite3.connect(db_path)
         cur = con.cursor()
@@ -300,6 +303,8 @@ async def run_solver_benchmark(
             try:
                 new_case = await case_gen.generate_case(theme=th)
                 if new_case.metadata and (new_case.metadata.used_fallback_sample or new_case.metadata.fallback_triggered):
+                    if raise_on_rate_limit:
+                        raise RuntimeError("Rate limited / fallback triggered during case generation")
                     print("  -> Skipped fallback sample/model case, retrying...")
                     continue
                 if new_case.case_id in seen_case_ids:
@@ -313,6 +318,9 @@ async def run_solver_benchmark(
                 seen_case_ids.add(case.case_id)
                 print(f"  -> Generated valid case: '{case.title}' ({case.case_id})")
             except Exception as ex:
+                err_low = str(ex).lower()
+                if raise_on_rate_limit and any(k in err_low for k in ("429", "rate limit", "too many requests", "quota", "resource_exhausted")):
+                    raise
                 print(f"  -> Error generating case: {ex}")
                 await asyncio.sleep(5.0)
                 continue
@@ -433,6 +441,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="gh/gpt-4o-mini", help="Solver model identifier")
     parser.add_argument("--api-base", type=str, default="http://localhost:20128/v1", help="API base URL")
     parser.add_argument("--api-key", type=str, default=os.getenv("LLM_API_KEY", ""), help="API key (defaults to LLM_API_KEY env var)")
+    parser.add_argument("--generator-model", type=str, default=None, help="Optional separate model for case generation")
     parser.add_argument("--cases", type=int, default=20, help="Number of cases to evaluate")
     parser.add_argument("--output", type=str, default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results", "solver_benchmark.json"), help="Output JSON path")
     parser.add_argument("--use-db", action="store_true", help="Load existing valid cases from detective.db instead of generating all fresh cases")
@@ -447,6 +456,7 @@ if __name__ == "__main__":
             target_cases_count=args.cases,
             output_path=args.output,
             use_db=args.use_db,
-            delay=args.delay
+            delay=args.delay,
+            generator_model=args.generator_model,
         )
     )

@@ -72,7 +72,7 @@ class BaseAgent:
         # Calculate local text payload token footprint (~1.33 tokens per word)
         self.last_payload_tokens = int(len((system_prompt + " " + user_prompt).split()) * 1.33)
 
-        max_attempts = 8
+        max_attempts = max(1, int(os.getenv("AGENT_MAX_429_ATTEMPTS", "8")))
         last_exc: Optional[Exception] = None
         for attempt in range(max_attempts):
             try:
